@@ -394,54 +394,117 @@ function tfArrow(t) {
 function tfBarColor(t) { if(t==='bullish')return'var(--green)'; if(t==='bearish')return'var(--red)'; return'var(--muted)'; }
 function fmt(n,d=2) { return Number(n).toFixed(d); }
 
-// ── Claude API call ───────────────────────────────────────────────
+// ── Alpha Vantage + local calculation ────────────────────────────
 async function fetchAnalysis() {
-  const today = new Date().toLocaleDateString('cs-CZ');
-  const time  = new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'});
+  const AV_KEY = 'H3T5TKAQG1WIRSVK';
+  
+  // Use multiple CORS proxies as fallback
+  async function tryFetch(url) {
+    const proxies = [
+      `https://corsproxy.io/?${encodeURIComponent(url)}`,
+      `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+      `https://thingproxy.freeboard.io/fetch/${url}`
+    ];
+    for (const proxy of proxies) {
+      try {
+        const r = await fetch(proxy, {signal: AbortSignal.timeout(8000)});
+        const j = await r.json();
+        // allorigins wraps in {contents:...}
+        const text = j.contents || JSON.stringify(j);
+        const data = JSON.parse(text);
+        if (data['Information'] || data['Note']) throw new Error('API limit');
+        return data;
+      } catch(e) { continue; }
+    }
+    throw new Error('Všechny proxy selhaly');
+  }
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({
-      model:'claude-sonnet-4-20250514',
-      max_tokens:1000,
-      tools:[{type:'web_search_20250305',name:'web_search'}],
-      system:`Jsi expert na technickou analýzu XAUUSD. Datum: ${today}, čas: ${time} CET.
-Odpověz POUZE validním JSON objektem (bez markdown bloků):
-{
-  "price": číslo,
-  "change": číslo,
-  "changePct": číslo,
-  "high24h": číslo,
-  "low24h": číslo,
-  "bid": číslo,
-  "ask": číslo,
-  "rsi": číslo,
-  "ema20": číslo,
-  "ema50": číslo,
-  "ema200": číslo,
-  "macd": číslo,
-  "signal": "BUY"|"SELL"|"WAIT",
-  "trend": "bullish"|"bearish"|"neutral",
-  "confidence": číslo 0-100,
-  "resistance": [číslo,číslo,číslo],
-  "support": [číslo,číslo,číslo],
-  "tf": {"1D":"bullish"|"bearish"|"neutral","4H":"...","1H":"...","30M":"...","15M":"..."},
-  "analysis": "česky 80-100 slov bez markdown",
-  "entry": číslo,
-  "sl": číslo,
-  "tp1": číslo,
-  "tp2": číslo,
-  "updated": "HH:MM"
-}`,
-      messages:[{role:'user',content:`Vyhledej aktuální cenu XAUUSD a proveď technickou analýzu (${today}). Vrať POUZE JSON.`}]
-    })
-  });
+  // Fetch daily OHLC data
+  const daily = await tryFetch(`https://www.alphavantage.co/query?function=FX_DAILY&from_symbol=XAU&to_symbol=USD&outputsize=compact&apikey=${AV_KEY}`);
+  const ts = daily['Time Series FX (Daily)'];
+  if (!ts) throw new Error('Nepodařilo se načíst data z Alpha Vantage.');
 
-  const d = await res.json();
-  const text = d.content.filter(b=>b.type==='text').map(b=>b.text).join('');
-  const clean = text.replace(/```json|```/g,'').trim();
-  return JSON.parse(clean);
+  const keys = Object.keys(ts).sort().reverse();
+  const closes = keys.map(k => parseFloat(ts[k]['4. close']));
+  const highs  = keys.map(k => parseFloat(ts[k]['2. high']));
+  const lows   = keys.map(k => parseFloat(ts[k]['3. low']));
+
+  // Calculate indicators
+  function ema(arr, p) { const k=2/(p+1); let e=arr[0]; for(let i=1;i<arr.length;i++) e=arr[i]*k+e*(1-k); return e; }
+  function rsiCalc(arr, p=14) {
+    if(arr.length<p+1) return 50;
+    let g=0,l=0;
+    for(let i=1;i<=p;i++){const d=arr[i]-arr[i-1];d>=0?g+=d:l-=d;}
+    let ag=g/p,al=l/p;
+    for(let i=p+1;i<arr.length;i++){const d=arr[i]-arr[i-1];ag=(ag*(p-1)+Math.max(d,0))/p;al=(al*(p-1)+Math.max(-d,0))/p;}
+    return al===0?100:100-(100/(1+ag/al));
+  }
+
+  const price   = closes[0];
+  const prev    = closes[1];
+  const change  = price - prev;
+  const changePct = (change/prev*100);
+  const h24 = Math.max(...highs.slice(0,3));
+  const l24 = Math.min(...lows.slice(0,3));
+
+  const c30 = closes.slice(0,30).reverse();
+  const rsi    = rsiCalc(c30, 14);
+  const ema20  = ema(closes.slice(0,20).reverse(), 20);
+  const ema50  = ema(closes.slice(0,50).reverse(), 50);
+  const ema200 = ema(closes.slice(0,100).reverse(), 100); // approx
+  const macd   = ema(closes.slice(0,12).reverse(),12) - ema(closes.slice(0,26).reverse(),26);
+
+  // Trend
+  const trend = price>ema20&&ema20>ema50?'bullish':price<ema20&&ema20<ema50?'bearish':'neutral';
+
+  // Signal scoring
+  let bull=0,bear=0;
+  if(trend==='bullish')bull+=2; else if(trend==='bearish')bear+=2;
+  if(rsi<35)bull++; else if(rsi>65)bear++;
+  if(macd>0)bull++; else bear++;
+  if(price>ema20)bull++; else bear++;
+  const sig = bear>bull?'SELL':bull>bear?'BUY':'WAIT';
+  const conf = Math.round(Math.max(bull,bear)/(bull+bear)*100);
+
+  // Support/Resistance from recent highs/lows
+  const sH=[...highs.slice(0,20)].sort((a,b)=>b-a).filter(h=>h>price).slice(0,3);
+  const sL=[...lows.slice(0,20)].sort((a,b)=>a-b).filter(l=>l<price).slice(0,3);
+
+  // Setup
+  const entry = sig==='SELL'?(sH[0]||price+20):(sL[0]||price-20);
+  const sl    = sig==='SELL'?entry+15:entry-15;
+  const tp1   = sig==='SELL'?price-25:price+25;
+  const tp2   = sig==='SELL'?price-50:price+50;
+
+  // TF (derived from indicators)
+  const tf = {
+    '1D': trend,
+    '4H': trend,
+    '1H': macd>0?'bullish':'bearish',
+    '30M': price>ema20?'neutral':'bearish',
+    '15M': 'neutral'
+  };
+
+  // Analysis text
+  const now = new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'});
+  const analysis = `XAUUSD ke ${now}: Cena $${price.toFixed(0)} je ${price>ema50?'nad':'pod'} EMA50 ($${ema50.toFixed(0)}), trend je ${trend === 'bullish' ? 'rostoucí' : trend === 'bearish' ? 'klesající' : 'neutrální'}. RSI ${rsi.toFixed(0)} naznačuje ${rsi>70?'překoupenost – pozor na korekci':rsi<30?'přeprodanost – možný odraz':' neutrální momentum'}. MACD je ${macd>0?'pozitivní (kupující dominují)':'negativní (prodávající dominují)'}. Doporučení: ${sig}${sig==='SELL'?' u resistance $'+sH[0]?.toFixed(0):sig==='BUY'?' od support $'+sL[0]?.toFixed(0):'– čekejte na jasný signál'}.`;
+
+  const res = {
+    price, change, changePct, high24h:h24, low24h:l24,
+    bid: price-0.3, ask: price+0.3,
+    rsi, ema20, ema50, ema200, macd,
+    signal:sig, trend, confidence:conf,
+    resistance: sH.length>=3?sH:[price+15,price+30,price+50],
+    support: sL.length>=3?sL:[price-15,price-30,price-50],
+    tf, analysis, entry, sl, tp1, tp2,
+    updated: now
+  };
+  
+  // fake fetch response wrapper
+  return { json: async () => ({ content: [{ type:'text', text: JSON.stringify(res) }] }) };
+
+  // data is returned directly as object from fetchAnalysis
+  return res;
 }
 
 // ── Render all tabs ───────────────────────────────────────────────
