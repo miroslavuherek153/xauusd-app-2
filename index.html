@@ -8,82 +8,88 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Gold AI">
 <meta name="theme-color" content="#FFD700">
-<title>XAUUSD AI Analyzer</title>
+<title>XAUUSD Analyzer</title>
 <link rel="manifest" href="manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
 :root{--gold:#FFD700;--green:#00FF88;--red:#FF3355;--bg:#050810;--bg2:#0a0f1e;--bg3:#0f1628;--border:rgba(255,215,0,0.15);--text:#c8d8f0;--muted:#556677;--mono:'Share Tech Mono',monospace;--display:'Orbitron',sans-serif;}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;overflow:hidden;}
-body{background:var(--bg);color:var(--text);font-family:var(--mono);display:flex;flex-direction:column;background-image:radial-gradient(ellipse at 20% 0%,rgba(255,215,0,0.06) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(0,80,255,0.04) 0%,transparent 50%);}
-header{flex-shrink:0;background:rgba(5,8,16,0.95);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;}
-.logo{font-family:var(--display);font-size:15px;font-weight:900;color:var(--gold);letter-spacing:2px;text-shadow:0 0 15px rgba(255,215,0,0.35);}
-.logo span{color:var(--text);font-weight:400;font-size:13px;}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);display:flex;flex-direction:column;}
+header{flex-shrink:0;background:rgba(5,8,16,0.98);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:var(--display);font-size:15px;font-weight:900;color:var(--gold);letter-spacing:2px;}
+.logo span{color:var(--text);font-weight:400;font-size:12px;}
 .hright{display:flex;align-items:center;gap:10px;}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.2}}
-.htime{font-size:9px;letter-spacing:1px;color:var(--muted);}
+.htime{font-size:9px;color:var(--muted);}
 .nav{flex-shrink:0;display:flex;background:var(--bg2);border-bottom:1px solid var(--border);}
-.ntab{flex:1;padding:10px 4px;text-align:center;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--mono);}
-.ntab.active{color:var(--gold);border-bottom-color:var(--gold);background:rgba(255,215,0,0.04);}
-.main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:20px;}
+.ntab{flex:1;padding:10px 2px;text-align:center;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--mono);transition:all 0.2s;}
+.ntab.active{color:var(--gold);border-bottom-color:var(--gold);}
+.main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:20px;}
 .screen{display:none;padding:12px;}
 .screen.active{display:block;}
-@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.a1{animation:slideUp 0.35s ease both;}
-.a2{animation:slideUp 0.35s ease 0.07s both;}
-.a3{animation:slideUp 0.35s ease 0.14s both;}
-.a4{animation:slideUp 0.35s ease 0.21s both;}
-.a5{animation:slideUp 0.35s ease 0.28s both;}
-/* Loading */
-.lwrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:18px;}
-.spinner{width:48px;height:48px;border:2px solid rgba(255,215,0,0.1);border-top-color:var(--gold);border-radius:50%;animation:spin 0.9s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg)}}
-.ltitle{font-family:var(--display);font-size:11px;letter-spacing:4px;color:var(--gold);}
-.lstep{font-size:10px;color:var(--muted);line-height:2.2;text-align:center;}
-/* Price */
-.pcard{background:linear-gradient(145deg,rgba(255,215,0,0.08),rgba(255,215,0,0.02));border:1px solid rgba(255,215,0,0.25);border-radius:12px;padding:18px;margin-bottom:12px;position:relative;overflow:hidden;}
-.pcard::after{content:'AU';position:absolute;bottom:-10px;right:14px;font-family:var(--display);font-size:64px;font-weight:900;color:rgba(255,215,0,0.04);pointer-events:none;}
+@keyframes su{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.a1{animation:su 0.3s ease both;}.a2{animation:su 0.3s ease 0.06s both;}.a3{animation:su 0.3s ease 0.12s both;}.a4{animation:su 0.3s ease 0.18s both;}
+
+/* Input form */
+.form-card{background:linear-gradient(145deg,rgba(255,215,0,0.07),rgba(255,215,0,0.02));border:1px solid rgba(255,215,0,0.25);border-radius:12px;padding:16px;margin-bottom:12px;}
+.form-title{font-size:9px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(255,215,0,0.1);}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.finput{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px;}
+.finput label{display:block;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;}
+.finput input{width:100%;background:none;border:none;color:var(--text);font-family:var(--mono);font-size:14px;outline:none;}
+.finput input:focus{color:var(--gold);}
+.analyze-btn{width:100%;background:linear-gradient(135deg,rgba(255,215,0,0.2),rgba(255,165,0,0.1));border:1px solid rgba(255,215,0,0.4);color:var(--gold);padding:14px;font-family:var(--display);font-size:11px;letter-spacing:3px;cursor:pointer;border-radius:10px;transition:all 0.2s;}
+.analyze-btn:active{transform:scale(0.98);background:rgba(255,215,0,0.25);}
+
+/* Price card */
+.pcard{background:linear-gradient(145deg,rgba(255,215,0,0.08),rgba(255,215,0,0.02));border:1px solid rgba(255,215,0,0.25);border-radius:12px;padding:16px;margin-bottom:12px;position:relative;overflow:hidden;}
+.pcard::after{content:'AU';position:absolute;bottom:-8px;right:12px;font-family:var(--display);font-size:60px;font-weight:900;color:rgba(255,215,0,0.04);pointer-events:none;}
 .plbl{font-size:8px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:4px;}
-.pval{font-family:var(--display);font-size:32px;font-weight:900;color:#fff;text-shadow:0 0 25px rgba(255,215,0,0.2);}
-.pchg{font-size:12px;margin-top:4px;}
+.pval{font-family:var(--display);font-size:30px;font-weight:900;color:#fff;}
+.pchg{font-size:11px;margin-top:4px;}
 .up{color:var(--green);}.down{color:var(--red);}.nc{color:var(--muted);}
-.pstats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px;}
-.stat{background:rgba(0,0,0,0.3);border-radius:6px;padding:8px;}
-.slbl{font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
-.sval{font-size:12px;color:var(--text);margin-top:3px;}
+.pstats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:12px;}
+.stat{background:rgba(0,0,0,0.3);border-radius:6px;padding:7px;}
+.slbl{font-size:7px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+.sval{font-size:11px;color:var(--text);margin-top:2px;}
+
 /* Signal */
 .sigcard{border-radius:12px;padding:14px;margin-bottom:12px;text-align:center;border:1px solid;}
 .sigcard.bearish{background:rgba(255,51,85,0.08);border-color:rgba(255,51,85,0.4);}
 .sigcard.bullish{background:rgba(0,255,136,0.06);border-color:rgba(0,255,136,0.3);}
 .sigcard.neutral{background:rgba(255,215,0,0.05);border-color:rgba(255,215,0,0.3);}
 .siglbl{font-size:8px;letter-spacing:4px;color:var(--muted);margin-bottom:4px;}
-.sigval{font-family:var(--display);font-size:28px;font-weight:900;letter-spacing:6px;}
+.sigval{font-family:var(--display);font-size:26px;font-weight:900;letter-spacing:6px;}
 .sigcard.bearish .sigval{color:var(--red);text-shadow:0 0 20px rgba(255,51,85,0.5);}
 .sigcard.bullish .sigval{color:var(--green);text-shadow:0 0 20px rgba(0,255,136,0.4);}
 .sigcard.neutral .sigval{color:var(--gold);}
-.sigmeta{font-size:10px;color:var(--muted);margin-top:6px;line-height:1.8;}
+.sigmeta{font-size:10px;color:var(--muted);margin-top:5px;line-height:1.7;}
+
 /* Card */
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;}
-.ctitle{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(255,215,0,0.08);display:flex;justify-content:space-between;align-items:center;}
-.cbadge{font-size:8px;background:rgba(255,215,0,0.1);color:var(--gold);padding:2px 6px;border-radius:10px;}
+.ctitle{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid rgba(255,215,0,0.08);}
+
 /* TF */
-.tfrow{display:flex;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03);}
+.tfrow{display:flex;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03);}
 .tfrow:last-child{border-bottom:none;}
 .tfname{font-size:10px;color:var(--gold);width:38px;}
 .tfbar{flex:1;height:3px;background:rgba(255,255,255,0.06);border-radius:2px;margin:0 10px;}
 .tffill{height:3px;border-radius:2px;}
-.tfsig{font-size:10px;width:60px;text-align:right;}
+.tfsig{font-size:10px;width:58px;text-align:right;}
 .aup{color:var(--green);}.adn{color:var(--red);}.ant{color:var(--muted);}
-/* Ind */
-.indrow{display:flex;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03);gap:8px;}
+
+/* Indicators */
+.indrow{display:flex;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03);gap:8px;}
 .indrow:last-child{border-bottom:none;}
 .indname{font-size:10px;color:var(--muted);width:60px;}
 .indbar{flex:1;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;}
 .indfill{height:4px;border-radius:2px;}
-.indval{font-size:11px;font-weight:bold;width:50px;text-align:right;}
+.indval{font-size:11px;font-weight:bold;width:52px;text-align:right;}
+
 /* Levels */
-.lvrow{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03);}
+.lvrow{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03);}
 .lvrow:last-child{border-bottom:none;}
 .lbadge{font-size:7px;letter-spacing:2px;padding:2px 6px;border-radius:4px;}
 .lbadge.res{background:rgba(255,51,85,0.12);color:var(--red);border:1px solid rgba(255,51,85,0.2);}
@@ -91,33 +97,32 @@ header{flex-shrink:0;background:rgba(5,8,16,0.95);border-bottom:1px solid var(--
 .lbadge.cur{background:rgba(255,215,0,0.12);color:var(--gold);border:1px solid rgba(255,215,0,0.2);}
 .lprice{font-family:var(--display);font-size:13px;}
 .ldist{font-size:9px;color:var(--muted);}
+
 /* Setup */
-.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
 .sitem{background:var(--bg3);border:1px solid rgba(255,255,255,0.05);border-radius:8px;padding:10px;}
 .silbl{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
 .sival{font-family:var(--display);font-size:14px;}
-.ce{color:var(--gold);}.csl{color:var(--red);}.ctp{color:var(--green);}.crr{color:var(--text);}
-.rrbadge{background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.2);border-radius:6px;padding:6px 10px;text-align:center;margin-top:10px;font-size:11px;color:var(--green);}
-/* Analysis */
+.ce{color:var(--gold);}.csl{color:var(--red);}.ctp{color:var(--green);}
+.rrbadge{background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.2);border-radius:6px;padding:6px;text-align:center;font-size:11px;color:var(--green);}
+
+/* Analysis box */
 .acard{background:var(--bg2);border:1px solid rgba(0,255,136,0.2);border-radius:12px;padding:14px;margin-bottom:12px;}
-.ahead{display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(0,255,136,0.1);}
-.aicon{width:24px;height:24px;border-radius:6px;background:rgba(0,255,136,0.15);display:flex;align-items:center;justify-content:center;font-size:12px;}
+.ahead{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:7px;border-bottom:1px solid rgba(0,255,136,0.1);}
 .atitle{font-size:8px;letter-spacing:3px;color:var(--green);}
-.asub{font-size:8px;color:var(--muted);margin-top:1px;}
 .atext{font-size:11px;line-height:2;color:#9aafc5;}
+
 /* Info */
-.isect{margin-bottom:16px;}
-.ititle{font-size:8px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:8px;}
-.iitem{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+.iitem{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:13px 15px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
 .iname{font-size:12px;color:var(--text);}
-.idesc{font-size:10px;color:var(--muted);margin-top:3px;}
+.idesc{font-size:9px;color:var(--muted);margin-top:2px;}
 .iright{font-size:10px;color:var(--gold);}
-/* Refresh */
+.isect-title{font-size:8px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:8px;margin-top:4px;}
+
 .rbtn{background:rgba(255,215,0,0.07);border:1px solid var(--border);color:var(--gold);padding:12px;font-family:var(--mono);font-size:9px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;border-radius:10px;width:100%;margin-bottom:8px;transition:background 0.2s;}
 .rbtn:active{background:rgba(255,215,0,0.15);}
-.disc{font-size:9px;color:#2a3345;text-align:center;padding:8px;letter-spacing:1px;line-height:1.8;}
-/* Error */
-.ewrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:16px;padding:20px;text-align:center;}
+.disc{font-size:9px;color:#2a3345;text-align:center;padding:6px;line-height:1.8;}
+.hint{font-size:10px;color:var(--muted);text-align:center;padding:20px;line-height:1.8;}
 </style>
 </head>
 <body>
@@ -126,275 +131,227 @@ header{flex-shrink:0;background:rgba(5,8,16,0.95);border-bottom:1px solid var(--
   <div class="hright"><div class="htime" id="ht"></div><div class="dot"></div></div>
 </header>
 <nav class="nav">
-  <button class="ntab active" onclick="tab('analysis')">◈ Analýza</button>
-  <button class="ntab" onclick="tab('levels')">◈ Úrovně</button>
-  <button class="ntab" onclick="tab('setup')">◈ Setup</button>
-  <button class="ntab" onclick="tab('info')">◈ Info</button>
+  <button class="ntab active" onclick="showTab('input')">◈ Vstup</button>
+  <button class="ntab" onclick="showTab('analysis')">◈ Analýza</button>
+  <button class="ntab" onclick="showTab('levels')">◈ Úrovně</button>
+  <button class="ntab" onclick="showTab('setup')">◈ Setup</button>
 </nav>
 <div class="main">
-  <div class="screen active" id="tab-analysis"><div id="ac"><div class="lwrap"><div class="spinner"></div><div class="ltitle">NAČÍTÁM</div></div></div></div>
-  <div class="screen" id="tab-levels"><div id="lc"><div class="lwrap"><div class="spinner"></div></div></div></div>
-  <div class="screen" id="tab-setup"><div id="sc"><div class="lwrap"><div class="spinner"></div></div></div></div>
-  <div class="screen" id="tab-info">
-    <div style="padding:4px">
-      <div class="isect"><div class="ititle">◈ Jak nainstalovat jako apku</div>
-        <div class="card"><div style="font-size:11px;line-height:2.2;color:var(--text)">
-          <div style="color:var(--gold);margin-bottom:8px">Chrome / Android:</div>
-          1. Otevřete tuto stránku v Chrome<br>
-          2. Klepněte na <b style="color:var(--gold)">⋮</b> vpravo nahoře<br>
-          3. Vyberte <b style="color:var(--gold)">"Přidat na plochu"</b><br>
-          4. Potvrďte → ikona na ploše ✓
-        </div></div>
+
+  <!-- INPUT TAB -->
+  <div class="screen active" id="tab-input">
+    <div class="form-card a1">
+      <div class="form-title">◈ Zadejte data z TradingView</div>
+      <div class="form-grid">
+        <div class="finput"><label>Aktuální cena</label><input type="number" id="i_price" placeholder="4740.00" step="0.01"></div>
+        <div class="finput"><label>Předchozí close</label><input type="number" id="i_prev" placeholder="4720.00" step="0.01"></div>
+        <div class="finput"><label>RSI (14)</label><input type="number" id="i_rsi" placeholder="45" step="0.1" min="0" max="100"></div>
+        <div class="finput"><label>EMA 20</label><input type="number" id="i_ema20" placeholder="4750.00" step="0.01"></div>
+        <div class="finput"><label>EMA 50</label><input type="number" id="i_ema50" placeholder="4700.00" step="0.01"></div>
+        <div class="finput"><label>EMA 200</label><input type="number" id="i_ema200" placeholder="4500.00" step="0.01"></div>
+        <div class="finput"><label>High 24h</label><input type="number" id="i_high" placeholder="4780.00" step="0.01"></div>
+        <div class="finput"><label>Low 24h</label><input type="number" id="i_low" placeholder="4710.00" step="0.01"></div>
       </div>
-      <div class="isect"><div class="ititle">◈ O aplikaci</div>
-        <div class="iitem"><div><div class="iname">Verze</div><div class="idesc">XAUUSD AI Analyzer PWA</div></div><div class="iright">v2.0</div></div>
-        <div class="iitem"><div><div class="iname">Data</div><div class="idesc">Metals.live API (bez CORS)</div></div><div class="iright">LIVE</div></div>
-        <div class="iitem"><div><div class="iname">Analýza</div><div class="idesc">Lokální výpočty RSI/EMA/MACD</div></div><div class="iright">✓</div></div>
+      <div class="form-title" style="margin-top:4px">◈ Timeframe signály (z Smart Money)</div>
+      <div class="form-grid">
+        <div class="finput"><label>1D trend</label>
+          <select id="t_1d" style="background:none;border:none;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;width:100%">
+            <option value="bearish">▼ Bearish</option><option value="neutral">— Neutral</option><option value="bullish">▲ Bullish</option>
+          </select>
+        </div>
+        <div class="finput"><label>4H trend</label>
+          <select id="t_4h" style="background:none;border:none;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;width:100%">
+            <option value="bearish">▼ Bearish</option><option value="neutral">— Neutral</option><option value="bullish">▲ Bullish</option>
+          </select>
+        </div>
+        <div class="finput"><label>1H trend</label>
+          <select id="t_1h" style="background:none;border:none;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;width:100%">
+            <option value="bearish">▼ Bearish</option><option value="neutral">— Neutral</option><option value="bullish">▲ Bullish</option>
+          </select>
+        </div>
+        <div class="finput"><label>15M trend</label>
+          <select id="t_15m" style="background:none;border:none;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;width:100%">
+            <option value="neutral">— Neutral</option><option value="bearish">▼ Bearish</option><option value="bullish">▲ Bullish</option>
+          </select>
+        </div>
       </div>
-      <div class="isect"><div class="ititle">◈ Upozornění</div>
-        <div class="card"><div style="font-size:10px;line-height:1.9;color:var(--muted)">Pouze informativní účely. Není finančním poradenstvím. Obchodujte zodpovědně.</div></div>
+      <button class="analyze-btn" onclick="analyze()">⚡ ANALYZOVAT</button>
+    </div>
+    <div class="card a2">
+      <div class="ctitle">◈ Jak na to</div>
+      <div style="font-size:10px;line-height:2;color:var(--muted)">
+        1. Otevřete <b style="color:var(--text)">TradingView → XAUUSD</b><br>
+        2. Přepněte na <b style="color:var(--text)">D1 graf</b><br>
+        3. Zapněte <b style="color:var(--text)">RSI + EMA 20/50/200</b><br>
+        4. Opište hodnoty sem<br>
+        5. Klepněte <b style="color:var(--gold)">ANALYZOVAT</b>
       </div>
     </div>
   </div>
+
+  <!-- ANALYSIS TAB -->
+  <div class="screen" id="tab-analysis">
+    <div id="ac"><div class="hint">← Nejprve zadejte data na záložce Vstup</div></div>
+  </div>
+
+  <!-- LEVELS TAB -->
+  <div class="screen" id="tab-levels">
+    <div id="lc"><div class="hint">← Nejprve zadejte data na záložce Vstup</div></div>
+  </div>
+
+  <!-- SETUP TAB -->
+  <div class="screen" id="tab-setup">
+    <div id="sc"><div class="hint">← Nejprve zadejte data na záložce Vstup</div></div>
+  </div>
+
 </div>
 
 <script>
 // Time
-function ut(){const t=new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'});document.getElementById('ht').textContent=t;}
+function ut(){document.getElementById('ht').textContent=new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'});}
 ut();setInterval(ut,10000);
 
 // Tabs
-function tab(n){
+function showTab(n){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+n).classList.add('active');
-  ['analysis','levels','setup','info'].forEach((x,i)=>{if(x===n)document.querySelectorAll('.ntab')[i].classList.add('active');});
+  ['input','analysis','levels','setup'].forEach((x,i)=>{if(x===n)document.querySelectorAll('.ntab')[i].classList.add('active');});
 }
 
 // SW
 if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
 
 // Helpers
+function f(n,d=2){return Number(n).toFixed(d);}
 function rc(v){if(v>70)return'var(--red)';if(v<30)return'var(--green)';return'var(--text)';}
 function ta(t){if(t==='bullish')return'<span class="aup">▲ BUY</span>';if(t==='bearish')return'<span class="adn">▼ SELL</span>';return'<span class="ant">— WAIT</span>';}
 function tbc(t){if(t==='bullish')return'var(--green)';if(t==='bearish')return'var(--red)';return'var(--muted)';}
-function f(n,d=2){return Number(n).toFixed(d);}
+function g(id){return parseFloat(document.getElementById(id).value)||0;}
 
-// EMA / RSI / MACD
-function ema(a,p){const k=2/(p+1);let e=a[0];for(let i=1;i<a.length;i++)e=a[i]*k+e*(1-k);return e;}
-function rsi(a,p=14){
-  if(a.length<p+1)return 50;
-  let g=0,l=0;
-  for(let i=1;i<=p;i++){const d=a[i]-a[i-1];d>=0?g+=d:l-=d;}
-  let ag=g/p,al=l/p;
-  for(let i=p+1;i<a.length;i++){const d=a[i]-a[i-1];ag=(ag*(p-1)+Math.max(d,0))/p;al=(al*(p-1)+Math.max(-d,0))/p;}
-  return al===0?100:100-(100/(1+ag/al));
-}
+function analyze(){
+  const price  = g('i_price');
+  const prev   = g('i_prev');
+  const rsi    = g('i_rsi');
+  const ema20  = g('i_ema20');
+  const ema50  = g('i_ema50');
+  const ema200 = g('i_ema200');
+  const high   = g('i_high');
+  const low    = g('i_low');
 
-// Fetch gold price from metals.live (supports CORS)
-async function getPrice(){
-  // metals.live free API - no key needed, supports browser fetch
-  const r = await fetch('https://metals.live/api/v1/spot/gold', {signal:AbortSignal.timeout(8000)});
-  if(!r.ok) throw new Error('API nedostupné');
-  const d = await r.json();
-  return d[0]?.price || d?.price || d?.XAU || null;
-}
+  if(!price){alert('Zadejte prosím aktuální cenu!');return;}
 
-// Fallback: frankfurter for FX, hardcoded recent gold base
-async function getFallbackPrice(){
-  // Use open.er-api for a working CORS-friendly call, combine with known gold price
-  // Actually use: data.nasdaq.com style via jsonp isn't possible
-  // Use metals-api.com free tier workaround via a jsonp-style public endpoint
-  throw new Error('Záložní API také selhalo');
-}
+  const t1d  = document.getElementById('t_1d').value;
+  const t4h  = document.getElementById('t_4h').value;
+  const t1h  = document.getElementById('t_1h').value;
+  const t15m = document.getElementById('t_15m').value;
 
-// Build analysis from price
-function buildAnalysis(price, prevPrice){
-  const change = price - prevPrice;
-  const changePct = (change/prevPrice*100);
+  const change    = prev ? price - prev : 0;
+  const changePct = prev ? (change/prev*100) : 0;
 
-  // Simulate realistic recent closes around current price for indicator calc
-  const seed = price;
-  const closes = [];
-  let p = seed * 0.97; // start slightly below
-  for(let i=0;i<60;i++){
-    const drift = (seed - p) * 0.05; // mean reversion
-    const noise = (Math.random()-0.5)*8;
-    p = p + drift + noise;
-    closes.push(p);
-  }
-  closes.push(price); // latest is real price
-  closes.reverse(); // newest first
+  // Signal scoring
+  let bull=0, bear=0;
+  [t1d,t4h,t1h,t15m].forEach(t=>{if(t==='bullish')bull++;else if(t==='bearish')bear++;});
+  if(rsi && rsi<35)bull++;else if(rsi && rsi>65)bear++;
+  if(ema20 && price>ema20)bull++;else if(ema20) bear++;
+  if(ema50 && price>ema50)bull++;else if(ema50) bear++;
+  if(changePct>0)bull++;else if(changePct<0) bear++;
 
-  const c30 = closes.slice(0,30).reverse();
-  const RSI  = rsi(c30,14);
-  const EMA20 = ema(closes.slice(0,20).reverse(),20);
-  const EMA50 = ema(closes.slice(0,50).reverse(),50);
-  const EMA200= ema(closes.slice(0,60).reverse(),60); // approx 200
-  const MACD  = ema(closes.slice(0,12).reverse(),12) - ema(closes.slice(0,26).reverse(),26);
-  const trend = price>EMA20&&EMA20>EMA50?'bullish':price<EMA20&&EMA20<EMA50?'bearish':'neutral';
+  const total = bull+bear||1;
+  const sig   = bear>bull?'SELL':bull>bear?'BUY':'WAIT';
+  const conf  = Math.round(Math.max(bull,bear)/total*100);
+  const sc    = sig==='SELL'?'bearish':sig==='BUY'?'bullish':'neutral';
+  const trend = t1d;
 
-  let bull=0,bear=0;
-  if(trend==='bullish')bull+=2;else if(trend==='bearish')bear+=2;
-  if(RSI<35)bull++;else if(RSI>65)bear++;
-  if(MACD>0)bull++;else bear++;
-  if(price>EMA20)bull++;else bear++;
-  if(changePct>0)bull++;else bear++;
-
-  const sig = bear>bull?'SELL':bull>bear?'BUY':'WAIT';
-  const conf = Math.round(Math.max(bull,bear)/(bull+bear)*100);
-
-  // Real support/resistance based on price
-  const res = [price+15, price+30, price+55].map(x=>Math.round(x*10)/10);
-  const sup = [price-15, price-30, price-55].map(x=>Math.round(x*10)/10);
+  // S/R levels
+  const res = [price+15, price+30, price+55];
+  const sup = [price-15, price-30, price-55];
 
   const entry = sig==='SELL'?res[0]:sup[0];
-  const sl = sig==='SELL'?entry+12:entry-12;
-  const tp1 = sig==='SELL'?price-25:price+25;
-  const tp2 = sig==='SELL'?price-50:price+50;
+  const sl    = sig==='SELL'?entry+12:entry-12;
+  const tp1   = sig==='SELL'?price-25:price+25;
+  const tp2   = sig==='SELL'?price-50:price+50;
+  const rr    = f(Math.abs(tp1-entry)/Math.abs(sl-entry||1),1);
 
   const now = new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'});
-  const analysis = `XAUUSD ke ${now} CET: Cena $${f(price,0)} je ${price>EMA50?'nad':'pod'} EMA50 – trend ${trend==='bullish'?'rostoucí 📈':trend==='bearish'?'klesající 📉':'neutrální ➡️'}. RSI ${f(RSI,0)} ${RSI>70?'– trh překoupen, pozor na korekci':RSI<30?'– trh přeprodán, možný odraz':'– neutrální pásmo'}. MACD ${MACD>0?'pozitivní (kupující dominují)':'negativní (prodávající dominují)'}. Doporučení: ${sig} ${sig!=='WAIT'?'od úrovně $'+f(entry,0):'– čekejte na potvrzení'}.`;
 
-  return {
-    price, change, changePct,
-    high24h: price+Math.abs(change)*1.5+8,
-    low24h: price-Math.abs(change)*1.5-8,
-    bid: price-0.4, ask: price+0.4,
-    rsi:RSI, ema20:EMA20, ema50:EMA50, ema200:EMA200, macd:MACD,
-    signal:sig, trend, confidence:conf,
-    resistance:res, support:sup,
-    tf:{'1D':trend,'4H':trend,'1H':MACD>0?'bullish':'bearish','30M':price>EMA20?'neutral':'bearish','15M':'neutral'},
-    analysis, entry, sl, tp1, tp2, updated:now
-  };
-}
+  // Build analysis text
+  let txt = `XAUUSD ke ${now}: Cena $${f(price,0)}`;
+  if(ema50) txt += ` je ${price>ema50?'NAD':'POD'} EMA50 ($${f(ema50,0)})`;
+  txt += ` – D1 trend ${t1d==='bullish'?'rostoucí 📈':t1d==='bearish'?'klesající 📉':'neutrální ➡️'}.`;
+  if(rsi) txt += ` RSI ${f(rsi,0)}${rsi>70?' – trh překoupen ⚠️':rsi<30?' – trh přeprodán, možný odraz':' – neutrální pásmo'}.`;
+  txt += ` Shoda TF signálů: ${bull} bullish vs ${bear} bearish.`;
+  txt += ` Doporučení: ${sig}${sig!=='WAIT'?' od $'+f(entry,0):'– čekejte na jasný signál'}.`;
+  if(sig==='SELL') txt += ` SL nad $${f(sl,0)}, cíl $${f(tp1,0)}.`;
+  else if(sig==='BUY') txt += ` SL pod $${f(sl,0)}, cíl $${f(tp1,0)}.`;
 
-function render(d){
-  const sc = d.signal==='SELL'?'bearish':d.signal==='BUY'?'bullish':'neutral';
+  const tf = {'1D':t1d,'4H':t4h,'1H':t1h,'15M':t15m};
 
+  // Render Analysis
   document.getElementById('ac').innerHTML=`
     <div class="pcard a1">
-      <div class="plbl">◈ GOLD SPOT · ${d.updated}</div>
-      <div class="pval">$${f(d.price,2)}</div>
-      <div class="pchg ${d.change>=0?'up':'down'}">${d.change>=0?'▲':'▼'} $${f(Math.abs(d.change),2)} · ${d.changePct>=0?'+':''}${f(d.changePct,2)}%</div>
+      <div class="plbl">◈ GOLD SPOT · ${now}</div>
+      <div class="pval">$${f(price,2)}</div>
+      <div class="pchg ${change>=0?'up':'down'}">${change>=0?'▲':'▼'} $${f(Math.abs(change),2)} · ${changePct>=0?'+':''}${f(changePct,2)}%</div>
       <div class="pstats">
-        <div class="stat"><div class="slbl">BID</div><div class="sval">$${f(d.bid,1)}</div></div>
-        <div class="stat"><div class="slbl">24h High</div><div class="sval up">$${f(d.high24h,1)}</div></div>
-        <div class="stat"><div class="slbl">24h Low</div><div class="sval down">$${f(d.low24h,1)}</div></div>
+        <div class="stat"><div class="slbl">RSI 14</div><div class="sval" style="color:${rc(rsi)}">${rsi||'–'}</div></div>
+        <div class="stat"><div class="slbl">24h High</div><div class="sval up">${high?'$'+f(high,0):'–'}</div></div>
+        <div class="stat"><div class="slbl">24h Low</div><div class="sval down">${low?'$'+f(low,0):'–'}</div></div>
       </div>
     </div>
     <div class="sigcard ${sc} a2">
-      <div class="siglbl">◈ SIGNÁL</div>
-      <div class="sigval">${d.signal}</div>
-      <div class="sigmeta">Shoda: ${d.confidence}% · Trend: ${d.trend.toUpperCase()}</div>
+      <div class="siglbl">◈ CELKOVÝ SIGNÁL</div>
+      <div class="sigval">${sig}</div>
+      <div class="sigmeta">Shoda: ${conf}% · D1: ${t1d.toUpperCase()}<br>${bull}× BUY signál · ${bear}× SELL signál</div>
     </div>
     <div class="card a3">
-      <div class="ctitle">◈ Multi-Timeframe <span class="cbadge">D1→15M</span></div>
-      ${Object.entries(d.tf).map(([tf,t])=>`<div class="tfrow"><span class="tfname">${tf}</span><div class="tfbar"><div class="tffill" style="width:${t==='bullish'?70:t==='bearish'?30:50}%;background:${tbc(t)}"></div></div><span class="tfsig">${ta(t)}</span></div>`).join('')}
+      <div class="ctitle">◈ Multi-Timeframe</div>
+      ${Object.entries(tf).map(([t,v])=>`<div class="tfrow"><span class="tfname">${t}</span><div class="tfbar"><div class="tffill" style="width:${v==='bullish'?70:v==='bearish'?30:50}%;background:${tbc(v)}"></div></div><span class="tfsig">${ta(v)}</span></div>`).join('')}
     </div>
     <div class="card a4">
       <div class="ctitle">◈ Indikátory</div>
-      <div class="indrow"><span class="indname">RSI 14</span><div class="indbar"><div class="indfill" style="width:${d.rsi}%;background:${rc(d.rsi)}"></div></div><span class="indval" style="color:${rc(d.rsi)}">${f(d.rsi,0)}</span></div>
-      <div class="indrow"><span class="indname">EMA 20</span><div class="indbar"><div class="indfill" style="width:60%;background:${d.price>d.ema20?'var(--green)':'var(--red)'}"></div></div><span class="indval" style="color:${d.price>d.ema20?'var(--green)':'var(--red)'}">${d.price>d.ema20?'↑':'↓'} ${f(d.ema20,0)}</span></div>
-      <div class="indrow"><span class="indname">EMA 50</span><div class="indbar"><div class="indfill" style="width:55%;background:${d.price>d.ema50?'var(--green)':'var(--red)'}"></div></div><span class="indval" style="color:${d.price>d.ema50?'var(--green)':'var(--red)'}">${d.price>d.ema50?'↑':'↓'} ${f(d.ema50,0)}</span></div>
-      <div class="indrow"><span class="indname">MACD</span><div class="indbar"><div class="indfill" style="width:50%;background:${d.macd>0?'var(--green)':'var(--red)'}"></div></div><span class="indval" style="color:${d.macd>0?'var(--green)':'var(--red)'}">${f(d.macd,1)}</span></div>
+      ${rsi?`<div class="indrow"><span class="indname">RSI 14</span><div class="indbar"><div class="indfill" style="width:${rsi}%;background:${rc(rsi)}"></div></div><span class="indval" style="color:${rc(rsi)}">${f(rsi,0)}</span></div>`:''}
+      ${ema20?`<div class="indrow"><span class="indname">EMA 20</span><div class="indbar"><div class="indfill" style="width:60%;background:${price>ema20?'var(--green)':'var(--red)'}"></div></div><span class="indval" style="color:${price>ema20?'var(--green)':'var(--red)'}">${price>ema20?'↑':'↓'} $${f(ema20,0)}</span></div>`:''}
+      ${ema50?`<div class="indrow"><span class="indname">EMA 50</span><div class="indbar"><div class="indfill" style="width:55%;background:${price>ema50?'var(--green)':'var(--red)'}"></div></div><span class="indval" style="color:${price>ema50?'var(--green)':'var(--red)'}">${price>ema50?'↑':'↓'} $${f(ema50,0)}</span></div>`:''}
+      ${ema200?`<div class="indrow"><span class="indname">EMA 200</span><div class="indbar"><div class="indfill" style="width:50%;background:${price>ema200?'var(--green)':'var(--red)'}"></div></div><span class="indval" style="color:${price>ema200?'var(--green)':'var(--red)'}">${price>ema200?'↑':'↓'} $${f(ema200,0)}</span></div>`:''}
     </div>
-    <div class="acard a5">
-      <div class="ahead"><div class="aicon">📊</div><div><div class="atitle">TECHNICKÁ ANALÝZA</div><div class="asub">RSI · EMA · MACD · Trend</div></div></div>
-      <div class="atext">${d.analysis}</div>
+    <div class="acard a4">
+      <div class="ahead"><div style="font-size:16px">📊</div><div><div class="atitle">TECHNICKÁ ANALÝZA</div></div></div>
+      <div class="atext">${txt}</div>
     </div>
-    <button class="rbtn" onclick="load()">↻ AKTUALIZOVAT</button>
+    <button class="rbtn" onclick="showTab('input')">← UPRAVIT DATA</button>
     <div class="disc">⚠ Pouze informativní · Není finanční poradenství</div>`;
 
+  // Render Levels
   document.getElementById('lc').innerHTML=`
-    <div class="card a1"><div class="ctitle">◈ Resistance zóny</div>${d.resistance.map((r,i)=>`<div class="lvrow"><span class="lbadge res">R${i+1}</span><span class="lprice" style="color:var(--red)">$${f(r,2)}</span><span class="ldist">+$${f(r-d.price,1)}</span></div>`).join('')}</div>
-    <div class="card a2"><div class="ctitle">◈ Aktuální cena</div><div class="lvrow"><span class="lbadge cur">LIVE</span><span class="lprice" style="color:var(--gold)">$${f(d.price,2)}</span><span class="ldist" style="color:${d.change>=0?'var(--green)':'var(--red)'}">${d.changePct>=0?'+':''}${f(d.changePct,2)}%</span></div></div>
-    <div class="card a3"><div class="ctitle">◈ Support zóny</div>${d.support.map((s,i)=>`<div class="lvrow"><span class="lbadge sup">S${i+1}</span><span class="lprice" style="color:var(--green)">$${f(s,2)}</span><span class="ldist">-$${f(d.price-s,1)}</span></div>`).join('')}</div>
-    <div class="card a4"><div class="ctitle">◈ Klouzavé průměry</div>${[{n:'EMA 20',v:d.ema20},{n:'EMA 50',v:d.ema50},{n:'EMA 200',v:d.ema200}].map(e=>`<div class="lvrow"><span style="font-size:10px;color:var(--muted)">${e.n}</span><span class="lprice" style="color:${d.price>e.v?'var(--green)':'var(--red)'}">$${f(e.v,1)}</span><span class="ldist" style="color:${d.price>e.v?'var(--green)':'var(--red)'}">${d.price>e.v?'▲ nad':'▼ pod'}</span></div>`).join('')}</div>
-    <button class="rbtn" onclick="load()">↻ AKTUALIZOVAT</button>`;
+    <div class="card a1"><div class="ctitle">◈ Resistance zóny</div>${res.map((r,i)=>`<div class="lvrow"><span class="lbadge res">R${i+1}</span><span class="lprice" style="color:var(--red)">$${f(r,2)}</span><span class="ldist">+$${f(r-price,1)}</span></div>`).join('')}</div>
+    <div class="card a2"><div class="ctitle">◈ Aktuální cena</div><div class="lvrow"><span class="lbadge cur">LIVE</span><span class="lprice" style="color:var(--gold)">$${f(price,2)}</span><span class="ldist" style="color:${change>=0?'var(--green)':'var(--red)'}">${changePct>=0?'+':''}${f(changePct,2)}%</span></div></div>
+    <div class="card a3"><div class="ctitle">◈ Support zóny</div>${sup.map((s,i)=>`<div class="lvrow"><span class="lbadge sup">S${i+1}</span><span class="lprice" style="color:var(--green)">$${f(s,2)}</span><span class="ldist">-$${f(price-s,1)}</span></div>`).join('')}</div>
+    ${ema20||ema50||ema200?`<div class="card a4"><div class="ctitle">◈ Klouzavé průměry</div>${[[ema20,'EMA 20'],[ema50,'EMA 50'],[ema200,'EMA 200']].filter(e=>e[0]).map(e=>`<div class="lvrow"><span style="font-size:10px;color:var(--muted)">${e[1]}</span><span class="lprice" style="color:${price>e[0]?'var(--green)':'var(--red)'}">$${f(e[0],1)}</span><span class="ldist" style="color:${price>e[0]?'var(--green)':'var(--red)'}">${price>e[0]?'▲ nad':'▼ pod'}</span></div>`).join('')}</div>`:''}
+    <button class="rbtn" onclick="showTab('input')">← UPRAVIT DATA</button>`;
 
-  const rr = f(Math.abs(d.tp1-d.entry)/Math.abs(d.sl-d.entry),1);
+  // Render Setup
   document.getElementById('sc').innerHTML=`
-    <div class="sigcard ${sc} a1"><div class="siglbl">◈ SETUP</div><div class="sigval">${d.signal}</div><div class="sigmeta">Shoda: ${d.confidence}% · ${d.trend.toUpperCase()}</div></div>
+    <div class="sigcard ${sc} a1"><div class="siglbl">◈ DOPORUČENÝ SETUP</div><div class="sigval">${sig}</div><div class="sigmeta">Shoda: ${conf}% · ${trend.toUpperCase()}</div></div>
     <div class="card a2"><div class="ctitle">◈ Vstupní parametry</div>
       <div class="sgrid">
-        <div class="sitem"><div class="silbl">Vstup</div><div class="sival ce">$${f(d.entry,2)}</div></div>
-        <div class="sitem"><div class="silbl">Stop Loss</div><div class="sival csl">$${f(d.sl,2)}</div></div>
-        <div class="sitem"><div class="silbl">TP1</div><div class="sival ctp">$${f(d.tp1,2)}</div></div>
-        <div class="sitem"><div class="silbl">TP2</div><div class="sival ctp">$${f(d.tp2,2)}</div></div>
+        <div class="sitem"><div class="silbl">Vstup ${sig}</div><div class="sival ce">$${f(entry,2)}</div></div>
+        <div class="sitem"><div class="silbl">Stop Loss</div><div class="sival csl">$${f(sl,2)}</div></div>
+        <div class="sitem"><div class="silbl">Take Profit 1</div><div class="sival ctp">$${f(tp1,2)}</div></div>
+        <div class="sitem"><div class="silbl">Take Profit 2</div><div class="sival ctp">$${f(tp2,2)}</div></div>
       </div>
-      <div class="rrbadge">Risk/Reward: 1 : ${rr}</div>
+      <div class="rrbadge">Risk / Reward = 1 : ${rr}</div>
     </div>
     <div class="card a3"><div class="ctitle">◈ Risk kalkulace</div>
-      ${[{lot:'0.01',r:f(Math.abs(d.sl-d.entry)*1,2)},{lot:'0.05',r:f(Math.abs(d.sl-d.entry)*5,2)},{lot:'0.10',r:f(Math.abs(d.sl-d.entry)*10,2)}].map(x=>`<div class="lvrow"><span style="font-size:10px;color:var(--muted)">Lot ${x.lot}</span><span style="font-size:11px;color:var(--red)">Risk ~$${x.r}</span></div>`).join('')}
-      <div style="font-size:9px;color:var(--muted);margin-top:8px">* Přibližný výpočet</div>
+      ${[['0.01',1],['0.05',5],['0.10',10]].map(([lot,m])=>`<div class="lvrow"><span style="font-size:10px;color:var(--muted)">Lot ${lot}</span><span style="font-size:11px;color:var(--red)">Risk ~$${f(Math.abs(sl-entry)*m,1)}</span></div>`).join('')}
+      <div style="font-size:9px;color:var(--muted);margin-top:8px">* Přibližný výpočet · závisí na brokeru a páce</div>
     </div>
-    <div class="acard a4"><div class="ahead"><div class="aicon">🎯</div><div><div class="atitle">ZDŮVODNĚNÍ</div><div class="asub">Technická analýza</div></div></div><div class="atext">${d.analysis}</div></div>
-    <button class="rbtn" onclick="load()">↻ NOVÝ SETUP</button>
-    <div class="disc">⚠ Není finanční poradenství</div>`;
+    <div class="acard a4"><div class="ahead"><div style="font-size:16px">🎯</div><div><div class="atitle">ZDŮVODNĚNÍ</div></div></div><div class="atext">${txt}</div></div>
+    <button class="rbtn" onclick="showTab('input')">← UPRAVIT DATA</button>
+    <div class="disc">⚠ Není finanční poradenství · Obchodujte zodpovědně</div>`;
+
+  showTab('analysis');
 }
-
-function errAll(msg){
-  const h=`<div class="ewrap"><div style="font-size:32px">⚠</div><div style="color:var(--red);font-size:11px;letter-spacing:3px">CHYBA</div><div style="color:var(--muted);font-size:10px;line-height:1.8;max-width:280px;text-align:center">${msg}</div><button class="rbtn" style="max-width:240px" onclick="load()">↻ ZKUSIT ZNOVU</button></div>`;
-  document.getElementById('ac').innerHTML=h;
-  document.getElementById('lc').innerHTML=h;
-  document.getElementById('sc').innerHTML=h;
-}
-
-async function load(){
-  const lh=`<div class="lwrap"><div class="spinner"></div><div class="ltitle">NAČÍTÁM</div></div>`;
-  document.getElementById('ac').innerHTML=`<div class="lwrap"><div class="spinner"></div><div class="ltitle">NAČÍTÁM CENU</div><div class="lstep">◈ Metals.live API<br>◈ Výpočet indikátorů<br>◈ Generování analýzy</div></div>`;
-  document.getElementById('lc').innerHTML=lh;
-  document.getElementById('sc').innerHTML=lh;
-
-  try{
-    // Try multiple free gold price APIs that support CORS
-    let price = null;
-    let prevPrice = null;
-
-    const apis = [
-      // metals.live - free, CORS friendly
-      async () => {
-        const r = await fetch('https://metals.live/api/v1/spot/gold',{signal:AbortSignal.timeout(6000)});
-        const d = await r.json();
-        return {price: d[0]?.price || d?.price, prev: null};
-      },
-      // frankfurter.app - free CORS API (for USD only, not gold - skip)
-      // Use a simple fetch to get gold from open API
-      async () => {
-        const r = await fetch('https://api.metalpriceapi.com/v1/latest?api_key=demo&base=XAU&currencies=USD',{signal:AbortSignal.timeout(6000)});
-        const d = await r.json();
-        return {price: d?.rates?.USD ? 1/d.rates.USD : null, prev: null};
-      }
-    ];
-
-    for(const api of apis){
-      try{
-        const res = await api();
-        if(res.price && res.price > 1000 && res.price < 10000){
-          price = res.price;
-          prevPrice = res.prev || price - (Math.random()*10-5);
-          break;
-        }
-      }catch(e){continue;}
-    }
-
-    if(!price){
-      // Last resort: use a known recent price + small random walk for demo
-      // This ensures app always works even without internet for gold APIs
-      const base = 4741; // approximately current gold price
-      price = base + (Math.random()-0.5)*20;
-      prevPrice = price - (Math.random()*15-7);
-    }
-
-    const data = buildAnalysis(price, prevPrice);
-    render(data);
-  }catch(e){
-    errAll(e.message || 'Chyba při načítání');
-  }
-}
-
-load();
 </script>
 </body>
 </html>
