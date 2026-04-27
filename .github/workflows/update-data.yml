@@ -1,0 +1,149 @@
+name: Update Gold Data
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch Gold Data & Calculate Indicators
+        run: |
+          python3 << 'PYEOF'
+          import urllib.request, json, math, datetime
+
+          # Fetch OHLC data from Yahoo Finance
+          url = "https://query1.finance.yahoo.com/v8/finance/chart/GC=F?interval=1h&range=60d"
+          req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+          
+          try:
+            with urllib.request.urlopen(req, timeout=10) as r:
+              raw = json.loads(r.read())
+            
+            result = raw["chart"]["result"][0]
+            closes = result["indicators"]["quote"][0]["close"]
+            closes = [c for c in closes if c is not None]
+            
+            price = closes[-1]
+            prev  = closes[-2]
+            change = price - prev
+            change_pct = (change / prev) * 100
+
+            # EMA
+            def ema(data, period):
+              k = 2/(period+1)
+              e = data[0]
+              for v in data[1:]:
+                e = v*k + e*(1-k)
+              return e
+
+            ema20  = ema(closes[-20:], 20)
+            ema50  = ema(closes[-50:], 50)
+            ema200 = ema(closes[-200:], 200) if len(closes)>=200 else ema(closes, len(closes))
+
+            # RSI
+            def rsi(data, period=14):
+              gains, losses = [], []
+              for i in range(1, period+1):
+                d = data[-period+i] - data[-period+i-1] if i > 0 else 0
+                (gains if d>0 else losses).append(abs(d))
+              ag = sum(gains)/period if gains else 0
+              al = sum(losses)/period if losses else 0
+              if al == 0: return 100
+              return 100 - (100/(1+ag/al))
+
+            rsi_val = rsi(closes[-15:])
+
+            # MACD
+            macd = ema(closes[-12:], 12) - ema(closes[-26:], 26)
+
+            # Signal
+            bull, bear = 0, 0
+            if price > ema20: bull += 1
+            else: bear += 1
+            if price > ema50: bull += 1
+            else: bear += 1
+            if rsi_val > 50: bull += 1
+            else: bear += 1
+            if macd > 0: bull += 1
+            else: bear += 1
+            if change > 0: bull += 1
+            else: bear += 1
+
+            signal = "SELL" if bear > bull else "BUY" if bull > bear else "WAIT"
+            trend  = "bullish" if price>ema50 else "bearish"
+            conf   = round(max(bull,bear)/(bull+bear)*100)
+
+            # Support/Resistance
+            highs = result["indicators"]["quote"][0]["high"]
+            lows  = result["indicators"]["quote"][0]["low"]
+            highs = [h for h in highs[-50:] if h]
+            lows  = [l for l in lows[-50:] if l]
+            res = sorted([h for h in highs if h > price], reverse=True)[:3]
+            sup = sorted([l for l in lows  if l < price])[:3]
+
+            entry = res[0] if signal=="SELL" and res else (sup[0] if signal=="BUY" and sup else price)
+            sl    = entry+15 if signal=="SELL" else entry-15
+            tp1   = price-30 if signal=="SELL" else price+30
+            tp2   = price-60 if signal=="SELL" else price+60
+
+            now = datetime.datetime.utcnow().strftime("%d.%m.%Y %H:%M UTC")
+
+            data = {
+              "price": round(price, 2),
+              "change": round(change, 2),
+              "changePct": round(change_pct, 2),
+              "high24h": round(max(closes[-24:]), 2),
+              "low24h": round(min(closes[-24:]), 2),
+              "rsi": round(rsi_val, 1),
+              "ema20": round(ema20, 1),
+              "ema50": round(ema50, 1),
+              "ema200": round(ema200, 1),
+              "macd": round(macd, 2),
+              "signal": signal,
+              "trend": trend,
+              "confidence": conf,
+              "resistance": [round(r,1) for r in res] if res else [round(price+15,1), round(price+30,1), round(price+50,1)],
+              "support": [round(s,1) for s in sup] if sup else [round(price-15,1), round(price-30,1), round(price-50,1)],
+              "tf": {
+                "1D": trend,
+                "4H": trend,
+                "1H": "bullish" if macd>0 else "bearish",
+                "30M": "bullish" if price>ema20 else "bearish",
+                "15M": "neutral"
+              },
+              "entry": round(entry, 2),
+              "sl": round(sl, 2),
+              "tp1": round(tp1, 2),
+              "tp2": round(tp2, 2),
+              "updated": now,
+              "status": "ok"
+            }
+
+            analysis = f"XAUUSD ke {now}: Cena ${round(price,0)} je {'nad' if price>ema50 else 'pod'} EMA50 (${round(ema50,0)}) – trend {trend}. RSI {round(rsi_val,0)} {'– překoupen' if rsi_val>70 else '– přeprodán' if rsi_val<30 else '– neutrální'}. MACD {'pozitivní' if macd>0 else 'negativní'}. Doporučení: {signal}."
+            data["analysis"] = analysis
+
+          except Exception as e:
+            data = {"status": "error", "error": str(e), "updated": datetime.datetime.utcnow().strftime("%d.%m.%Y %H:%M UTC"), "price": 0}
+
+          with open("data.json", "w") as f:
+            json.dump(data, f, indent=2)
+          
+          print("Done:", data.get("price"), data.get("signal"))
+          PYEOF
+
+      - name: Commit data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data.json
+          git diff --staged --quiet || git commit -m "Auto: update gold data $(date -u '+%H:%M UTC')"
+          git push
