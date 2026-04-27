@@ -1,21 +1,21 @@
 {
-  "price": 4697.1,
-  "change": -0.1,
-  "changePct": -0.0,
-  "high24h": 4740.9,
+  "price": 4697.7,
+  "change": 0.0,
+  "changePct": 0.0,
+  "high24h": 4740.5,
   "low24h": 4684.8,
-  "rsi": 49.0,
-  "ema20": 4708.2,
-  "ema50": 4718.8,
-  "ema200": 4769.7,
-  "macd": -10.9,
+  "rsi": 53.1,
+  "ema20": 4708.8,
+  "ema50": 4712.8,
+  "ema200": 4768.2,
+  "macd": -8.81,
   "signal": "SELL",
   "trend": "bearish",
-  "confidence": 100,
+  "confidence": 80,
   "resistance": [
     4745.8,
     4744.8,
-    4742.4
+    4741.2
   ],
   "support": [
     4681.2,
@@ -31,9 +31,9 @@
   },
   "entry": 4745.8,
   "sl": 4760.8,
-  "tp1": 4667.1,
-  "tp2": 4637.1,
-  "updated": "27.04.2026 18:20 UTC",
+  "tp1": 4667.7,
+  "tp2": 4637.7,
+  "updated": "27.04.2026 21:40 UTC",
   "status": "ok",
-  "analysis": "XAUUSD ke 27.04.2026 18:20 UTC: Cena $4697.0 je pod EMA50 ($4719.0) \u2013 trend bearish. RSI 49.0 \u2013 neutr\u00e1ln\u00ed. MACD negativn\u00ed. Doporu\u010den\u00ed: SELL."
+  "analysis": "XAUUSD ke 27.04.2026 21:40 UTC: Cena $4698.0 je pod EMA50 ($4713.0) \u2013 trend bearish. RSI 53.0 \u2013 neutr\u00e1ln\u00ed. MACD negativn\u00ed. Doporu\u010den\u00ed: SELL."
 }
