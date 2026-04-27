@@ -1,1 +1,39 @@
-{"price":0,"updated":"čekám na první aktualizaci"}
+{
+  "price": 4697.1,
+  "change": -0.1,
+  "changePct": -0.0,
+  "high24h": 4740.9,
+  "low24h": 4684.8,
+  "rsi": 49.0,
+  "ema20": 4708.2,
+  "ema50": 4718.8,
+  "ema200": 4769.7,
+  "macd": -10.9,
+  "signal": "SELL",
+  "trend": "bearish",
+  "confidence": 100,
+  "resistance": [
+    4745.8,
+    4744.8,
+    4742.4
+  ],
+  "support": [
+    4681.2,
+    4681.5,
+    4682.5
+  ],
+  "tf": {
+    "1D": "bearish",
+    "4H": "bearish",
+    "1H": "bearish",
+    "30M": "bearish",
+    "15M": "neutral"
+  },
+  "entry": 4745.8,
+  "sl": 4760.8,
+  "tp1": 4667.1,
+  "tp2": 4637.1,
+  "updated": "27.04.2026 18:20 UTC",
+  "status": "ok",
+  "analysis": "XAUUSD ke 27.04.2026 18:20 UTC: Cena $4697.0 je pod EMA50 ($4719.0) \u2013 trend bearish. RSI 49.0 \u2013 neutr\u00e1ln\u00ed. MACD negativn\u00ed. Doporu\u010den\u00ed: SELL."
+}
