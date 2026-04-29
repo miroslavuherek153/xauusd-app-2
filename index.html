@@ -100,12 +100,35 @@ async function fetchLivePrice() {
 
 // 2. FUNKCE PRO NAČTENÍ ANALÝZY Z ROBOTA
 async function loadData() {
+    const btn = document.querySelector('.rbtn');
+    const originalText = btn.innerHTML;
+    
     try {
+        // Vizuální zpětná vazba
+        btn.innerHTML = '↻ AKTUALIZUJI...';
+        btn.style.opacity = '0.5';
+
+        // Přidání časového razítka (t=...) zabrání prohlížeči načítat starou verzi z paměti
         const r = await fetch('./data.json?t=' + Date.now());
+        if (!r.ok) throw new Error('Data nedostupná');
+        
         const d = await r.json();
         renderAnalysis(d);
+        
+        // Úspěch - na chvíli změníme text
+        btn.innerHTML = '✓ AKTUALIZOVÁNO';
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.style.opacity = '1';
+        }, 2000);
+
     } catch (e) {
-        console.error("Robot data nedostupná");
+        console.error("Chyba při refresh:", e);
+        btn.innerHTML = '⚠ CHYBA PŘIPOJENÍ';
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.style.opacity = '1';
+        }, 3000);
     }
 }
 
