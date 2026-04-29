@@ -74,18 +74,24 @@ let lastPrice = 0;
 // 1. FUNKCE PRO ŽIVOU CENU (každých 10s)
 async function fetchLivePrice() {
     try {
-        const response = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=PAXGUSDT');
+        const response = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=PAXGUSDT');
         const data = await response.json();
-        const price = parseFloat(data.price);
+        const price = parseFloat(data.lastPrice);
+        const percent = parseFloat(data.priceChangePercent);
         
         const el = document.getElementById('live-price');
+        const ch = document.getElementById('price-change');
+        
         if (lastPrice > 0) {
             el.classList.remove('up-flash', 'down-flash');
-            void el.offsetWidth; // trigger reflow
+            void el.offsetWidth;
             el.classList.add(price > lastPrice ? 'up-flash' : 'down-flash');
         }
         
         el.textContent = '$' + price.toFixed(2);
+        ch.textContent = `${percent > 0 ? '+' : ''}${percent.toFixed(2)}% (24h)`;
+        ch.style.color = percent >= 0 ? 'var(--green)' : 'var(--red)';
+        
         lastPrice = price;
     } catch (e) {
         console.error("Chyba live ceny");
