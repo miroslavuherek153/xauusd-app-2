@@ -298,7 +298,8 @@ async function loadData(){
     document.getElementById('sc').innerHTML = err;
   }
 }
-
+// Zavolání funkce ihned po načtení stránky
+loadData();
 function renderAll(d){
   const sc = d.signal==='SELL'?'bearish':d.signal==='BUY'?'bullish':'neutral';
   const rr = d.tp1&&d.sl&&d.entry ? f(Math.abs(d.tp1-d.entry)/Math.abs(d.sl-d.entry||1),1) : '2.0';
