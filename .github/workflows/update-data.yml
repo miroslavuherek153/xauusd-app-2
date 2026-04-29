@@ -15,94 +15,134 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Fetch Gold Data & Calculate Indicators
+      - name: Fetch Gold Spot Data & Calculate Indicators
         run: |
           python3 << 'PYEOF'
-          import urllib.request, json, math, datetime
+          import urllib.request, json, datetime
 
-          # Fetch OHLC data from Yahoo Finance
-          url = "https://query1.finance.yahoo.com/v8/finance/chart/GC=F?interval=1h&range=60d"
-          req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-          
-          try:
-            with urllib.request.urlopen(req, timeout=10) as r:
-              raw = json.loads(r.read())
-            
-            result = raw["chart"]["result"][0]
-            closes = result["indicators"]["quote"][0]["close"]
-            closes = [c for c in closes if c is not None]
-            
+          def ema(data, period):
+            k = 2/(period+1)
+            e = data[0]
+            for v in data[1:]:
+              e = v*k + e*(1-k)
+            return e
+
+          def rsi_calc(data, period=14):
+            if len(data) < period+1: return 50
+            gains, losses = [], []
+            for i in range(1, period+1):
+              d = data[i] - data[i-1]
+              if d > 0: gains.append(d)
+              else: losses.append(abs(d))
+            ag = sum(gains)/period if gains else 0
+            al = sum(losses)/period if losses else 0
+            if al == 0: return 100
+            return 100 - (100/(1+ag/al))
+
+          closes = []
+          highs = []
+          lows = []
+          status = "ok"
+          error_msg = ""
+
+          # Try multiple sources for SPOT gold price
+          sources = [
+            # Source 1: Yahoo Finance XAUUSD=X (spot)
+            ("https://query1.finance.yahoo.com/v8/finance/chart/XAUUSD=X?interval=1h&range=60d", "yahoo_spot"),
+            # Source 2: Yahoo Finance GC=F minus premium
+            ("https://query1.finance.yahoo.com/v8/finance/chart/GC=F?interval=1h&range=60d", "yahoo_futures"),
+          ]
+
+          for url, source in sources:
+            try:
+              req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"})
+              with urllib.request.urlopen(req, timeout=15) as r:
+                raw = json.loads(r.read())
+              result = raw["chart"]["result"][0]
+              c = [x for x in result["indicators"]["quote"][0]["close"] if x]
+              h = [x for x in result["indicators"]["quote"][0]["high"] if x]
+              l = [x for x in result["indicators"]["quote"][0]["low"] if x]
+              if len(c) > 30:
+                closes = c
+                highs = h
+                lows = l
+                # If futures, subtract ~80 to get spot approximation
+                if source == "yahoo_futures":
+                  closes = [x - 80 for x in closes]
+                  highs = [x - 80 for x in highs]
+                  lows = [x - 80 for x in lows]
+                print(f"Got data from {source}: {len(closes)} candles, last={closes[-1]:.2f}")
+                break
+            except Exception as e:
+              error_msg = str(e)
+              print(f"Source {source} failed: {e}")
+              continue
+
+          if not closes:
+            # Use last known data with error status
+            status = "error"
+            data = {
+              "status": "error",
+              "error": error_msg,
+              "updated": datetime.datetime.utcnow().strftime("%d.%m.%Y %H:%M UTC"),
+              "price": 0
+            }
+          else:
             price = closes[-1]
-            prev  = closes[-2]
+            prev = closes[-2]
             change = price - prev
-            change_pct = (change / prev) * 100
+            change_pct = (change/prev)*100 if prev else 0
 
-            # EMA
-            def ema(data, period):
-              k = 2/(period+1)
-              e = data[0]
-              for v in data[1:]:
-                e = v*k + e*(1-k)
-              return e
-
-            ema20  = ema(closes[-20:], 20)
-            ema50  = ema(closes[-50:], 50)
+            # Indicators
+            ema20  = ema(closes[-20:], 20) if len(closes)>=20 else price
+            ema50  = ema(closes[-50:], 50) if len(closes)>=50 else price
             ema200 = ema(closes[-200:], 200) if len(closes)>=200 else ema(closes, len(closes))
-
-            # RSI
-            def rsi(data, period=14):
-              gains, losses = [], []
-              for i in range(1, period+1):
-                d = data[-period+i] - data[-period+i-1] if i > 0 else 0
-                (gains if d>0 else losses).append(abs(d))
-              ag = sum(gains)/period if gains else 0
-              al = sum(losses)/period if losses else 0
-              if al == 0: return 100
-              return 100 - (100/(1+ag/al))
-
-            rsi_val = rsi(closes[-15:])
-
-            # MACD
-            macd = ema(closes[-12:], 12) - ema(closes[-26:], 26)
+            macd   = ema(closes[-12:], 12) - ema(closes[-26:], 26) if len(closes)>=26 else 0
+            rsi_val = rsi_calc(closes[-15:]) if len(closes)>=15 else 50
 
             # Signal
             bull, bear = 0, 0
-            if price > ema20: bull += 1
-            else: bear += 1
-            if price > ema50: bull += 1
-            else: bear += 1
-            if rsi_val > 50: bull += 1
-            else: bear += 1
-            if macd > 0: bull += 1
-            else: bear += 1
-            if change > 0: bull += 1
-            else: bear += 1
+            if price > ema20: bull+=1
+            else: bear+=1
+            if price > ema50: bull+=1
+            else: bear+=1
+            if price > ema200: bull+=1
+            else: bear+=1
+            if rsi_val > 50: bull+=1
+            else: bear+=1
+            if macd > 0: bull+=1
+            else: bear+=1
+            if change > 0: bull+=1
+            else: bear+=1
 
-            signal = "SELL" if bear > bull else "BUY" if bull > bear else "WAIT"
+            signal = "SELL" if bear>bull else "BUY" if bull>bear else "WAIT"
             trend  = "bullish" if price>ema50 else "bearish"
             conf   = round(max(bull,bear)/(bull+bear)*100)
 
-            # Support/Resistance
-            highs = result["indicators"]["quote"][0]["high"]
-            lows  = result["indicators"]["quote"][0]["low"]
-            highs = [h for h in highs[-50:] if h]
-            lows  = [l for l in lows[-50:] if l]
-            res = sorted([h for h in highs if h > price], reverse=True)[:3]
-            sup = sorted([l for l in lows  if l < price])[:3]
+            # S/R levels
+            h50 = sorted([x for x in highs[-50:] if x > price], reverse=True)[:3]
+            l50 = sorted([x for x in lows[-50:] if x < price])[:3]
 
-            entry = res[0] if signal=="SELL" and res else (sup[0] if signal=="BUY" and sup else price)
+            entry = h50[0] if signal=="SELL" and h50 else (l50[0] if signal=="BUY" and l50 else price)
             sl    = entry+15 if signal=="SELL" else entry-15
             tp1   = price-30 if signal=="SELL" else price+30
             tp2   = price-60 if signal=="SELL" else price+60
 
             now = datetime.datetime.utcnow().strftime("%d.%m.%Y %H:%M UTC")
 
+            analysis = (f"XAUUSD ke {now}: Cena ${round(price,0):.0f} je "
+                       f"{'nad' if price>ema50 else 'pod'} EMA50 (${round(ema50,0):.0f}) "
+                       f"– trend {trend}. RSI {round(rsi_val,0):.0f} "
+                       f"{'– překoupen ⚠️' if rsi_val>70 else '– přeprodán ⚠️' if rsi_val<30 else '– neutrální'}. "
+                       f"MACD {'pozitivní ↑' if macd>0 else 'negativní ↓'}. "
+                       f"Doporučení: {signal}.")
+
             data = {
               "price": round(price, 2),
               "change": round(change, 2),
               "changePct": round(change_pct, 2),
-              "high24h": round(max(closes[-24:]), 2),
-              "low24h": round(min(closes[-24:]), 2),
+              "high24h": round(max(closes[-24:]), 2) if len(closes)>=24 else round(max(highs[-5:]),2),
+              "low24h": round(min(closes[-24:]), 2) if len(closes)>=24 else round(min(lows[-5:]),2),
               "rsi": round(rsi_val, 1),
               "ema20": round(ema20, 1),
               "ema50": round(ema50, 1),
@@ -111,8 +151,8 @@ jobs:
               "signal": signal,
               "trend": trend,
               "confidence": conf,
-              "resistance": [round(r,1) for r in res] if res else [round(price+15,1), round(price+30,1), round(price+50,1)],
-              "support": [round(s,1) for s in sup] if sup else [round(price-15,1), round(price-30,1), round(price-50,1)],
+              "resistance": [round(x,1) for x in h50] if h50 else [round(price+15,1), round(price+30,1), round(price+50,1)],
+              "support": [round(x,1) for x in l50] if l50 else [round(price-15,1), round(price-30,1), round(price-50,1)],
               "tf": {
                 "1D": trend,
                 "4H": trend,
@@ -125,19 +165,14 @@ jobs:
               "tp1": round(tp1, 2),
               "tp2": round(tp2, 2),
               "updated": now,
-              "status": "ok"
+              "status": "ok",
+              "analysis": analysis
             }
 
-            analysis = f"XAUUSD ke {now}: Cena ${round(price,0)} je {'nad' if price>ema50 else 'pod'} EMA50 (${round(ema50,0)}) – trend {trend}. RSI {round(rsi_val,0)} {'– překoupen' if rsi_val>70 else '– přeprodán' if rsi_val<30 else '– neutrální'}. MACD {'pozitivní' if macd>0 else 'negativní'}. Doporučení: {signal}."
-            data["analysis"] = analysis
-
-          except Exception as e:
-            data = {"status": "error", "error": str(e), "updated": datetime.datetime.utcnow().strftime("%d.%m.%Y %H:%M UTC"), "price": 0}
-
           with open("data.json", "w") as f:
-            json.dump(data, f, indent=2)
-          
-          print("Done:", data.get("price"), data.get("signal"))
+            json.dump(data, f, indent=2, ensure_ascii=False)
+
+          print(f"Done: price=${data.get('price')}, signal={data.get('signal')}, status={data.get('status')}")
           PYEOF
 
       - name: Commit data
