@@ -1,26 +1,26 @@
 {
-  "price": 4558.2,
-  "change": 0.8,
-  "changePct": 0.02,
-  "high24h": 4618.1,
-  "low24h": 4534.7,
-  "rsi": 53.4,
-  "ema20": 4575.5,
-  "ema50": 4609.7,
-  "ema200": 4705.7,
-  "macd": -17.02,
+  "price": 4480.1,
+  "change": -2.0,
+  "changePct": -0.04,
+  "high24h": 4538.1,
+  "low24h": 4454.7,
+  "rsi": 40.5,
+  "ema20": 4490.4,
+  "ema50": 4523.7,
+  "ema200": 4620.0,
+  "macd": -14.33,
   "signal": "SELL",
   "trend": "bearish",
-  "confidence": 60,
+  "confidence": 100,
   "resistance": [
-    4716.5,
-    4710.3,
-    4706.3
+    4636.5,
+    4630.3,
+    4626.3
   ],
   "support": [
-    4522.2,
-    4530.3,
-    4548.6
+    4442.2,
+    4450.3,
+    4452.0
   ],
   "tf": {
     "1D": "bearish",
@@ -29,11 +29,11 @@
     "30M": "bearish",
     "15M": "neutral"
   },
-  "entry": 4716.5,
-  "sl": 4731.5,
-  "tp1": 4528.2,
-  "tp2": 4498.2,
-  "updated": "29.04.2026 18:05 UTC",
+  "entry": 4636.5,
+  "sl": 4651.5,
+  "tp1": 4450.1,
+  "tp2": 4420.1,
+  "updated": "29.04.2026 22:40 UTC",
   "status": "ok",
-  "analysis": "XAUUSD ke 29.04.2026 18:05 UTC: Cena $4558.0 je pod EMA50 ($4610.0) \u2013 trend bearish. RSI 53.0 \u2013 neutr\u00e1ln\u00ed. MACD negativn\u00ed. Doporu\u010den\u00ed: SELL."
+  "analysis": "XAUUSD ke 29.04.2026 22:40 UTC: Cena $4480 je pod EMA50 ($4524) – trend bearish. RSI 41 – neutrální. MACD negativní ↓. Doporučení: SELL."
 }
