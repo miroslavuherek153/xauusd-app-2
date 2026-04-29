@@ -110,8 +110,8 @@ async function loadData() {
 }
 
 function renderAnalysis(d) {
+    // 1. KARTA AUTO (Hlavní signál)
     const sc = d.signal === 'SELL' ? 'bearish' : d.signal === 'BUY' ? 'bullish' : 'neutral';
-    
     document.getElementById('ai-signal-container').innerHTML = `
         <div class="sigcard ${sc}">
             <div style="font-size:8px; letter-spacing:2px; color:var(--muted)">AI ROBOT SIGNÁL</div>
@@ -119,16 +119,53 @@ function renderAnalysis(d) {
             <div style="font-size:9px;">Shoda: ${d.confidence}% | Trend: ${d.trend}</div>
         </div>
     `;
-
     document.getElementById('ai-analysis-text').innerHTML = `
         <div class="card">
             <div class="ctitle">Analýza trhu</div>
             <div style="font-size:11px; line-height:1.6; color:#9aafc5;">${d.analysis}</div>
         </div>
     `;
-    
-    // Vykreslení widgetu (pouze jednou nebo při refresh)
-    document.getElementById('tv-widget').innerHTML = '';
+
+    // 2. KARTA ÚROVNĚ (Tady to bylo prázdné)
+    document.getElementById('tab-levels').innerHTML = `
+        <div class="card">
+            <div class="ctitle">Klíčové hladiny</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <div style="border-left:2px solid var(--red); padding-left:10px;">
+                    <div style="font-size:8px; color:var(--muted)">RESISTANCE</div>
+                    <div style="font-size:16px; color:var(--red)">${d.resistance || 'N/A'}</div>
+                </div>
+                <div style="border-left:2px solid var(--green); padding-left:10px;">
+                    <div style="font-size:8px; color:var(--muted)">SUPPORT</div>
+                    <div style="font-size:16px; color:var(--green)">${d.support || 'N/A'}</div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="ctitle">Pivot Point</div>
+            <div style="font-size:18px; color:var(--gold)">${d.pivot || 'N/A'}</div>
+        </div>
+    `;
+
+    // 3. KARTA SETUP (Tady taky)
+    document.getElementById('tab-setup').innerHTML = `
+        <div class="card">
+            <div class="ctitle">Obchodní Doporučení</div>
+            <div style="font-size:12px; color:#fff; margin-bottom:10px;">${d.recommendation || 'Čekejte na potvrzení'}</div>
+            <div style="font-size:10px; color:var(--muted)">
+                SL: <span style="color:var(--red)">${d.stop_loss || '-'}</span><br>
+                TP: <span style="color:var(--green)">${d.take_profit || '-'}</span>
+            </div>
+        </div>
+    `;
+
+    // Refresh grafu (volitelné)
+    renderWidget();
+}
+
+function renderWidget() {
+    const container = document.getElementById('tv-widget');
+    if (container.innerHTML !== '') return; // Nechceme widget překreslovat pořád dokola
     const script = document.createElement('script');
     script.src = "https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js";
     script.async = true;
@@ -136,9 +173,8 @@ function renderAnalysis(d) {
         "symbol": "OANDA:XAUUSD", "width": "100%", "height": "100%", "locale": "cs",
         "dateRange": "12M", "colorTheme": "dark", "isTransparent": true
     });
-    document.getElementById('tv-widget').appendChild(script);
+    container.appendChild(script);
 }
-
 function showTab(n) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.ntab').forEach(t => t.classList.remove('active'));
