@@ -1,77 +1,102 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>XAUUSD Live AI</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
-<style>
-:root{--gold:#FFD700;--green:#00FF88;--red:#FF3355;--bg:#050810;--bg2:#0a0f1e;--border:rgba(255,215,0,0.15);--text:#c8d8f0;--muted:#556677;--mono:'Share Tech Mono',monospace;--display:'Orbitron',sans-serif;}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);color:var(--text);font-family:var(--mono);display:flex;flex-direction:column;height:100vh;overflow:hidden;}
-header{background:rgba(5,8,16,0.98);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;}
-.logo{font-family:var(--display);font-size:15px;font-weight:900;color:var(--gold);letter-spacing:2px;}
-.nav{display:flex;background:var(--bg2);border-bottom:1px solid var(--border);}
-.ntab{flex:1;padding:12px;text-align:center;font-size:9px;color:var(--muted);cursor:pointer;border:none;background:none;font-family:var(--mono);text-transform:uppercase;}
-.ntab.active{color:var(--gold);border-bottom:2px solid var(--gold);}
-.main{flex:1;overflow-y:auto;padding:12px;}
-.screen{display:none;}.screen.active{display:block;}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>XAUUSD Live AI Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #FFD700;
+            --green: #00FF88;
+            --red: #FF3355;
+            --bg: #050810;
+            --bg2: #0a0f1e;
+            --border: rgba(255, 215, 0, 0.15);
+            --text: #c8d8f0;
+            --muted: #556677;
+            --mono: 'Share Tech Mono', monospace;
+            --display: 'Orbitron', sans-serif;
+        }
 
-/* Animace ceny */
-@keyframes flashGreen{from{color:var(--green);}to{color:#fff;}}
-@keyframes flashRed{from{color:var(--red);}to{color:#fff;}}
-.up-flash{animation:flashGreen 1s ease;}
-.down-flash{animation:flashRed 1s ease;}
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--bg); color: var(--text); font-family: var(--mono); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        
+        header { background: rgba(5, 8, 16, 0.98); border-bottom: 1px solid var(--border); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-family: var(--display); font-size: 15px; font-weight: 900; color: var(--gold); letter-spacing: 2px; }
+        
+        .nav { display: flex; background: var(--bg2); border-bottom: 1px solid var(--border); }
+        .ntab { flex: 1; padding: 12px; text-align: center; font-size: 9px; color: var(--muted); cursor: pointer; border: none; background: none; font-family: var(--mono); text-transform: uppercase; transition: 0.3s; }
+        .ntab.active { color: var(--gold); border-bottom: 2px solid var(--gold); background: rgba(255, 215, 0, 0.05); }
 
-.pcard{background:linear-gradient(145deg,rgba(255,215,0,0.08),rgba(255,215,0,0.02));border:1px solid rgba(255,215,0,0.25);border-radius:12px;padding:16px;margin-bottom:12px;text-align:center;}
-.plbl{font-size:8px;letter-spacing:3px;color:var(--gold);margin-bottom:4px;}
-.pval{font-family:var(--display);font-size:32px;font-weight:900;color:#fff;transition:all 0.3s;}
-.sigcard{border-radius:12px;padding:15px;margin-bottom:12px;text-align:center;border:1px solid;}
-.sigcard.bearish{background:rgba(255,51,85,0.08);border-color:rgba(255,51,85,0.4);color:var(--red);}
-.sigcard.bullish{background:rgba(0,255,136,0.06);border-color:rgba(0,255,136,0.3);color:var(--green);}
-.sigval{font-family:var(--display);font-size:24px;font-weight:900;}
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;}
-.ctitle{font-size:8px;letter-spacing:2px;color:var(--gold);margin-bottom:10px;text-transform:uppercase;}
-.rbtn{background:rgba(255,215,0,0.07);border:1px solid var(--border);color:var(--gold);padding:12px;width:100%;border-radius:10px;cursor:pointer;font-family:var(--mono);font-size:9px;}
-</style>
+        .main { flex: 1; overflow-y: auto; padding: 12px; }
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        /* Animace ceny */
+        @keyframes flashGreen { from { color: var(--green); text-shadow: 0 0 10px var(--green); } to { color: #fff; } }
+        @keyframes flashRed { from { color: var(--red); text-shadow: 0 0 10px var(--red); } to { color: #fff; } }
+        .up-flash { animation: flashGreen 1s ease; }
+        .down-flash { animation: flashRed 1s ease; }
+
+        .pcard { background: linear-gradient(145deg, rgba(255, 215, 0, 0.08), rgba(255, 215, 0, 0.02)); border: 1px solid rgba(255, 215, 0, 0.25); border-radius: 12px; padding: 16px; margin-bottom: 12px; text-align: center; }
+        .plbl { font-size: 8px; letter-spacing: 3px; color: var(--gold); margin-bottom: 4px; }
+        .pval { font-family: var(--display); font-size: 32px; font-weight: 900; color: #fff; transition: all 0.3s; }
+
+        .sigcard { border-radius: 12px; padding: 15px; margin-bottom: 12px; text-align: center; border: 1px solid; }
+        .sigcard.bearish { background: rgba(255, 51, 85, 0.08); border-color: rgba(255, 51, 85, 0.4); color: var(--red); }
+        .sigcard.bullish { background: rgba(0, 255, 136, 0.06); border-color: rgba(0, 255, 136, 0.3); color: var(--green); }
+        .sigval { font-family: var(--display); font-size: 24px; font-weight: 900; }
+
+        .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+        .ctitle { font-size: 8px; letter-spacing: 2px; color: var(--gold); margin-bottom: 10px; text-transform: uppercase; }
+        
+        .rbtn { background: rgba(255, 215, 0, 0.07); border: 1px solid var(--border); color: var(--gold); padding: 14px; width: 100%; border-radius: 10px; cursor: pointer; font-family: var(--mono); font-size: 10px; font-weight: bold; margin-top: 10px; transition: 0.2s; }
+        .rbtn:active { transform: scale(0.98); background: rgba(255, 215, 0, 0.15); }
+    </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">XAU<span>/USD</span> LIVE</div>
-  <div id="ht" style="font-size:10px;"></div>
+    <div class="logo">XAU<span>/USD</span> LIVE</div>
+    <div id="ht" style="font-size:10px; color: var(--muted);">--:--:--</div>
 </header>
 
 <nav class="nav">
-  <button class="ntab active" onclick="showTab('analysis')">◈ Auto</button>
-  <button class="ntab" onclick="showTab('levels')">◈ Úrovně</button>
-  <button class="ntab" onclick="showTab('setup')">◈ Setup</button>
+    <button class="ntab active" onclick="showTab('analysis')">◈ Auto</button>
+    <button class="ntab" onclick="showTab('levels')">◈ Úrovně</button>
+    <button class="ntab" onclick="showTab('setup')">◈ Setup</button>
 </nav>
 
 <div class="main">
-  <div class="screen active" id="tab-analysis">
-    <div class="pcard">
-      <div class="plbl" id="price-source">◈ GOLD LIVE PRICE (BINANCE)</div>
-      <div class="pval" id="live-price">0.00</div>
-      <div id="price-change" style="font-size:11px; margin-top:5px;">Načítání...</div>
+    <!-- TAB 1: AUTO -->
+    <div class="screen active" id="tab-analysis">
+        <div class="pcard">
+            <div class="plbl">◈ GOLD LIVE PRICE (BINANCE)</div>
+            <div class="pval" id="live-price">0.00</div>
+            <div id="price-change" style="font-size:11px; margin-top:5px;">Načítání...</div>
+        </div>
+
+        <div class="card" id="tv-widget" style="height:150px; padding:0; overflow:hidden;"></div>
+
+        <div id="ai-signal-container"></div>
+        <div id="ai-analysis-text"></div>
+        
+        <button class="rbtn" onclick="loadData()">↻ REFRESH ANALYSIS</button>
     </div>
 
-    <!-- TradingView Widget -->
-    <div class="card" id="tv-widget" style="height:150px; padding:0; overflow:hidden;"></div>
+    <!-- TAB 2: LEVELS -->
+    <div class="screen" id="tab-levels"></div>
 
-    <div id="ai-signal-container"></div>
-    <div id="ai-analysis-text"></div>
-    <button class="rbtn" onclick="loadData()">↻ REFRESH ANALYSIS</button>
-  </div>
-
-  <div class="screen" id="tab-levels" id="lc"></div>
-  <div class="screen" id="tab-setup" id="sc"></div>
+    <!-- TAB 3: SETUP -->
+    <div class="screen" id="tab-setup"></div>
 </div>
 
 <script>
 let lastPrice = 0;
+let cachedData = null;
 
-// 1. FUNKCE PRO ŽIVOU CENU (každých 10s)
+// 1. ŽIVÁ CENA Z BINANCE
 async function fetchLivePrice() {
     try {
         const response = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=PAXGUSDT');
@@ -82,7 +107,7 @@ async function fetchLivePrice() {
         const el = document.getElementById('live-price');
         const ch = document.getElementById('price-change');
         
-        if (lastPrice > 0) {
+        if (lastPrice > 0 && el) {
             el.classList.remove('up-flash', 'down-flash');
             void el.offsetWidth;
             el.classList.add(price > lastPrice ? 'up-flash' : 'down-flash');
@@ -93,47 +118,35 @@ async function fetchLivePrice() {
         ch.style.color = percent >= 0 ? 'var(--green)' : 'var(--red)';
         
         lastPrice = price;
-    } catch (e) {
-        console.error("Chyba live ceny");
-    }
+        if (cachedData) renderAnalysis(cachedData); // Přepočítat setup s novou cenou
+    } catch (e) { console.error("Chyba live ceny"); }
 }
 
-// 2. FUNKCE PRO NAČTENÍ ANALÝZY Z ROBOTA
+// 2. NAČTENÍ DAT OD ROBOTA
 async function loadData() {
     const btn = document.querySelector('.rbtn');
     const originalText = btn.innerHTML;
     
     try {
-        // Vizuální zpětná vazba
         btn.innerHTML = '↻ AKTUALIZUJI...';
         btn.style.opacity = '0.5';
 
-        // Přidání časového razítka (t=...) zabrání prohlížeči načítat starou verzi z paměti
         const r = await fetch('./data.json?t=' + Date.now());
-        if (!r.ok) throw new Error('Data nedostupná');
+        if (!r.ok) throw new Error();
         
-        const d = await r.json();
-        renderAnalysis(d);
+        cachedData = await r.json();
+        renderAnalysis(cachedData);
         
-        // Úspěch - na chvíli změníme text
         btn.innerHTML = '✓ AKTUALIZOVÁNO';
-        setTimeout(() => {
-            btn.innerHTML = originalText;
-            btn.style.opacity = '1';
-        }, 2000);
-
+        setTimeout(() => { btn.innerHTML = originalText; btn.style.opacity = '1'; }, 2000);
     } catch (e) {
-        console.error("Chyba při refresh:", e);
-        btn.innerHTML = '⚠ CHYBA PŘIPOJENÍ';
-        setTimeout(() => {
-            btn.innerHTML = originalText;
-            btn.style.opacity = '1';
-        }, 3000);
+        btn.innerHTML = '⚠ CHYBA DAT';
+        setTimeout(() => { btn.innerHTML = originalText; btn.style.opacity = '1'; }, 3000);
     }
 }
 
 function renderAnalysis(d) {
-    // 1. KARTA AUTO (Hlavní signál)
+    // TAB: AUTO
     const sc = d.signal === 'SELL' ? 'bearish' : d.signal === 'BUY' ? 'bullish' : 'neutral';
     document.getElementById('ai-signal-container').innerHTML = `
         <div class="sigcard ${sc}">
@@ -149,18 +162,18 @@ function renderAnalysis(d) {
         </div>
     `;
 
-    // 2. KARTA ÚROVNĚ (Tady to bylo prázdné)
+    // TAB: LEVELS
     document.getElementById('tab-levels').innerHTML = `
         <div class="card">
             <div class="ctitle">Klíčové hladiny</div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
                 <div style="border-left:2px solid var(--red); padding-left:10px;">
                     <div style="font-size:8px; color:var(--muted)">RESISTANCE</div>
-                    <div style="font-size:16px; color:var(--red)">${d.resistance || 'N/A'}</div>
+                    <div style="font-size:14px; color:var(--red)">${d.resistance || 'N/A'}</div>
                 </div>
                 <div style="border-left:2px solid var(--green); padding-left:10px;">
                     <div style="font-size:8px; color:var(--muted)">SUPPORT</div>
-                    <div style="font-size:16px; color:var(--green)">${d.support || 'N/A'}</div>
+                    <div style="font-size:14px; color:var(--green)">${d.support || 'N/A'}</div>
                 </div>
             </div>
         </div>
@@ -170,25 +183,48 @@ function renderAnalysis(d) {
         </div>
     `;
 
-    // 3. KARTA SETUP (Tady taky)
+    // TAB: SETUP (Výpočet pro R StocksTrader)
+    const currentPrice = lastPrice || 0;
+    let displaySL = d.stop_loss && d.stop_loss !== '-' ? d.stop_loss : 
+                   (d.signal === 'BUY' ? (currentPrice - 5).toFixed(2) : (currentPrice + 5).toFixed(2));
+    let displayTP = d.take_profit && d.take_profit !== '-' ? d.take_profit : 
+                   (d.signal === 'BUY' ? (currentPrice + 10).toFixed(2) : (currentPrice - 10).toFixed(2));
+
     document.getElementById('tab-setup').innerHTML = `
-        <div class="card">
-            <div class="ctitle">Obchodní Doporučení</div>
-            <div style="font-size:12px; color:#fff; margin-bottom:10px;">${d.recommendation || 'Čekejte na potvrzení'}</div>
-            <div style="font-size:10px; color:var(--muted)">
-                SL: <span style="color:var(--red)">${d.stop_loss || '-'}</span><br>
-                TP: <span style="color:var(--green)">${d.take_profit || '-'}</span>
+        <div class="card" style="border-left: 4px solid var(--gold);">
+            <div class="ctitle">Příkaz pro R StocksTrader</div>
+            <div style="font-size:14px; font-weight:bold; color:#fff; margin-bottom:12px; display:flex; justify-content:space-between;">
+                <span>Instrument:</span> <span style="color:var(--gold)">XAUUSD</span>
+            </div>
+            <div style="background:rgba(0,0,0,0.2); padding:10px; border-radius:8px; margin-bottom:10px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                    <span style="font-size:10px; color:var(--muted)">TYP:</span>
+                    <span style="color:${d.signal === 'BUY' ? 'var(--green)' : 'var(--red)'}">${d.signal === 'BUY' ? 'MARKET BUY' : 'MARKET SELL'}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                    <span style="font-size:10px; color:var(--muted)">STOP LOSS:</span>
+                    <span style="color:var(--red); font-weight:bold; font-size:16px;">${displaySL}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="font-size:10px; color:var(--muted)">TAKE PROFIT:</span>
+                    <span style="color:var(--green); font-weight:bold; font-size:16px;">${displayTP}</span>
+                </div>
+            </div>
+            <div style="font-size:9px; color:var(--muted); font-style:italic; line-height:1.3;">
+                Poznámka: SL/TP vypočítán na základě aktuální ceny a volatility.
             </div>
         </div>
+        <div class="card">
+            <div class="ctitle">Doporučení robota</div>
+            <div style="font-size:11px; color:#9aafc5;">${d.recommendation || 'Čekejte na potvrzení trendu.'}</div>
+        </div>
     `;
-
-    // Refresh grafu (volitelné)
     renderWidget();
 }
 
 function renderWidget() {
     const container = document.getElementById('tv-widget');
-    if (container.innerHTML !== '') return; // Nechceme widget překreslovat pořád dokola
+    if (container.innerHTML !== '') return;
     const script = document.createElement('script');
     script.src = "https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js";
     script.async = true;
@@ -198,6 +234,7 @@ function renderWidget() {
     });
     container.appendChild(script);
 }
+
 function showTab(n) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.ntab').forEach(t => t.classList.remove('active'));
@@ -205,7 +242,7 @@ function showTab(n) {
     event.currentTarget.classList.add('active');
 }
 
-// Spuštění
+// START
 setInterval(fetchLivePrice, 10000);
 fetchLivePrice();
 loadData();
