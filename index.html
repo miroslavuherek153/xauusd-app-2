@@ -1,184 +1,446 @@
-name: Update Gold Data
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Gold AI">
+<meta name="theme-color" content="#FFD700">
+<title>XAUUSD AI Analyzer</title>
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#FFD700;--green:#00FF88;--red:#FF3355;--bg:#050810;--bg2:#0a0f1e;--bg3:#0f1628;--border:rgba(255,215,0,0.15);--text:#c8d8f0;--muted:#556677;--mono:'Share Tech Mono',monospace;--display:'Orbitron',sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);display:flex;flex-direction:column;background-image:radial-gradient(ellipse at 20% 0%,rgba(255,215,0,0.06) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(0,80,255,0.04) 0%,transparent 50%);}
+header{flex-shrink:0;background:rgba(5,8,16,0.98);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:var(--display);font-size:15px;font-weight:900;color:var(--gold);letter-spacing:2px;}
+.logo span{color:var(--text);font-weight:400;font-size:12px;}
+.hright{display:flex;align-items:center;gap:10px;}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite;}
+.dot.red{background:var(--red);box-shadow:0 0 8px var(--red);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.2}}
+.htime{font-size:9px;color:var(--muted);}
+.nav{flex-shrink:0;display:flex;background:var(--bg2);border-bottom:1px solid var(--border);}
+.ntab{flex:1;padding:10px 2px;text-align:center;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--mono);transition:all 0.2s;}
+.ntab.active{color:var(--gold);border-bottom-color:var(--gold);}
+.main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:20px;}
+.screen{display:none;padding:12px;}
+.screen.active{display:block;}
+@keyframes su{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.a1{animation:su 0.3s ease both;}.a2{animation:su 0.3s ease 0.06s both;}.a3{animation:su 0.3s ease 0.12s both;}.a4{animation:su 0.3s ease 0.18s both;}.a5{animation:su 0.3s ease 0.24s both;}
+/* Loading */
+.lwrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:18px;}
+.spinner{width:48px;height:48px;border:2px solid rgba(255,215,0,0.1);border-top-color:var(--gold);border-radius:50%;animation:spin 0.9s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ltitle{font-family:var(--display);font-size:11px;letter-spacing:4px;color:var(--gold);}
+.lsub{font-size:10px;color:var(--muted);letter-spacing:2px;}
+/* Countdown bar */
+.cbar-wrap{flex-shrink:0;background:var(--bg2);border-bottom:1px solid var(--border);padding:6px 16px;display:flex;align-items:center;gap:10px;}
+.cbar-label{font-size:8px;letter-spacing:2px;color:var(--muted);}
+.cbar-bg{flex:1;height:3px;background:rgba(255,255,255,0.06);border-radius:2px;}
+.cbar-fill{height:3px;border-radius:2px;background:var(--gold);transition:width 1s linear;}
+.cbar-time{font-size:9px;color:var(--gold);width:40px;text-align:right;}
+/* Price card */
+.pcard{background:linear-gradient(145deg,rgba(255,215,0,0.08),rgba(255,215,0,0.02));border:1px solid rgba(255,215,0,0.25);border-radius:12px;padding:16px;margin-bottom:12px;position:relative;overflow:hidden;}
+.pcard::after{content:'AU';position:absolute;bottom:-8px;right:12px;font-family:var(--display);font-size:60px;font-weight:900;color:rgba(255,215,0,0.04);pointer-events:none;}
+.plbl{font-size:8px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:4px;}
+.pval{font-family:var(--display);font-size:30px;font-weight:900;color:#fff;}
+.pchg{font-size:11px;margin-top:4px;}
+.up{color:var(--green);}.down{color:var(--red);}.nc{color:var(--muted);}
+.pstats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px;}
+.stat{background:rgba(0,0,0,0.3);border-radius:6px;padding:7px;}
+.slbl{font-size:7px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+.sval{font-size:11px;color:var(--text);margin-top:2px;}
+/* Signal */
+.sigcard{border-radius:12px;padding:14px;margin-bottom:12px;text-align:center;border:1px solid;}
+.sigcard.bearish{background:rgba(255,51,85,0.08);border-color:rgba(255,51,85,0.4);}
+.sigcard.bullish{background:rgba(0,255,136,0.06);border-color:rgba(0,255,136,0.3);}
+.sigcard.neutral{background:rgba(255,215,0,0.05);border-color:rgba(255,215,0,0.3);}
+.siglbl{font-size:8px;letter-spacing:4px;color:var(--muted);margin-bottom:4px;}
+.sigval{font-family:var(--display);font-size:26px;font-weight:900;letter-spacing:6px;}
+.sigcard.bearish .sigval{color:var(--red);text-shadow:0 0 20px rgba(255,51,85,0.5);}
+.sigcard.bullish .sigval{color:var(--green);text-shadow:0 0 20px rgba(0,255,136,0.4);}
+.sigcard.neutral .sigval{color:var(--gold);}
+.sigmeta{font-size:10px;color:var(--muted);margin-top:5px;line-height:1.7;}
+/* Card */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;}
+.ctitle{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid rgba(255,215,0,0.08);display:flex;justify-content:space-between;align-items:center;}
+.cbadge{font-size:8px;background:rgba(255,215,0,0.1);color:var(--gold);padding:2px 6px;border-radius:10px;}
+/* TF */
+.tfrow{display:flex;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03);}
+.tfrow:last-child{border-bottom:none;}
+.tfname{font-size:10px;color:var(--gold);width:38px;}
+.tfbar{flex:1;height:3px;background:rgba(255,255,255,0.06);border-radius:2px;margin:0 10px;}
+.tffill{height:3px;border-radius:2px;}
+.tfsig{font-size:10px;width:58px;text-align:right;}
+.aup{color:var(--green);}.adn{color:var(--red);}.ant{color:var(--muted);}
+/* Ind */
+.indrow{display:flex;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03);gap:8px;}
+.indrow:last-child{border-bottom:none;}
+.indname{font-size:10px;color:var(--muted);width:60px;}
+.indbar{flex:1;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;}
+.indfill{height:4px;border-radius:2px;}
+.indval{font-size:11px;font-weight:bold;width:52px;text-align:right;}
+/* Levels */
+.lvrow{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03);}
+.lvrow:last-child{border-bottom:none;}
+.lbadge{font-size:7px;letter-spacing:2px;padding:2px 6px;border-radius:4px;}
+.lbadge.res{background:rgba(255,51,85,0.12);color:var(--red);border:1px solid rgba(255,51,85,0.2);}
+.lbadge.sup{background:rgba(0,255,136,0.08);color:var(--green);border:1px solid rgba(0,255,136,0.15);}
+.lbadge.cur{background:rgba(255,215,0,0.12);color:var(--gold);border:1px solid rgba(255,215,0,0.2);}
+.lprice{font-family:var(--display);font-size:13px;}
+.ldist{font-size:9px;color:var(--muted);}
+/* Setup */
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.sitem{background:var(--bg3);border:1px solid rgba(255,255,255,0.05);border-radius:8px;padding:10px;}
+.silbl{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.sival{font-family:var(--display);font-size:14px;}
+.ce{color:var(--gold);}.csl{color:var(--red);}.ctp{color:var(--green);}
+.rrbadge{background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.2);border-radius:6px;padding:6px;text-align:center;font-size:11px;color:var(--green);margin-bottom:10px;}
+/* Analysis */
+.acard{background:var(--bg2);border:1px solid rgba(0,255,136,0.2);border-radius:12px;padding:14px;margin-bottom:12px;}
+.ahead{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:7px;border-bottom:1px solid rgba(0,255,136,0.1);}
+.atitle{font-size:8px;letter-spacing:3px;color:var(--green);}
+.asub{font-size:8px;color:var(--muted);margin-top:1px;}
+.atext{font-size:11px;line-height:2;color:#9aafc5;}
+/* Info */
+.iitem{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:13px 15px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+.iname{font-size:12px;color:var(--text);}
+.idesc{font-size:9px;color:var(--muted);margin-top:2px;}
+.iright{font-size:10px;color:var(--gold);}
+.isect{margin-bottom:16px;}
+.isect-title{font-size:8px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:8px;}
+/* Refresh */
+.rbtn{background:rgba(255,215,0,0.07);border:1px solid var(--border);color:var(--gold);padding:12px;font-family:var(--mono);font-size:9px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;border-radius:10px;width:100%;margin-bottom:8px;transition:background 0.2s;}
+.rbtn:active{background:rgba(255,215,0,0.15);}
+.disc{font-size:9px;color:#2a3345;text-align:center;padding:6px;line-height:1.8;}
+/* Status badge */
+.status-ok{color:var(--green);font-size:9px;letter-spacing:1px;}
+.status-err{color:var(--red);font-size:9px;letter-spacing:1px;}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">XAU<span>/USD</span></div>
+  <div class="hright">
+    <div class="htime" id="ht"></div>
+    <div class="dot" id="statusDot"></div>
+  </div>
+</header>
+<div class="cbar-wrap">
+  <span class="cbar-label">REFRESH</span>
+  <div class="cbar-bg"><div class="cbar-fill" id="cbar" style="width:100%"></div></div>
+  <span class="cbar-time" id="ctimer">15:00</span>
+</div>
+<nav class="nav">
+  <button class="ntab active" onclick="showTab('analysis')">◈ Auto</button>
+  <button class="ntab" onclick="showTab('levels')">◈ Úrovně</button>
+  <button class="ntab" onclick="showTab('setup')">◈ Setup</button>
+  <button class="ntab" onclick="showTab('manual')">◈ Manuál</button>
+  <button class="ntab" onclick="showTab('info')">◈ Info</button>
+</nav>
+<div class="main">
+  <div class="screen active" id="tab-analysis"><div id="ac"><div class="lwrap"><div class="spinner"></div><div class="ltitle">NAČÍTÁM DATA</div><div class="lsub">github actions · auto update</div></div></div></div>
+  <div class="screen" id="tab-levels"><div id="lc"><div class="lwrap"><div class="spinner"></div></div></div></div>
+  <div class="screen" id="tab-setup"><div id="sc"><div class="lwrap"><div class="spinner"></div></div></div></div>
+  <div class="screen" id="tab-manual">
+    <div style="padding:4px">
+      <div class="card a1" style="background:linear-gradient(145deg,rgba(255,215,0,0.07),rgba(255,215,0,0.02));border-color:rgba(255,215,0,0.25)">
+        <div class="ctitle">◈ Zadejte data z TradingView</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px">
+            <label style="font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:4px">Aktuální cena</label>
+            <input type="number" id="m_price" placeholder="4740.00" step="0.01" style="width:100%;background:none;border:none;color:var(--text);font-family:var(--mono);font-size:14px;outline:none">
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px">
+            <label style="font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:4px">Předchozí close</label>
+            <input type="number" id="m_prev" placeholder="4720.00" step="0.01" style="width:100%;background:none;border:none;color:var(--text);font-family:var(--mono);font-size:14px;outline:none">
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px">
+            <label style="font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:4px">RSI (14)</label>
+            <input type="number" id="m_rsi" placeholder="45" step="0.1" min="0" max="100" style="width:100%;background:none;border:none;color:var(--text);font-family:var(--mono);font-size:14px;outline:none">
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px">
+            <label style="font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:4px">EMA 20</label>
+            <input type="number" id="m_ema20" placeholder="4750.00" step="0.01" style="width:100%;background:none;border:none;color:var(--text);font-family:var(--mono);font-size:14px;outline:none">
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px">
+            <label style="font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:4px">EMA 50</label>
+            <input type="number" id="m_ema50" placeholder="4700.00" step="0.01" style="width:100%;background:none;border:none;color:var(--text);font-family:var(--mono);font-size:14px;outline:none">
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px">
+            <label style="font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:4px">EMA 200</label>
+            <input type="number" id="m_ema200" placeholder="4500.00" step="0.01" style="width:100%;background:none;border:none;color:var(--text);font-family:var(--mono);font-size:14px;outline:none">
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px">
+            <label style="font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:4px">High 24h</label>
+            <input type="number" id="m_high" placeholder="4780.00" step="0.01" style="width:100%;background:none;border:none;color:var(--text);font-family:var(--mono);font-size:14px;outline:none">
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px">
+            <label style="font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:4px">Low 24h</label>
+            <input type="number" id="m_low" placeholder="4710.00" step="0.01" style="width:100%;background:none;border:none;color:var(--text);font-family:var(--mono);font-size:14px;outline:none">
+          </div>
+        </div>
+        <div class="ctitle" style="margin-top:4px">◈ Timeframe signály</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px">
+            <label style="font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:4px">1D trend</label>
+            <select id="t_1d" style="width:100%;background:none;border:none;color:var(--text);font-family:var(--mono);font-size:13px;outline:none">
+              <option value="bearish">▼ Bearish</option><option value="neutral">— Neutral</option><option value="bullish">▲ Bullish</option>
+            </select>
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px">
+            <label style="font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:4px">4H trend</label>
+            <select id="t_4h" style="width:100%;background:none;border:none;color:var(--text);font-family:var(--mono);font-size:13px;outline:none">
+              <option value="bearish">▼ Bearish</option><option value="neutral">— Neutral</option><option value="bullish">▲ Bullish</option>
+            </select>
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px">
+            <label style="font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:4px">1H trend</label>
+            <select id="t_1h" style="width:100%;background:none;border:none;color:var(--text);font-family:var(--mono);font-size:13px;outline:none">
+              <option value="bearish">▼ Bearish</option><option value="neutral">— Neutral</option><option value="bullish">▲ Bullish</option>
+            </select>
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px">
+            <label style="font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:4px">15M trend</label>
+            <select id="t_15m" style="width:100%;background:none;border:none;color:var(--text);font-family:var(--mono);font-size:13px;outline:none">
+              <option value="neutral">— Neutral</option><option value="bearish">▼ Bearish</option><option value="bullish">▲ Bullish</option>
+            </select>
+          </div>
+        </div>
+        <button onclick="manualAnalyze()" style="width:100%;background:linear-gradient(135deg,rgba(255,215,0,0.2),rgba(255,165,0,0.1));border:1px solid rgba(255,215,0,0.4);color:var(--gold);padding:14px;font-family:var(--display);font-size:11px;letter-spacing:3px;cursor:pointer;border-radius:10px">⚡ ANALYZOVAT</button>
+      </div>
+      <div id="manual-result"></div>
+    </div>
+  </div>
 
-on:
-  schedule:
-    - cron: '*/15 * * * *'
-  workflow_dispatch:
+  <div class="screen" id="tab-info">
+    <div style="padding:4px">
+      <div class="isect">
+        <div class="isect-title">◈ Status systému</div>
+        <div class="iitem"><div><div class="iname">Data robot</div><div class="idesc">GitHub Actions · každých 15 min</div></div><div class="iright" id="robotStatus">⏳</div></div>
+        <div class="iitem"><div><div class="iname">Poslední update</div><div class="idesc">Automatická aktualizace</div></div><div class="iright" id="lastUpdate">–</div></div>
+        <div class="iitem"><div><div class="iname">Zdroj dat</div><div class="idesc">Yahoo Finance GC=F</div></div><div class="iright">LIVE</div></div>
+        <div class="iitem"><div><div class="iname">Indikátory</div><div class="idesc">RSI · EMA · MACD</div></div><div class="iright">AUTO</div></div>
+      </div>
+      <div class="isect">
+        <div class="isect-title">◈ Jak nainstalovat jako apku</div>
+        <div class="card"><div style="font-size:11px;line-height:2.2;color:var(--text)">
+          1. Otevřete v <b style="color:var(--gold)">Chrome</b><br>
+          2. Klepněte <b style="color:var(--gold)">⋮</b> vpravo nahoře<br>
+          3. <b style="color:var(--gold)">"Přidat na plochu"</b><br>
+          4. Potvrďte → ikona na ploše ✓
+        </div></div>
+      </div>
+      <div class="isect">
+        <div class="isect-title">◈ Upozornění</div>
+        <div class="card"><div style="font-size:10px;line-height:1.9;color:var(--muted)">Pouze informativní. Není finančním poradenstvím. Obchodujte zodpovědně.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
 
-permissions:
-  contents: write
+<script>
+// Time
+function ut(){document.getElementById('ht').textContent=new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'});}
+ut();setInterval(ut,10000);
 
-jobs:
-  update:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+// Tabs
+function showTab(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+n).classList.add('active');
+  ['analysis','levels','setup','manual','info'].forEach((x,i)=>{if(x===n)document.querySelectorAll('.ntab')[i].classList.add('active');});
+}
 
-      - name: Fetch Gold Spot Data & Calculate Indicators
-        run: |
-          python3 << 'PYEOF'
-          import urllib.request, json, datetime
+// SW
+if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
 
-          def ema(data, period):
-            k = 2/(period+1)
-            e = data[0]
-            for v in data[1:]:
-              e = v*k + e*(1-k)
-            return e
+// Helpers
+function f(n,d=2){return Number(n).toFixed(d);}
+function rc(v){if(v>70)return'var(--red)';if(v<30)return'var(--green)';return'var(--text)';}
+function ta(t){if(t==='bullish')return'<span class="aup">▲ BUY</span>';if(t==='bearish')return'<span class="adn">▼ SELL</span>';return'<span class="ant">— WAIT</span>';}
+function tbc(t){if(t==='bullish')return'var(--green)';if(t==='bearish')return'var(--red)';return'var(--muted)';}
 
-          def rsi_calc(data, period=14):
-            if len(data) < period+1: return 50
-            gains, losses = [], []
-            for i in range(1, period+1):
-              d = data[i] - data[i-1]
-              if d > 0: gains.append(d)
-              else: losses.append(abs(d))
-            ag = sum(gains)/period if gains else 0
-            al = sum(losses)/period if losses else 0
-            if al == 0: return 100
-            return 100 - (100/(1+ag/al))
+// Countdown timer (15 min)
+let countdown = 900;
+function updateCountdown(){
+  countdown--;
+  if(countdown <= 0){ countdown = 900; loadData(); }
+  const m = Math.floor(countdown/60);
+  const s = countdown%60;
+  document.getElementById('ctimer').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+  document.getElementById('cbar').style.width = (countdown/900*100)+'%';
+}
+setInterval(updateCountdown, 1000);
 
-          closes = []
-          highs = []
-          lows = []
-          status = "ok"
-          error_msg = ""
+// Fetch data.json from GitHub
+async function loadData(){
+  try{
+    const r = await fetch('./data.json?t='+Date.now());
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const d = await r.json();
+    if(d.status === 'error') throw new Error(d.error || 'Data error');
+    renderAll(d);
+    document.getElementById('statusDot').className = 'dot';
+    document.getElementById('robotStatus').textContent = '✅ Online';
+    document.getElementById('lastUpdate').textContent = d.updated || '–';
+  }catch(e){
+    document.getElementById('statusDot').className = 'dot red';
+    document.getElementById('robotStatus').textContent = '❌ Offline';
+    const err = `<div class="lwrap"><div style="font-size:28px">⚠</div><div style="color:var(--red);font-size:11px;letter-spacing:3px">CHYBA NAČÍTÁNÍ</div><div style="color:var(--muted);font-size:10px;text-align:center;line-height:1.8;max-width:280px">${e.message}<br><br>GitHub Actions robot aktualizuje data každých 15 minut.</div><button class="rbtn" style="max-width:240px;margin-top:8px" onclick="loadData()">↻ ZKUSIT ZNOVU</button></div>`;
+    document.getElementById('ac').innerHTML = err;
+    document.getElementById('lc').innerHTML = err;
+    document.getElementById('sc').innerHTML = err;
+  }
+}
 
-          # Try multiple sources for SPOT gold price
-          sources = [
-            # Source 1: Yahoo Finance XAUUSD=X (spot)
-            ("https://query1.finance.yahoo.com/v8/finance/chart/XAUUSD=X?interval=1h&range=60d", "yahoo_spot"),
-            # Source 2: Yahoo Finance GC=F minus premium
-            ("https://query1.finance.yahoo.com/v8/finance/chart/GC=F?interval=1h&range=60d", "yahoo_futures"),
-          ]
+function renderAll(d){
+  const sc = d.signal==='SELL'?'bearish':d.signal==='BUY'?'bullish':'neutral';
+  const rr = d.tp1&&d.sl&&d.entry ? f(Math.abs(d.tp1-d.entry)/Math.abs(d.sl-d.entry||1),1) : '2.0';
 
-          for url, source in sources:
-            try:
-              req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"})
-              with urllib.request.urlopen(req, timeout=15) as r:
-                raw = json.loads(r.read())
-              result = raw["chart"]["result"][0]
-              c = [x for x in result["indicators"]["quote"][0]["close"] if x]
-              h = [x for x in result["indicators"]["quote"][0]["high"] if x]
-              l = [x for x in result["indicators"]["quote"][0]["low"] if x]
-              if len(c) > 30:
-                closes = c
-                highs = h
-                lows = l
-                # If futures, subtract ~80 to get spot approximation
-                if source == "yahoo_futures":
-                  closes = [x - 80 for x in closes]
-                  highs = [x - 80 for x in highs]
-                  lows = [x - 80 for x in lows]
-                print(f"Got data from {source}: {len(closes)} candles, last={closes[-1]:.2f}")
-                break
-            except Exception as e:
-              error_msg = str(e)
-              print(f"Source {source} failed: {e}")
-              continue
+  // ANALYSIS
+  document.getElementById('ac').innerHTML=`
+    <div class="pcard a1">
+      <div class="plbl">◈ GOLD SPOT · ${d.updated||''}</div>
+      <div class="pval">$${f(d.price,2)}</div>
+      <div class="pchg ${d.change>=0?'up':'down'}">${d.change>=0?'▲':'▼'} $${f(Math.abs(d.change||0),2)} · ${d.changePct>=0?'+':''}${f(d.changePct||0,2)}%</div>
+      <div class="pstats">
+        <div class="stat"><div class="slbl">RSI 14</div><div class="sval" style="color:${rc(d.rsi)}">${f(d.rsi,1)}</div></div>
+        <div class="stat"><div class="slbl">24h High</div><div class="sval up">$${f(d.high24h,0)}</div></div>
+        <div class="stat"><div class="slbl">24h Low</div><div class="sval down">$${f(d.low24h,0)}</div></div>
+      </div>
+    </div>
+    <div class="sigcard ${sc} a2">
+      <div class="siglbl">◈ CELKOVÝ SIGNÁL</div>
+      <div class="sigval">${d.signal}</div>
+      <div class="sigmeta">Shoda: ${d.confidence}% · Trend: ${(d.trend||'').toUpperCase()}<br>EMA200: $${f(d.ema200,0)} · MACD: ${f(d.macd,1)}</div>
+    </div>
+    <div class="card a3">
+      <div class="ctitle">◈ Multi-Timeframe <span class="cbadge">AUTO</span></div>
+      ${Object.entries(d.tf||{}).map(([tf,t])=>`<div class="tfrow"><span class="tfname">${tf}</span><div class="tfbar"><div class="tffill" style="width:${t==='bullish'?70:t==='bearish'?30:50}%;background:${tbc(t)}"></div></div><span class="tfsig">${ta(t)}</span></div>`).join('')}
+    </div>
+    <div class="card a4">
+      <div class="ctitle">◈ Indikátory</div>
+      <div class="indrow"><span class="indname">RSI 14</span><div class="indbar"><div class="indfill" style="width:${d.rsi}%;background:${rc(d.rsi)}"></div></div><span class="indval" style="color:${rc(d.rsi)}">${f(d.rsi,1)}</span></div>
+      <div class="indrow"><span class="indname">EMA 20</span><div class="indbar"><div class="indfill" style="width:60%;background:${d.price>d.ema20?'var(--green)':'var(--red)'}"></div></div><span class="indval" style="color:${d.price>d.ema20?'var(--green)':'var(--red)'}">${d.price>d.ema20?'↑':'↓'} $${f(d.ema20,0)}</span></div>
+      <div class="indrow"><span class="indname">EMA 50</span><div class="indbar"><div class="indfill" style="width:55%;background:${d.price>d.ema50?'var(--green)':'var(--red)'}"></div></div><span class="indval" style="color:${d.price>d.ema50?'var(--green)':'var(--red)'}">${d.price>d.ema50?'↑':'↓'} $${f(d.ema50,0)}</span></div>
+      <div class="indrow"><span class="indname">EMA 200</span><div class="indbar"><div class="indfill" style="width:50%;background:${d.price>d.ema200?'var(--green)':'var(--red)'}"></div></div><span class="indval" style="color:${d.price>d.ema200?'var(--green)':'var(--red)'}">${d.price>d.ema200?'↑':'↓'} $${f(d.ema200,0)}</span></div>
+      <div class="indrow"><span class="indname">MACD</span><div class="indbar"><div class="indfill" style="width:50%;background:${d.macd>0?'var(--green)':'var(--red)'}"></div></div><span class="indval" style="color:${d.macd>0?'var(--green)':'var(--red)'}">${f(d.macd,1)}</span></div>
+    </div>
+    <div class="acard a5">
+      <div class="ahead"><div style="font-size:16px">📊</div><div><div class="atitle">AUTOMATICKÁ ANALÝZA</div><div class="asub">GitHub Actions · Yahoo Finance</div></div></div>
+      <div class="atext">${d.analysis||'–'}</div>
+    </div>
+    <button class="rbtn" onclick="loadData()">↻ AKTUALIZOVAT</button>
+    <div class="disc">⚠ Pouze informativní · Není finanční poradenství</div>`;
 
-          if not closes:
-            # Use last known data with error status
-            status = "error"
-            data = {
-              "status": "error",
-              "error": error_msg,
-              "updated": datetime.datetime.utcnow().strftime("%d.%m.%Y %H:%M UTC"),
-              "price": 0
-            }
-          else:
-            price = closes[-1]
-            prev = closes[-2]
-            change = price - prev
-            change_pct = (change/prev)*100 if prev else 0
+  // LEVELS
+  document.getElementById('lc').innerHTML=`
+    <div class="card a1"><div class="ctitle">◈ Resistance zóny</div>${(d.resistance||[]).map((r,i)=>`<div class="lvrow"><span class="lbadge res">R${i+1}</span><span class="lprice" style="color:var(--red)">$${f(r,2)}</span><span class="ldist">+$${f(r-d.price,1)}</span></div>`).join('')}</div>
+    <div class="card a2"><div class="ctitle">◈ Aktuální cena</div><div class="lvrow"><span class="lbadge cur">LIVE</span><span class="lprice" style="color:var(--gold)">$${f(d.price,2)}</span><span class="ldist" style="color:${d.change>=0?'var(--green)':'var(--red)'}">${d.changePct>=0?'+':''}${f(d.changePct||0,2)}%</span></div></div>
+    <div class="card a3"><div class="ctitle">◈ Support zóny</div>${(d.support||[]).map((s,i)=>`<div class="lvrow"><span class="lbadge sup">S${i+1}</span><span class="lprice" style="color:var(--green)">$${f(s,2)}</span><span class="ldist">-$${f(d.price-s,1)}</span></div>`).join('')}</div>
+    <div class="card a4"><div class="ctitle">◈ Klouzavé průměry</div>
+      ${[[d.ema20,'EMA 20'],[d.ema50,'EMA 50'],[d.ema200,'EMA 200']].map(([v,n])=>`<div class="lvrow"><span style="font-size:10px;color:var(--muted)">${n}</span><span class="lprice" style="color:${d.price>v?'var(--green)':'var(--red)'}">$${f(v,1)}</span><span class="ldist" style="color:${d.price>v?'var(--green)':'var(--red)'}">${d.price>v?'▲ nad':'▼ pod'}</span></div>`).join('')}
+    </div>
+    <button class="rbtn" onclick="loadData()">↻ AKTUALIZOVAT</button>`;
 
-            # Indicators
-            ema20  = ema(closes[-20:], 20) if len(closes)>=20 else price
-            ema50  = ema(closes[-50:], 50) if len(closes)>=50 else price
-            ema200 = ema(closes[-200:], 200) if len(closes)>=200 else ema(closes, len(closes))
-            macd   = ema(closes[-12:], 12) - ema(closes[-26:], 26) if len(closes)>=26 else 0
-            rsi_val = rsi_calc(closes[-15:]) if len(closes)>=15 else 50
+  // SETUP
+  document.getElementById('sc').innerHTML=`
+    <div class="sigcard ${sc} a1"><div class="siglbl">◈ DOPORUČENÝ SETUP</div><div class="sigval">${d.signal}</div><div class="sigmeta">Shoda: ${d.confidence}% · ${(d.trend||'').toUpperCase()}</div></div>
+    <div class="card a2"><div class="ctitle">◈ Vstupní parametry</div>
+      <div class="sgrid">
+        <div class="sitem"><div class="silbl">Vstup ${d.signal}</div><div class="sival ce">$${f(d.entry,2)}</div></div>
+        <div class="sitem"><div class="silbl">Stop Loss</div><div class="sival csl">$${f(d.sl,2)}</div></div>
+        <div class="sitem"><div class="silbl">TP1</div><div class="sival ctp">$${f(d.tp1,2)}</div></div>
+        <div class="sitem"><div class="silbl">TP2</div><div class="sival ctp">$${f(d.tp2,2)}</div></div>
+      </div>
+      <div class="rrbadge">Risk / Reward = 1 : ${rr}</div>
+    </div>
+    <div class="card a3"><div class="ctitle">◈ Risk kalkulace</div>
+      ${[['0.01',1],['0.05',5],['0.10',10]].map(([lot,m])=>`<div class="lvrow"><span style="font-size:10px;color:var(--muted)">Lot ${lot}</span><span style="font-size:11px;color:var(--red)">Risk ~$${f(Math.abs((d.sl-d.entry)||15)*m,1)}</span></div>`).join('')}
+      <div style="font-size:9px;color:var(--muted);margin-top:8px">* Přibližný výpočet · závisí na brokeru a páce</div>
+    </div>
+    <div class="acard a4"><div class="ahead"><div style="font-size:16px">🎯</div><div><div class="atitle">ZDŮVODNĚNÍ</div><div class="asub">Auto analýza · ${d.updated||''}</div></div></div><div class="atext">${d.analysis||'–'}</div></div>
+    <button class="rbtn" onclick="loadData()">↻ NOVÝ SETUP</button>
+    <div class="disc">⚠ Není finanční poradenství · Obchodujte zodpovědně</div>`;
+}
 
-            # Signal
-            bull, bear = 0, 0
-            if price > ema20: bull+=1
-            else: bear+=1
-            if price > ema50: bull+=1
-            else: bear+=1
-            if price > ema200: bull+=1
-            else: bear+=1
-            if rsi_val > 50: bull+=1
-            else: bear+=1
-            if macd > 0: bull+=1
-            else: bear+=1
-            if change > 0: bull+=1
-            else: bear+=1
+// Manual analyze
+function manualAnalyze(){
+  const price = parseFloat(document.getElementById('m_price').value)||0;
+  const prev  = parseFloat(document.getElementById('m_prev').value)||price;
+  const rsi   = parseFloat(document.getElementById('m_rsi').value)||50;
+  const ema20 = parseFloat(document.getElementById('m_ema20').value)||0;
+  const ema50 = parseFloat(document.getElementById('m_ema50').value)||0;
+  const ema200= parseFloat(document.getElementById('m_ema200').value)||0;
+  const high  = parseFloat(document.getElementById('m_high').value)||price+20;
+  const low   = parseFloat(document.getElementById('m_low').value)||price-20;
+  const t1d   = document.getElementById('t_1d').value;
+  const t4h   = document.getElementById('t_4h').value;
+  const t1h   = document.getElementById('t_1h').value;
+  const t15m  = document.getElementById('t_15m').value;
 
-            signal = "SELL" if bear>bull else "BUY" if bull>bear else "WAIT"
-            trend  = "bullish" if price>ema50 else "bearish"
-            conf   = round(max(bull,bear)/(bull+bear)*100)
+  if(!price){alert('Zadejte aktuální cenu!');return;}
 
-            # S/R levels
-            h50 = sorted([x for x in highs[-50:] if x > price], reverse=True)[:3]
-            l50 = sorted([x for x in lows[-50:] if x < price])[:3]
+  const change = price-prev;
+  const changePct = prev?(change/prev*100):0;
 
-            entry = h50[0] if signal=="SELL" and h50 else (l50[0] if signal=="BUY" and l50 else price)
-            sl    = entry+15 if signal=="SELL" else entry-15
-            tp1   = price-30 if signal=="SELL" else price+30
-            tp2   = price-60 if signal=="SELL" else price+60
+  let bull=0,bear=0;
+  [t1d,t4h,t1h,t15m].forEach(t=>{if(t==='bullish')bull++;else if(t==='bearish')bear++;});
+  if(rsi<35)bull++;else if(rsi>65)bear++;
+  if(ema20&&price>ema20)bull++;else if(ema20)bear++;
+  if(ema50&&price>ema50)bull++;else if(ema50)bear++;
+  if(changePct>0)bull++;else if(changePct<0)bear++;
 
-            now = datetime.datetime.utcnow().strftime("%d.%m.%Y %H:%M UTC")
+  const sig  = bear>bull?'SELL':bull>bear?'BUY':'WAIT';
+  const sc   = sig==='SELL'?'bearish':sig==='BUY'?'bullish':'neutral';
+  const conf = Math.round(Math.max(bull,bear)/(bull+bear||1)*100);
+  const now  = new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'});
 
-            analysis = (f"XAUUSD ke {now}: Cena ${round(price,0):.0f} je "
-                       f"{'nad' if price>ema50 else 'pod'} EMA50 (${round(ema50,0):.0f}) "
-                       f"– trend {trend}. RSI {round(rsi_val,0):.0f} "
-                       f"{'– překoupen ⚠️' if rsi_val>70 else '– přeprodán ⚠️' if rsi_val<30 else '– neutrální'}. "
-                       f"MACD {'pozitivní ↑' if macd>0 else 'negativní ↓'}. "
-                       f"Doporučení: {signal}.")
+  const res  = [price+15,price+30,price+55];
+  const sup  = [price-15,price-30,price-55];
+  const entry= sig==='SELL'?res[0]:sup[0];
+  const sl   = sig==='SELL'?entry+12:entry-12;
+  const tp1  = sig==='SELL'?price-25:price+25;
+  const tp2  = sig==='SELL'?price-50:price+50;
+  const rr   = f(Math.abs(tp1-entry)/Math.abs(sl-entry||1),1);
 
-            data = {
-              "price": round(price, 2),
-              "change": round(change, 2),
-              "changePct": round(change_pct, 2),
-              "high24h": round(max(closes[-24:]), 2) if len(closes)>=24 else round(max(highs[-5:]),2),
-              "low24h": round(min(closes[-24:]), 2) if len(closes)>=24 else round(min(lows[-5:]),2),
-              "rsi": round(rsi_val, 1),
-              "ema20": round(ema20, 1),
-              "ema50": round(ema50, 1),
-              "ema200": round(ema200, 1),
-              "macd": round(macd, 2),
-              "signal": signal,
-              "trend": trend,
-              "confidence": conf,
-              "resistance": [round(x,1) for x in h50] if h50 else [round(price+15,1), round(price+30,1), round(price+50,1)],
-              "support": [round(x,1) for x in l50] if l50 else [round(price-15,1), round(price-30,1), round(price-50,1)],
-              "tf": {
-                "1D": trend,
-                "4H": trend,
-                "1H": "bullish" if macd>0 else "bearish",
-                "30M": "bullish" if price>ema20 else "bearish",
-                "15M": "neutral"
-              },
-              "entry": round(entry, 2),
-              "sl": round(sl, 2),
-              "tp1": round(tp1, 2),
-              "tp2": round(tp2, 2),
-              "updated": now,
-              "status": "ok",
-              "analysis": analysis
-            }
+  const txt = `Manuální analýza ke ${now}: Cena $${f(price,0)} je ${ema50&&price>ema50?'nad':'pod'} EMA50${ema50?' ($'+f(ema50,0)+')':''}. D1 trend ${t1d}. RSI ${f(rsi,0)}${rsi>70?' – překoupen':rsi<30?' – přeprodán':''}. Signál: ${sig} (${conf}% shoda, ${bull}× BUY vs ${bear}× SELL).`;
 
-          with open("data.json", "w") as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
+  document.getElementById('manual-result').innerHTML=`
+    <div class="sigcard ${sc} a1" style="margin-top:12px">
+      <div class="siglbl">◈ MANUÁLNÍ SIGNÁL</div>
+      <div class="sigval">${sig}</div>
+      <div class="sigmeta">Shoda: ${conf}% · ${bull}× BUY · ${bear}× SELL</div>
+    </div>
+    <div class="card a2">
+      <div class="ctitle">◈ Setup</div>
+      <div class="sgrid">
+        <div class="sitem"><div class="silbl">Vstup</div><div class="sival ce">$${f(entry,2)}</div></div>
+        <div class="sitem"><div class="silbl">Stop Loss</div><div class="sival csl">$${f(sl,2)}</div></div>
+        <div class="sitem"><div class="silbl">TP1</div><div class="sival ctp">$${f(tp1,2)}</div></div>
+        <div class="sitem"><div class="silbl">TP2</div><div class="sival ctp">$${f(tp2,2)}</div></div>
+      </div>
+      <div class="rrbadge">Risk / Reward = 1 : ${rr}</div>
+    </div>
+    <div class="card a3">
+      <div class="ctitle">◈ Multi-Timeframe</div>
+      ${[['1D',t1d],['4H',t4h],['1H',t1h],['15M',t15m]].map(([tf,t])=>`<div class="tfrow"><span class="tfname">${tf}</span><div class="tfbar"><div class="tffill" style="width:${t==='bullish'?70:t==='bearish'?30:50}%;background:${tbc(t)}"></div></div><span class="tfsig">${ta(t)}</span></div>`).join('')}
+    </div>
+    <div class="acard a4"><div class="ahead"><div style="font-size:16px">📊</div><div><div class="atitle">ANALÝZA</div><div class="asub">Manuální zadání · ${now}</div></div></div><div class="atext">${txt}</div></div>
+    <div class="disc">⚠ Není finanční poradenství</div>`;
+  
+  // Scroll to result
+  document.getElementById('manual-result').scrollIntoView({behavior:'smooth'});
+}
 
-          print(f"Done: price=${data.get('price')}, signal={data.get('signal')}, status={data.get('status')}")
-          PYEOF
-
-      - name: Commit data
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data.json
-          git diff --staged --quiet || git commit -m "Auto: update gold data $(date -u '+%H:%M UTC')"
-          git push
+// Start
+loadData();
+</script>
+</body>
+</html>
