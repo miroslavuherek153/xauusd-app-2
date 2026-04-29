@@ -3,325 +3,148 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Gold AI">
-<meta name="theme-color" content="#FFD700">
-<title>XAUUSD AI Analyzer</title>
-<link rel="manifest" href="manifest.json">
+<title>XAUUSD Live AI</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-:root{--gold:#FFD700;--green:#00FF88;--red:#FF3355;--bg:#050810;--bg2:#0a0f1e;--bg3:#0f1628;--border:rgba(255,215,0,0.15);--text:#c8d8f0;--muted:#556677;--mono:'Share Tech Mono',monospace;--display:'Orbitron',sans-serif;}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;overflow:hidden;}
-body{background:var(--bg);color:var(--text);font-family:var(--mono);display:flex;flex-direction:column;background-image:radial-gradient(ellipse at 20% 0%,rgba(255,215,0,0.06) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(0,80,255,0.04) 0%,transparent 50%);}
-header{flex-shrink:0;background:rgba(5,8,16,0.98);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;}
+:root{--gold:#FFD700;--green:#00FF88;--red:#FF3355;--bg:#050810;--bg2:#0a0f1e;--border:rgba(255,215,0,0.15);--text:#c8d8f0;--muted:#556677;--mono:'Share Tech Mono',monospace;--display:'Orbitron',sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+header{background:rgba(5,8,16,0.98);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;}
 .logo{font-family:var(--display);font-size:15px;font-weight:900;color:var(--gold);letter-spacing:2px;}
-.logo span{color:var(--text);font-weight:400;font-size:12px;}
-.hright{display:flex;align-items:center;gap:10px;}
-.dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite;}
-.dot.red{background:var(--red);box-shadow:0 0 8px var(--red);}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.2}}
-.htime{font-size:9px;color:var(--muted);}
-.nav{flex-shrink:0;display:flex;background:var(--bg2);border-bottom:1px solid var(--border);}
-.ntab{flex:1;padding:10px 2px;text-align:center;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--mono);transition:all 0.2s;}
-.ntab.active{color:var(--gold);border-bottom-color:var(--gold);}
-.main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:20px;}
-.screen{display:none;padding:12px;}
-.screen.active{display:block;}
-@keyframes su{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.a1{animation:su 0.3s ease both;}.a2{animation:su 0.3s ease 0.06s both;}.a3{animation:su 0.3s ease 0.12s both;}.a4{animation:su 0.3s ease 0.18s both;}.a5{animation:su 0.3s ease 0.24s both;}
-.lwrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:18px;}
-.spinner{width:48px;height:48px;border:2px solid rgba(255,215,0,0.1);border-top-color:var(--gold);border-radius:50%;animation:spin 0.9s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg)}}
-.ltitle{font-family:var(--display);font-size:11px;letter-spacing:4px;color:var(--gold);}
-.lsub{font-size:10px;color:var(--muted);letter-spacing:2px;}
-.cbar-wrap{flex-shrink:0;background:var(--bg2);border-bottom:1px solid var(--border);padding:6px 16px;display:flex;align-items:center;gap:10px;}
-.cbar-label{font-size:8px;letter-spacing:2px;color:var(--muted);}
-.cbar-bg{flex:1;height:3px;background:rgba(255,255,255,0.06);border-radius:2px;}
-.cbar-fill{height:3px;border-radius:2px;background:var(--gold);transition:width 1s linear;}
-.cbar-time{font-size:9px;color:var(--gold);width:40px;text-align:right;}
-.pcard{background:linear-gradient(145deg,rgba(255,215,0,0.08),rgba(255,215,0,0.02));border:1px solid rgba(255,215,0,0.25);border-radius:12px;padding:16px;margin-bottom:12px;position:relative;overflow:hidden;}
-.pcard::after{content:'AU';position:absolute;bottom:-8px;right:12px;font-family:var(--display);font-size:60px;font-weight:900;color:rgba(255,215,0,0.04);pointer-events:none;}
-.plbl{font-size:8px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:4px;}
-.pval{font-family:var(--display);font-size:30px;font-weight:900;color:#fff;}
-.pchg{font-size:11px;margin-top:4px;}
-.up{color:var(--green);}.down{color:var(--red);}.nc{color:var(--muted);}
-.pstats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px;}
-.stat{background:rgba(0,0,0,0.3);border-radius:6px;padding:7px;}
-.slbl{font-size:7px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
-.sval{font-size:11px;color:var(--text);margin-top:2px;}
-.sigcard{border-radius:12px;padding:14px;margin-bottom:12px;text-align:center;border:1px solid;}
-.sigcard.bearish{background:rgba(255,51,85,0.08);border-color:rgba(255,51,85,0.4);}
-.sigcard.bullish{background:rgba(0,255,136,0.06);border-color:rgba(0,255,136,0.3);}
-.sigcard.neutral{background:rgba(255,215,0,0.05);border-color:rgba(255,215,0,0.3);}
-.siglbl{font-size:8px;letter-spacing:4px;color:var(--muted);margin-bottom:4px;}
-.sigval{font-family:var(--display);font-size:26px;font-weight:900;letter-spacing:6px;}
-.sigcard.bearish .sigval{color:var(--red);text-shadow:0 0 20px rgba(255,51,85,0.5);}
-.sigcard.bullish .sigval{color:var(--green);text-shadow:0 0 20px rgba(0,255,136,0.4);}
-.sigcard.neutral .sigval{color:var(--gold);}
-.sigmeta{font-size:10px;color:var(--muted);margin-top:5px;line-height:1.7;}
+.nav{display:flex;background:var(--bg2);border-bottom:1px solid var(--border);}
+.ntab{flex:1;padding:12px;text-align:center;font-size:9px;color:var(--muted);cursor:pointer;border:none;background:none;font-family:var(--mono);text-transform:uppercase;}
+.ntab.active{color:var(--gold);border-bottom:2px solid var(--gold);}
+.main{flex:1;overflow-y:auto;padding:12px;}
+.screen{display:none;}.screen.active{display:block;}
+
+/* Animace ceny */
+@keyframes flashGreen{from{color:var(--green);}to{color:#fff;}}
+@keyframes flashRed{from{color:var(--red);}to{color:#fff;}}
+.up-flash{animation:flashGreen 1s ease;}
+.down-flash{animation:flashRed 1s ease;}
+
+.pcard{background:linear-gradient(145deg,rgba(255,215,0,0.08),rgba(255,215,0,0.02));border:1px solid rgba(255,215,0,0.25);border-radius:12px;padding:16px;margin-bottom:12px;text-align:center;}
+.plbl{font-size:8px;letter-spacing:3px;color:var(--gold);margin-bottom:4px;}
+.pval{font-family:var(--display);font-size:32px;font-weight:900;color:#fff;transition:all 0.3s;}
+.sigcard{border-radius:12px;padding:15px;margin-bottom:12px;text-align:center;border:1px solid;}
+.sigcard.bearish{background:rgba(255,51,85,0.08);border-color:rgba(255,51,85,0.4);color:var(--red);}
+.sigcard.bullish{background:rgba(0,255,136,0.06);border-color:rgba(0,255,136,0.3);color:var(--green);}
+.sigval{font-family:var(--display);font-size:24px;font-weight:900;}
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;}
-.ctitle{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid rgba(255,215,0,0.08);display:flex;justify-content:space-between;align-items:center;}
-.cbadge{font-size:8px;background:rgba(255,215,0,0.1);color:var(--gold);padding:2px 6px;border-radius:10px;}
-.tfrow{display:flex;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03);}
-.tfrow:last-child{border-bottom:none;}
-.tfname{font-size:10px;color:var(--gold);width:38px;}
-.tfbar{flex:1;height:3px;background:rgba(255,255,255,0.06);border-radius:2px;margin:0 10px;}
-.tffill{height:3px;border-radius:2px;}
-.tfsig{font-size:10px;width:58px;text-align:right;}
-.aup{color:var(--green);}.adn{color:var(--red);}.ant{color:var(--muted);}
-.indrow{display:flex;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03);gap:8px;}
-.indrow:last-child{border-bottom:none;}
-.indname{font-size:10px;color:var(--muted);width:60px;}
-.indbar{flex:1;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;}
-.indfill{height:4px;border-radius:2px;}
-.indval{font-size:11px;font-weight:bold;width:52px;text-align:right;}
-.lvrow{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03);}
-.lvrow:last-child{border-bottom:none;}
-.lbadge{font-size:7px;letter-spacing:2px;padding:2px 6px;border-radius:4px;}
-.lbadge.res{background:rgba(255,51,85,0.12);color:var(--red);border:1px solid rgba(255,51,85,0.2);}
-.lbadge.sup{background:rgba(0,255,136,0.08);color:var(--green);border:1px solid rgba(0,255,136,0.15);}
-.lbadge.cur{background:rgba(255,215,0,0.12);color:var(--gold);border:1px solid rgba(255,215,0,0.2);}
-.lprice{font-family:var(--display);font-size:13px;}
-.ldist{font-size:9px;color:var(--muted);}
-.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
-.sitem{background:var(--bg3);border:1px solid rgba(255,255,255,0.05);border-radius:8px;padding:10px;}
-.silbl{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
-.sival{font-family:var(--display);font-size:14px;}
-.ce{color:var(--gold);}.csl{color:var(--red);}.ctp{color:var(--green);}
-.rrbadge{background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.2);border-radius:6px;padding:6px;text-align:center;font-size:11px;color:var(--green);margin-bottom:10px;}
-.acard{background:var(--bg2);border:1px solid rgba(0,255,136,0.2);border-radius:12px;padding:14px;margin-bottom:12px;}
-.ahead{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:7px;border-bottom:1px solid rgba(0,255,136,0.1);}
-.atitle{font-size:8px;letter-spacing:3px;color:var(--green);}
-.asub{font-size:8px;color:var(--muted);margin-top:1px;}
-.atext{font-size:11px;line-height:2;color:#9aafc5;}
-.iitem{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:13px 15px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
-.iname{font-size:12px;color:var(--text);}
-.idesc{font-size:9px;color:var(--muted);margin-top:2px;}
-.iright{font-size:10px;color:var(--gold);}
-.isect{margin-bottom:16px;}
-.isect-title{font-size:8px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:8px;}
-.rbtn{background:rgba(255,215,0,0.07);border:1px solid var(--border);color:var(--gold);padding:12px;font-family:var(--mono);font-size:9px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;border-radius:10px;width:100%;margin-bottom:8px;transition:background 0.2s;}
-.rbtn:active{background:rgba(255,215,0,0.15);}
-.disc{font-size:9px;color:#2a3345;text-align:center;padding:6px;line-height:1.8;}
+.ctitle{font-size:8px;letter-spacing:2px;color:var(--gold);margin-bottom:10px;text-transform:uppercase;}
+.rbtn{background:rgba(255,215,0,0.07);border:1px solid var(--border);color:var(--gold);padding:12px;width:100%;border-radius:10px;cursor:pointer;font-family:var(--mono);font-size:9px;}
 </style>
 </head>
 <body>
+
 <header>
-  <div class="logo">XAU<span>/USD</span></div>
-  <div class="hright">
-    <div class="htime" id="ht"></div>
-    <div class="dot" id="statusDot"></div>
-  </div>
+  <div class="logo">XAU<span>/USD</span> LIVE</div>
+  <div id="ht" style="font-size:10px;"></div>
 </header>
-<div class="cbar-wrap">
-  <span class="cbar-label">REFRESH</span>
-  <div class="cbar-bg"><div class="cbar-fill" id="cbar" style="width:100%"></div></div>
-  <span class="cbar-time" id="ctimer">15:00</span>
-</div>
+
 <nav class="nav">
   <button class="ntab active" onclick="showTab('analysis')">◈ Auto</button>
   <button class="ntab" onclick="showTab('levels')">◈ Úrovně</button>
   <button class="ntab" onclick="showTab('setup')">◈ Setup</button>
-  <button class="ntab" onclick="showTab('manual')">◈ Manuál</button>
-  <button class="ntab" onclick="showTab('info')">◈ Info</button>
 </nav>
+
 <div class="main">
-  <div class="screen active" id="tab-analysis"><div id="ac"><div class="lwrap"><div class="spinner"></div><div class="ltitle">NAČÍTÁM DATA</div><div class="lsub">github actions · auto update</div></div></div></div>
-  <div class="screen" id="tab-levels"><div id="lc"><div class="lwrap"><div class="spinner"></div></div></div></div>
-  <div class="screen" id="tab-setup"><div id="sc"><div class="lwrap"><div class="spinner"></div></div></div></div>
-  <div class="screen" id="tab-manual">
-    <div style="padding:4px">
-      <div class="card a1" style="background:linear-gradient(145deg,rgba(255,215,0,0.07),rgba(255,215,0,0.02));border-color:rgba(255,215,0,0.25)">
-        <div class="ctitle">◈ Zadejte data z TradingView</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px">
-            <label style="font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:4px">Aktuální cena</label>
-            <input type="number" id="m_price" placeholder="4740.00" step="0.01" style="width:100%;background:none;border:none;color:var(--text);font-family:var(--mono);font-size:14px;outline:none">
-          </div>
-          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px">
-            <label style="font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:4px">Předchozí close</label>
-            <input type="number" id="m_prev" placeholder="4720.00" step="0.01" style="width:100%;background:none;border:none;color:var(--text);font-family:var(--mono);font-size:14px;outline:none">
-          </div>
-          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px">
-            <label style="font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:4px">RSI (14)</label>
-            <input type="number" id="m_rsi" placeholder="45" step="0.1" min="0" max="100" style="width:100%;background:none;border:none;color:var(--text);font-family:var(--mono);font-size:14px;outline:none">
-          </div>
-          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px">
-            <label style="font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:4px">EMA 20</label>
-            <input type="number" id="m_ema20" placeholder="4750.00" step="0.01" style="width:100%;background:none;border:none;color:var(--text);font-family:var(--mono);font-size:14px;outline:none">
-          </div>
-          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px">
-            <label style="font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:4px">EMA 50</label>
-            <input type="number" id="m_ema50" placeholder="4700.00" step="0.01" style="width:100%;background:none;border:none;color:var(--text);font-family:var(--mono);font-size:14px;outline:none">
-          </div>
-          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px">
-            <label style="font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:4px">EMA 200</label>
-            <input type="number" id="m_ema200" placeholder="4500.00" step="0.01" style="width:100%;background:none;border:none;color:var(--text);font-family:var(--mono);font-size:14px;outline:none">
-          </div>
-        </div>
-        <button onclick="manualAnalyze()" style="width:100%;background:linear-gradient(135deg,rgba(255,215,0,0.2),rgba(255,165,0,0.1));border:1px solid rgba(255,215,0,0.4);color:var(--gold);padding:14px;font-family:var(--display);font-size:11px;letter-spacing:3px;cursor:pointer;border-radius:10px">⚡ ANALYZOVAT</button>
-      </div>
-      <div id="manual-result"></div>
+  <div class="screen active" id="tab-analysis">
+    <div class="pcard">
+      <div class="plbl" id="price-source">◈ GOLD LIVE PRICE (BINANCE)</div>
+      <div class="pval" id="live-price">0.00</div>
+      <div id="price-change" style="font-size:11px; margin-top:5px;">Načítání...</div>
     </div>
+
+    <!-- TradingView Widget -->
+    <div class="card" id="tv-widget" style="height:150px; padding:0; overflow:hidden;"></div>
+
+    <div id="ai-signal-container"></div>
+    <div id="ai-analysis-text"></div>
+    <button class="rbtn" onclick="loadData()">↻ REFRESH ANALYSIS</button>
   </div>
-  <div class="screen" id="tab-info">
-    <div style="padding:4px">
-      <div class="isect">
-        <div class="isect-title">◈ Status systému</div>
-        <div class="iitem"><div><div class="iname">Data robot</div><div class="idesc">GitHub Actions</div></div><div class="iright" id="robotStatus">⏳</div></div>
-        <div class="iitem"><div><div class="iname">Poslední update</div><div class="idesc" id="lastUpdate">Načítání...</div></div><div class="iright">LIVE</div></div>
-      </div>
-    </div>
-  </div>
+
+  <div class="screen" id="tab-levels" id="lc"></div>
+  <div class="screen" id="tab-setup" id="sc"></div>
 </div>
 
 <script>
-function ut(){document.getElementById('ht').textContent=new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'});}
-ut();setInterval(ut,10000);
+let lastPrice = 0;
 
-function showTab(n){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('tab-'+n).classList.add('active');
-  const tabs = ['analysis','levels','setup','manual','info'];
-  tabs.forEach((x,i)=>{if(x===n)document.querySelectorAll('.ntab')[i].classList.add('active');});
+// 1. FUNKCE PRO ŽIVOU CENU (každých 10s)
+async function fetchLivePrice() {
+    try {
+        const response = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=PAXGUSDT');
+        const data = await response.json();
+        const price = parseFloat(data.price);
+        
+        const el = document.getElementById('live-price');
+        if (lastPrice > 0) {
+            el.classList.remove('up-flash', 'down-flash');
+            void el.offsetWidth; // trigger reflow
+            el.classList.add(price > lastPrice ? 'up-flash' : 'down-flash');
+        }
+        
+        el.textContent = '$' + price.toFixed(2);
+        lastPrice = price;
+    } catch (e) {
+        console.error("Chyba live ceny");
+    }
 }
 
-function f(n,d=2){return Number(n).toFixed(d);}
-function rc(v){if(v>70)return'var(--red)';if(v<30)return'var(--green)';return'var(--text)';}
-function ta(t){if(t==='bullish')return'<span class="aup">▲ BUY</span>';if(t==='bearish')return'<span class="adn">▼ SELL</span>';return'<span class="ant">— WAIT</span>';}
-function tbc(t){if(t==='bullish')return'var(--green)';if(t==='bearish')return'var(--red)';return'var(--muted)';}
-
-let countdown = 900;
-function updateCountdown(){
-  countdown--;
-  if(countdown <= 0){ countdown = 900; loadData(); }
-  const m = Math.floor(countdown/60);
-  const s = countdown%60;
-  document.getElementById('ctimer').textContent = m + ":" + s.toString().padStart(2,'0');
-  document.getElementById('cbar').style.width = (countdown/900*100)+'%';
+// 2. FUNKCE PRO NAČTENÍ ANALÝZY Z ROBOTA
+async function loadData() {
+    try {
+        const r = await fetch('./data.json?t=' + Date.now());
+        const d = await r.json();
+        renderAnalysis(d);
+    } catch (e) {
+        console.error("Robot data nedostupná");
+    }
 }
-setInterval(updateCountdown, 1000);
 
-async function loadData(){
-  try{
-    const r = await fetch('./data.json?t='+Date.now());
-    const d = await r.json();
-    renderAll(d);
-    document.getElementById('statusDot').className = 'dot';
-    document.getElementById('robotStatus').textContent = '✅ Online';
-    document.getElementById('lastUpdate').textContent = d.updated || '';
-  }catch(e){
-    document.getElementById('statusDot').className = 'dot red';
-    document.getElementById('robotStatus').textContent = '❌ Offline';
-  }
-}
-loadData();
-
-function renderAll(d){
-  const sc = d.signal==='SELL'?'bearish':d.signal==='BUY'?'bullish':'neutral';
-  const rr = (d.tp1&&d.sl&&d.entry) ? f(Math.abs(d.tp1-d.entry)/Math.abs(d.sl-d.entry||1),1) : '2.0';
-
-  // 1. AUTO SCREEN
-  document.getElementById('ac').innerHTML = `
-    <div class="pcard a1">
-      <div class="plbl">◈ GOLD SPOT · ${d.updated||''}</div>
-      <div class="pval">$${f(d.price,2)}</div>
-      <div class="pchg ${d.change>=0?'up':'down'}">${d.change>=0?'▲':'▼'} $${f(Math.abs(d.change||0),2)} · ${f(d.changePct||0,2)}%</div>
-      <div class="pstats">
-        <div class="stat"><div class="slbl">RSI 14</div><div class="sval" style="color:${rc(d.rsi)}">${f(d.rsi,1)}</div></div>
-        <div class="stat"><div class="slbl">24h High</div><div class="sval up">$${f(d.high24h,0)}</div></div>
-        <div class="stat"><div class="slbl">24h Low</div><div class="sval down">$${f(d.low24h,0)}</div></div>
-      </div>
-    </div>
-
-    <div class="card a2" id="tv-widget-container" style="padding:0; overflow:hidden; border-color:rgba(255,215,0,0.3); height:140px;">
-        <!-- Widget bude vložen sem přes JS -->
-    </div>
-
-    <div class="sigcard ${sc} a3">
-      <div class="siglbl">◈ CELKOVÝ SIGNÁL</div>
-      <div class="sigval">${d.signal}</div>
-      <div class="sigmeta">Shoda: ${d.confidence}% · EMA200: $${f(d.ema200,0)}</div>
-    </div>
-
-    <div class="card a4">
-      <div class="ctitle">◈ Multi-Timeframe <span class="cbadge">AUTO</span></div>
-      ${Object.entries(d.tf||{}).map(([tf,t])=>`
-        <div class="tfrow">
-          <span class="tfname">${tf}</span>
-          <div class="tfbar"><div class="tffill" style="width:${t==='bullish'?70:t==='bearish'?30:50}%;background:${tbc(t)}"></div></div>
-          <span class="tfsig">${ta(t)}</span>
+function renderAnalysis(d) {
+    const sc = d.signal === 'SELL' ? 'bearish' : d.signal === 'BUY' ? 'bullish' : 'neutral';
+    
+    document.getElementById('ai-signal-container').innerHTML = `
+        <div class="sigcard ${sc}">
+            <div style="font-size:8px; letter-spacing:2px; color:var(--muted)">AI ROBOT SIGNÁL</div>
+            <div class="sigval">${d.signal}</div>
+            <div style="font-size:9px;">Shoda: ${d.confidence}% | Trend: ${d.trend}</div>
         </div>
-      `).join('')}
-    </div>
+    `;
 
-    <div class="acard a5">
-      <div class="ahead"><div style="font-size:16px">📊</div><div><div class="atitle">ANALÝZA</div><div class="asub">AI Robot</div></div></div>
-      <div class="atext">${d.analysis||'–'}</div>
-    </div>
-    <button class="rbtn" onclick="loadData()">↻ AKTUALIZOVAT</button>
-  `;
-
-  // 2. LEVELS SCREEN
-  document.getElementById('lc').innerHTML = `
-    <div class="card a1"><div class="ctitle">◈ Resistance</div>${(d.resistance||[]).map((r,i)=>`<div class="lvrow"><span class="lbadge res">R${i+1}</span><span class="lprice" style="color:var(--red)">$${f(r,2)}</span><span class="ldist">+$${f(r-d.price,1)}</span></div>`).join('')}</div>
-    <div class="card a2"><div class="ctitle">◈ Aktuální</div><div class="lvrow"><span class="lbadge cur">LIVE</span><span class="lprice" style="color:var(--gold)">$${f(d.price,2)}</span><span class="ldist">${f(d.changePct||0,2)}%</span></div></div>
-    <div class="card a3"><div class="ctitle">◈ Support</div>${(d.support||[]).map((s,i)=>`<div class="lvrow"><span class="lbadge sup">S${i+1}</span><span class="lprice" style="color:var(--green)">$${f(s,2)}</span><span class="ldist">-$${f(d.price-s,1)}</span></div>`).join('')}</div>
-  `;
-
-  // 3. SETUP SCREEN
-  document.getElementById('sc').innerHTML = `
-    <div class="sigcard ${sc} a1"><div class="siglbl">◈ DOPORUČENÝ SETUP</div><div class="sigval">${d.signal}</div></div>
-    <div class="card a2"><div class="ctitle">◈ Parametry</div>
-      <div class="sgrid">
-        <div class="sitem"><div class="silbl">Vstup</div><div class="sival ce">$${f(d.entry,2)}</div></div>
-        <div class="sitem"><div class="silbl">SL</div><div class="sival csl">$${f(d.sl,2)}</div></div>
-        <div class="sitem"><div class="silbl">TP1</div><div class="sival ctp">$${f(d.tp1,2)}</div></div>
-        <div class="sitem"><div class="silbl">TP2</div><div class="sival ctp">$${f(d.tp2,2)}</div></div>
-      </div>
-      <div class="rrbadge">R/R Ratio = 1 : ${rr}</div>
-    </div>
-  `;
-
-  // VLOŽENÍ TRADINGVIEW WIDGETU
-  const tvContainer = document.getElementById('tv-widget-container');
-  if(tvContainer) {
+    document.getElementById('ai-analysis-text').innerHTML = `
+        <div class="card">
+            <div class="ctitle">Analýza trhu</div>
+            <div style="font-size:11px; line-height:1.6; color:#9aafc5;">${d.analysis}</div>
+        </div>
+    `;
+    
+    // Vykreslení widgetu (pouze jednou nebo při refresh)
+    document.getElementById('tv-widget').innerHTML = '';
     const script = document.createElement('script');
     script.src = "https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js";
     script.async = true;
     script.innerHTML = JSON.stringify({
-      "symbol": "OANDA:XAUUSD",
-      "width": "100%",
-      "height": "140",
-      "locale": "cs",
-      "dateRange": "12M",
-      "colorTheme": "dark",
-      "trendLineColor": "rgba(255, 215, 0, 1)",
-      "underLineColor": "rgba(255, 215, 0, 0.3)",
-      "underLineBottomColor": "rgba(255, 215, 0, 0)",
-      "isTransparent": true,
-      "autosize": false,
-      "largeChartUrl": ""
+        "symbol": "OANDA:XAUUSD", "width": "100%", "height": "100%", "locale": "cs",
+        "dateRange": "12M", "colorTheme": "dark", "isTransparent": true
     });
-    tvContainer.appendChild(script);
-  }
+    document.getElementById('tv-widget').appendChild(script);
 }
 
-function manualAnalyze(){
-  const p = parseFloat(document.getElementById('m_price').value);
-  if(!p){alert('Zadejte cenu!'); return;}
-  const sig = "BUY"; // Zjednodušený příklad
-  document.getElementById('manual-result').innerHTML = `
-    <div class="sigcard bullish a1" style="margin-top:12px">
-      <div class="siglbl">◈ MANUÁLNÍ SIGNÁL</div>
-      <div class="sigval">${sig}</div>
-    </div>
-  `;
+function showTab(n) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.ntab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + n).classList.add('active');
+    event.currentTarget.classList.add('active');
 }
+
+// Spuštění
+setInterval(fetchLivePrice, 10000);
+fetchLivePrice();
+loadData();
+setInterval(() => { document.getElementById('ht').textContent = new Date().toLocaleTimeString(); }, 1000);
 </script>
 </body>
 </html>
