@@ -1,21 +1,21 @@
 {
-  "price": 4523.0,
-  "change": -0.6,
-  "changePct": -0.01,
-  "high24h": 4523.6,
+  "price": 4567.5,
+  "change": -0.1,
+  "changePct": -0.0,
+  "high24h": 4571.7,
   "low24h": 4454.7,
-  "rsi": 64.4,
-  "ema20": 4494.8,
-  "ema50": 4511.7,
-  "ema200": 4610.0,
-  "macd": 2.4,
+  "rsi": 72.1,
+  "ema20": 4525.4,
+  "ema50": 4518.6,
+  "ema200": 4618.7,
+  "macd": 21.7,
   "signal": "BUY",
   "trend": "bullish",
   "confidence": 67,
   "resistance": [
-    4601.5,
-    4576.9,
-    4573.3
+    4578.8,
+    4578.0,
+    4570.2
   ],
   "support": [
     4442.2,
@@ -31,9 +31,9 @@
   },
   "entry": 4442.2,
   "sl": 4427.2,
-  "tp1": 4553.0,
-  "tp2": 4583.0,
-  "updated": "30.04.2026 07:39 UTC",
+  "tp1": 4597.5,
+  "tp2": 4627.5,
+  "updated": "30.04.2026 12:22 UTC",
   "status": "ok",
-  "analysis": "XAUUSD ke 30.04.2026 07:39 UTC: Cena $4523 je nad EMA50 ($4512) – trend bullish. RSI 64 – neutrální. MACD pozitivní ↑. Doporučení: BUY."
+  "analysis": "XAUUSD ke 30.04.2026 12:22 UTC: Cena $4568 je nad EMA50 ($4519) – trend bullish. RSI 72 – překoupen ⚠️. MACD pozitivní ↑. Doporučení: BUY."
 }
