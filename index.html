@@ -3,12 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>XAUUSD Trading Console</title>
+  <title>XAUUSD Trading Console — kompletní soubor</title>
   <style>
     :root{
-      --bg:#0f1720;--card:#0b1220;--muted:#9aa6b2;--green:#00d084;--red:#ff6b6b;
+      --bg:#071021;--card:#0b1220;--muted:#9aa6b2;--green:#00d084;--red:#ff6b6b;
       --accent:#1f2937; font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
     }
+    html,body{height:100%}
     body{margin:0;background:linear-gradient(180deg,#071021 0%, #071827 100%);color:#e6eef6}
     .wrap{max-width:1100px;margin:18px auto;padding:18px}
     .header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
@@ -25,6 +26,10 @@
     .muted{color:var(--muted);font-size:13px}
     .small{font-size:12px;color:var(--muted)}
     .ctitle{font-weight:600;margin-bottom:8px}
+    .signal-buy{color:#042; background:linear-gradient(90deg, rgba(0,208,132,0.06), rgba(0,208,132,0.02)); padding:8px;border-radius:6px}
+    .signal-sell{color:#600; background:linear-gradient(90deg, rgba(255,107,107,0.06), rgba(255,107,107,0.02)); padding:8px;border-radius:6px}
+    .signal-neutral{color:var(--muted); padding:8px;border-radius:6px}
+    .apply-btn{background:#0b1220;border:1px solid rgba(255,255,255,0.04);padding:8px;border-radius:6px;cursor:pointer}
     .footer{margin-top:12px;color:var(--muted);font-size:13px}
     @media(max-width:900px){.grid{grid-template-columns:1fr}}
   </style>
@@ -35,16 +40,20 @@
       <div class="logo"></div>
       <div>
         <h1>XAUUSD Trading Console</h1>
-        <div class="small">Technická analýza a rychlé zadávání obchodů s TP a SL</div>
+        <div class="small">Technická analýza + signál + rychlé zadání obchodu (TP/SL) — vlož tento soubor přímo do repa</div>
       </div>
     </div>
 
     <div class="grid">
       <!-- Graf a indikátory -->
       <div class="card">
-        <div class="ctitle">Graf XAUUSD</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="ctitle">Graf XAUUSD</div>
+          <div class="small" id="priceLabel">Price: —</div>
+        </div>
         <canvas id="chartCanvas"></canvas>
-        <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
+
+        <div style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap">
           <div class="small">Timeframe</div>
           <select id="tfSelect" onchange="renderDummyChart()">
             <option value="M5">M5</option>
@@ -52,10 +61,22 @@
             <option value="H1">H1</option>
             <option value="H4">H4</option>
           </select>
+
           <div style="flex:1"></div>
+
           <div class="small">Indicators</div>
           <label style="margin-left:8px"><input id="showMA" type="checkbox" checked onchange="renderDummyChart()"> MA</label>
           <label style="margin-left:8px"><input id="showRSI" type="checkbox" onchange="renderDummyChart()"> RSI</label>
+        </div>
+
+        <div id="signalBox" style="margin-top:12px;padding:10px;border-radius:6px;background:#071827">
+          <div id="signalLabel" style="font-weight:700;font-size:16px" class="signal-neutral">Signal: —</div>
+          <div id="signalDetails" class="small" style="margin-top:6px">Entry: — · SL: — · TP: — · ATR: —</div>
+          <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+            <button class="apply-btn" onclick="applySignalToForm()">Aplikovat signál do formuláře</button>
+            <div style="flex:1"></div>
+            <div class="small">Aktualizace každých 5s</div>
+          </div>
         </div>
       </div>
 
@@ -118,20 +139,213 @@
         </div>
 
         <div id="trade_feedback" style="margin-top:10px;font-size:13px;color:var(--muted)"></div>
-        <div class="footer">Poznámka: Backend endpointy <code>/account</code> a <code>/order</code> musí být nasazeny samostatně.</div>
+        <div class="footer">Poznámka: Frontend volá backend endpointy <code>/price</code>, <code>/account</code>, <code>/order</code>. Pokud backend nemáš, viz komentáře níže.</div>
       </div>
     </div>
   </div>
 
   <script>
-    // ---------- Dummy chart data and rendering ----------
-    let cachedData = { price: 2465.00 }; // fallback poslední cena
+    /************************************************************************
+     * Kompletní soubor: co dělá
+     * - snaží se získat reálnou cenu a svíčky z backendu (/price)
+     * - pokud backend není dostupný, zkusí veřejné fallbacky (metals.live)
+     * - počítá EMA20/EMA50, RSI14, ATR14
+     * - generuje jednoduchý signál (BUY/SELL/NEUTRAL) a doporučené Entry/SL/TP
+     * - umožní aplikovat signál přímo do formuláře a spočítat loty
+     *
+     * Důležité: nasadit backend s těmito endpointy je doporučeno:
+     *  GET /price?symbol=XAUUSD&candles=60  -> { last: number, candles: [{open,high,low,close,ts}, ...] }
+     *  GET /account                         -> { balance: number }
+     *  POST /order                          -> přijme payload z prepareOrderPayload()
+     *
+     * Pokud backend nemáš, frontend použije fallbacky, ale data mohou být méně spolehlivá.
+     ************************************************************************/
+
+    // ---------- pomocné proměnné ----------
+    let cachedData = { price: 0, candles: [] };
+
+    // ---------- jednoduché TA funkce ----------
+    function emaFromArray(values, period){
+      if(values.length < period) return null;
+      const k = 2/(period+1);
+      let emaPrev = values.slice(0,period).reduce((a,b)=>a+b,0)/period;
+      for(let i=period;i<values.length;i++){
+        emaPrev = values[i]*k + emaPrev*(1-k);
+      }
+      return emaPrev;
+    }
+
+    function rsiFromCloses(closes, period=14){
+      if(closes.length <= period) return null;
+      let gains=0, losses=0;
+      for(let i=1;i<=period;i++){
+        const diff = closes[i]-closes[i-1];
+        if(diff>0) gains+=diff; else losses+=Math.abs(diff);
+      }
+      let avgGain = gains/period, avgLoss = losses/period;
+      for(let i=period+1;i<closes.length;i++){
+        const diff = closes[i]-closes[i-1];
+        avgGain = (avgGain*(period-1) + Math.max(0,diff))/period;
+        avgLoss = (avgLoss*(period-1) + Math.max(0,-diff))/period;
+      }
+      if(avgLoss === 0) return 100;
+      const rs = avgGain/avgLoss;
+      return 100 - (100/(1+rs));
+    }
+
+    function atrFromCandles(candles, period=14){
+      if(candles.length <= period) return null;
+      const trs = [];
+      for(let i=1;i<candles.length;i++){
+        const high = candles[i].high, low = candles[i].low, prevClose = candles[i-1].close;
+        trs.push(Math.max(high-low, Math.abs(high-prevClose), Math.abs(low-prevClose)));
+      }
+      const slice = trs.slice(-period);
+      const sum = slice.reduce((a,b)=>a+b,0);
+      return sum / slice.length;
+    }
+
+    // ---------- získání dat: nejprve backend, pak fallback veřejné API ----------
+    async function fetchMarketData(){
+      // prefer backend endpoint /price
+      try{
+        const r = await fetch('/price?symbol=XAUUSD&candles=60', {cache:'no-store'});
+        if(r.ok){
+          const j = await r.json();
+          if(j && typeof j.last === 'number' && Array.isArray(j.candles)){
+            cachedData.price = Number(j.last);
+            cachedData.candles = j.candles;
+            return cachedData;
+          }
+        }
+      }catch(e){
+        // pokračujeme na fallback
+      }
+
+      // fallback 1: metals.live (veřejné, může být dostupné)
+      try{
+        // metals.live vrací např. [{"symbol":"XAU","price":...}] nebo endpoint /v1/spot/gold
+        const r2 = await fetch('https://api.metals.live/v1/spot/gold');
+        if(r2.ok){
+          const j2 = await r2.json();
+          // j2 může být array of numbers or objects; zkusíme zpracovat
+          if(Array.isArray(j2) && j2.length>0){
+            // pokud jsou objekty s price
+            if(typeof j2[0] === 'object' && j2[0].price){
+              cachedData.price = Number(j2[0].price);
+            } else if(typeof j2[0] === 'number'){
+              cachedData.price = Number(j2[0]);
+            }
+            // fallback: vytvoříme jednoduché candles z poslední ceny
+            const now = Date.now();
+            cachedData.candles = [];
+            for(let i=60;i>0;i--){
+              const p = cachedData.price + (Math.random()-0.5)*2;
+              cachedData.candles.push({open:p,high:p+0.5,low:p-0.5,close:p,ts: now - i*60000});
+            }
+            return cachedData;
+          }
+        }
+      }catch(e){
+        // ignore
+      }
+
+      // fallback 2: pokud nic jiného, použijeme lokální simulaci nebo poslední známou cenu
+      if(!cachedData.price || cachedData.price === 0){
+        cachedData.price = 2463.00; // bezpečný fallback, uživatel může nahradit
+      }
+      if(!cachedData.candles || cachedData.candles.length < 60){
+        const now = Date.now();
+        cachedData.candles = [];
+        for(let i=60;i>0;i--){
+          const p = cachedData.price + (Math.random()-0.5)*2;
+          cachedData.candles.push({open:p,high:p+0.5,low:p-0.5,close:p,ts: now - i*60000});
+        }
+      }
+      return cachedData;
+    }
+
+    // ---------- signálová logika ----------
+    async function refreshSignal(){
+      try{
+        const data = await fetchMarketData();
+        const last = Number(data.price);
+        const candles = data.candles;
+        const closes = candles.map(c=>c.close);
+
+        const ema20 = emaFromArray(closes,20);
+        const ema50 = emaFromArray(closes,50);
+        const rsi14 = rsiFromCloses(closes,14);
+        const atr14 = atrFromCandles(candles,14);
+
+        // jednoduché pravidlo signálu
+        let signal = 'NEUTRAL';
+        let entry = last;
+        let sl = null;
+        let tp = null;
+
+        if(ema20 !== null && ema50 !== null && atr14 !== null && rsi14 !== null){
+          if(ema20 > ema50 && rsi14 < 70){
+            signal = 'BUY';
+            sl = +(entry - atr14*1.5).toFixed(2);
+            tp = +(entry + atr14*3).toFixed(2);
+          } else if(ema20 < ema50 && rsi14 > 30){
+            signal = 'SELL';
+            sl = +(entry + atr14*1.5).toFixed(2);
+            tp = +(entry - atr14*3).toFixed(2);
+          } else {
+            signal = 'NEUTRAL';
+          }
+        }
+
+        // aktualizace UI
+        const label = document.getElementById('signalLabel');
+        const details = document.getElementById('signalDetails');
+        const priceLabel = document.getElementById('priceLabel');
+
+        priceLabel.textContent = 'Price: ' + entry.toFixed(2);
+
+        if(signal === 'BUY'){
+          label.textContent = 'Signal: BUY';
+          label.className = 'signal-buy';
+        } else if(signal === 'SELL'){
+          label.textContent = 'Signal: SELL';
+          label.className = 'signal-sell';
+        } else {
+          label.textContent = 'Signal: NEUTRAL';
+          label.className = 'signal-neutral';
+        }
+
+        details.textContent = `Price: ${entry.toFixed(2)} · SL: ${sl!==null?sl:'—'} · TP: ${tp!==null?tp:'—'} · ATR: ${atr14!==null?atr14.toFixed(2):'—'} · EMA20:${ema20!==null?ema20.toFixed(2):'—'} EMA50:${ema50!==null?ema50.toFixed(2):'—'} RSI:${rsi14!==null?rsi14.toFixed(1):'—'}`;
+
+        // uložíme signál do cachedData pro použití v applySignalToForm
+        cachedData.signal = { signal, entry, sl, tp, atr: atr14, ema20, ema50, rsi14 };
+
+      }catch(err){
+        document.getElementById('signalLabel').textContent = 'Signal: error';
+        document.getElementById('signalDetails').textContent = err.message;
+      }
+    }
+
+    // ---------- aplikovat signál do formuláře ----------
+    function applySignalToForm(){
+      if(!cachedData.signal) return;
+      const s = cachedData.signal;
+      if(s.entry) document.getElementById('trade_entryPrice').value = s.entry.toFixed(2);
+      if(s.sl) document.getElementById('trade_slPrice').value = s.sl.toFixed(2);
+      if(s.tp) document.getElementById('trade_tpPrice').value = s.tp.toFixed(2);
+      if(s.signal === 'BUY') document.getElementById('trade_side').value = 'BUY';
+      if(s.signal === 'SELL') document.getElementById('trade_side').value = 'SELL';
+      // po aplikaci signálu spočítáme loty
+      previewCalc();
+    }
+
+    // ---------- graf (jednoduchý vizuál) ----------
     function renderDummyChart(){
       const canvas = document.getElementById('chartCanvas');
       const ctx = canvas.getContext('2d');
       canvas.width = canvas.clientWidth;
       canvas.height = canvas.clientHeight;
-      // jednoduchý gradient background
       const g = ctx.createLinearGradient(0,0,0,canvas.height);
       g.addColorStop(0,'#071827'); g.addColorStop(1,'#021018');
       ctx.fillStyle = g; ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -153,33 +367,24 @@
       // price label
       ctx.fillStyle = '#9aa6b2';
       ctx.font = '14px Inter, Arial';
-      ctx.fillText('Last price: ' + cachedData.price.toFixed(2), 12, 20);
+      ctx.fillText('Last price: ' + (cachedData.price?cachedData.price.toFixed(2):'—'), 12, 20);
     }
     renderDummyChart();
     setInterval(renderDummyChart, 4000);
 
-    // ---------- Entry type control ----------
-    function onEntryTypeChange(){
-      const t = document.getElementById('trade_type').value;
-      const entry = document.getElementById('trade_entryPrice');
-      entry.disabled = (t === 'MARKET');
-      if(t === 'MARKET') entry.value = '';
-    }
-
-    // ---------- Lot size calculation ----------
+    // ---------- výpočet lotů ----------
     function calcLotSize(accountBalanceUSD, riskPercent, entryPrice, slPrice, usdPerLot=1){
       const riskUSD = accountBalanceUSD * (riskPercent / 100);
       const slDistance = Math.abs(entryPrice - slPrice);
       if(slDistance <= 0 || usdPerLot <= 0) return 0;
       const lossPerLot = slDistance * usdPerLot;
       const lots = riskUSD / lossPerLot;
-      // zaokrouhlení podle běžného kroku brokera, tady 0.01 lotu
-      const step = 0.01;
+      const step = 0.01; // krok lotu, uprav podle brokera
       const rounded = Math.floor(lots / step) * step;
       return Math.max(0, Number(rounded.toFixed(2)));
     }
 
-    // ---------- Preview calculation ----------
+    // ---------- preview a odeslání ----------
     async function previewCalc(){
       const feedback = document.getElementById('trade_feedback');
       feedback.textContent = 'Počítám...';
@@ -204,7 +409,7 @@
 
       let entry = entryPriceInput;
       if(type === 'MARKET' && (!entry || entry === 0)){
-        entry = cachedData.price;
+        entry = cachedData.price || entry;
       }
 
       if(!entry || !slPrice){
@@ -217,7 +422,6 @@
       feedback.innerHTML = `<strong class="small">Risk</strong>: $${(accountBalance*(riskPercent/100)).toFixed(2)} · <strong class="small">Loty</strong>: ${lots}`;
     }
 
-    // ---------- Prepare payload ----------
     function prepareOrderPayload(){
       const side = document.getElementById('trade_side').value;
       const type = document.getElementById('trade_type').value;
@@ -241,7 +445,6 @@
       };
     }
 
-    // ---------- Send order to backend ----------
     async function sendOrder(){
       const fb = document.getElementById('trade_feedback');
       fb.textContent = 'Odesílám příkaz...';
@@ -281,15 +484,29 @@
       }
     }
 
-    // ---------- Optional: load real price periodically (placeholder) ----------
-    async function refreshMarketPrice(){
-      // Pokud máš backend endpoint, můžeš sem volat reálnou cenu
-      // Příklad: const r = await fetch('/price?symbol=XAUUSD');
-      // fallback: simulace drobné změny
-      cachedData.price = (cachedData.price + (Math.random()-0.5)*0.6);
-      setTimeout(refreshMarketPrice, 5000);
+    // ---------- periodické aktualizace ----------
+    async function periodic(){
+      await refreshSignal();
+      renderDummyChart();
+      setTimeout(periodic, 5000);
     }
-    refreshMarketPrice();
+    periodic();
+
+    // ---------- poznámky pro uživatele ----------
+    /*
+      1) Pokud chceš skutečnou cenu z TradingView nebo brokera, nasad backend s endpointem:
+         GET /price?symbol=XAUUSD&candles=60
+         který vrátí JSON: { last: 4610.7, candles: [{open,high,low,close,ts}, ...] }
+
+      2) Backend také poskytne:
+         GET /account -> { balance: 1234.56 }
+         POST /order  -> přijme payload a zavolá R StocksTrader API (API klíč v env proměnné)
+
+      3) Fallback: pokud backend není, frontend zkusí veřejné API (metals.live). Pokud ani to není dostupné,
+         použije se lokální simulace. Proto můžeš vidět rozdíl oproti TradingView — nasazení backendu vyřeší přesnost.
+
+      4) Pokud chceš, připravím ukázkový Node.js server s těmito endpointy (bez API klíče). Napiš "ANO backend".
+    */
   </script>
 </body>
 </html>
