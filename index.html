@@ -1,496 +1,295 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="cs">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Gold AI">
-<meta name="theme-color" content="#FFD700">
-<title>XAUUSD AI Terminal</title>
-<link rel="manifest" href="manifest.json">
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
-<style>
-:root{--gold:#FFD700;--green:#00FF88;--red:#FF3355;--bg:#050810;--bg2:#0a0f1e;--bg3:#0f1628;--border:rgba(255,215,0,0.15);--text:#c8d8f0;--muted:#556677;--mono:'Share Tech Mono',monospace;--display:'Orbitron',sans-serif;}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;overflow:hidden;}
-body{background:var(--bg);color:var(--text);font-family:var(--mono);display:flex;flex-direction:column;background-image:radial-gradient(ellipse at 20% 0%,rgba(255,215,0,0.06) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(0,80,255,0.04) 0%,transparent 50%);}
-
-/* Header */
-header{flex-shrink:0;background:rgba(5,8,16,0.98);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;}
-.logo{font-family:var(--display);font-size:14px;font-weight:900;color:var(--gold);letter-spacing:2px;text-shadow:0 0 15px rgba(255,215,0,0.3);}
-.logo span{color:var(--text);font-weight:400;font-size:12px;}
-.hright{display:flex;align-items:center;gap:10px;}
-.dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite;}
-.dot.red{background:var(--red);box-shadow:0 0 8px var(--red);}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.2}}
-.htime{font-size:9px;color:var(--muted);}
-
-/* Countdown bar */
-.cbar-wrap{flex-shrink:0;background:var(--bg2);border-bottom:1px solid var(--border);padding:5px 16px;display:flex;align-items:center;gap:10px;}
-.cbar-label{font-size:8px;letter-spacing:2px;color:var(--muted);}
-.cbar-bg{flex:1;height:3px;background:rgba(255,255,255,0.06);border-radius:2px;}
-.cbar-fill{height:3px;border-radius:2px;background:var(--gold);transition:width 1s linear;}
-.cbar-time{font-size:9px;color:var(--gold);width:40px;text-align:right;}
-
-/* Nav */
-.nav{flex-shrink:0;display:flex;background:var(--bg2);border-bottom:1px solid var(--border);}
-.ntab{flex:1;padding:9px 2px;text-align:center;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--mono);transition:all 0.2s;}
-.ntab.active{color:var(--gold);border-bottom-color:var(--gold);background:rgba(255,215,0,0.04);}
-
-/* Main */
-.main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:20px;}
-.screen{display:none;padding:12px;}
-.screen.active{display:block;}
-
-/* Animations */
-@keyframes su{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.a1{animation:su 0.3s ease both;}.a2{animation:su 0.3s ease 0.06s both;}.a3{animation:su 0.3s ease 0.12s both;}.a4{animation:su 0.3s ease 0.18s both;}.a5{animation:su 0.3s ease 0.24s both;}
-@keyframes flashGreen{from{color:var(--green);text-shadow:0 0 20px var(--green);}to{color:#fff;}}
-@keyframes flashRed{from{color:var(--red);text-shadow:0 0 20px var(--red);}to{color:#fff;}}
-.up-flash{animation:flashGreen 1.5s ease;}
-.down-flash{animation:flashRed 1.5s ease;}
-
-/* Price card */
-.pcard{background:linear-gradient(145deg,rgba(255,215,0,0.08),rgba(255,215,0,0.02));border:1px solid rgba(255,215,0,0.25);border-radius:12px;padding:16px;margin-bottom:12px;position:relative;overflow:hidden;}
-.pcard::after{content:'AU';position:absolute;bottom:-8px;right:12px;font-family:var(--display);font-size:60px;font-weight:900;color:rgba(255,215,0,0.04);pointer-events:none;}
-.plbl{font-size:8px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;}
-.live-badge{background:rgba(0,255,136,0.15);color:var(--green);font-size:7px;padding:2px 6px;border-radius:10px;letter-spacing:2px;border:1px solid rgba(0,255,136,0.3);}
-.pval{font-family:var(--display);font-size:32px;font-weight:900;color:#fff;transition:all 0.3s;}
-.pchg{font-size:11px;margin-top:4px;}
-.up{color:var(--green);}.down{color:var(--red);}.nc{color:var(--muted);}
-.pstats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px;}
-.stat{background:rgba(0,0,0,0.3);border-radius:6px;padding:7px;}
-.slbl{font-size:7px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
-.sval{font-size:11px;color:var(--text);margin-top:2px;}
-
-/* TradingView widget */
-.tv-wrap{border-radius:12px;overflow:hidden;margin-bottom:12px;height:140px;border:1px solid var(--border);}
-
-/* Signal */
-.sigcard{border-radius:12px;padding:14px;margin-bottom:12px;text-align:center;border:1px solid;}
-.sigcard.bearish{background:rgba(255,51,85,0.08);border-color:rgba(255,51,85,0.4);}
-.sigcard.bullish{background:rgba(0,255,136,0.06);border-color:rgba(0,255,136,0.3);}
-.sigcard.neutral{background:rgba(255,215,0,0.05);border-color:rgba(255,215,0,0.3);}
-.siglbl{font-size:8px;letter-spacing:4px;color:var(--muted);margin-bottom:4px;}
-.sigval{font-family:var(--display);font-size:26px;font-weight:900;letter-spacing:6px;}
-.sigcard.bearish .sigval{color:var(--red);text-shadow:0 0 20px rgba(255,51,85,0.5);}
-.sigcard.bullish .sigval{color:var(--green);text-shadow:0 0 20px rgba(0,255,136,0.4);}
-.sigcard.neutral .sigval{color:var(--gold);}
-.sigmeta{font-size:10px;color:var(--muted);margin-top:5px;line-height:1.7;}
-
-/* Card */
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;}
-.ctitle{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid rgba(255,215,0,0.08);display:flex;justify-content:space-between;align-items:center;}
-.cbadge{font-size:8px;background:rgba(255,215,0,0.1);color:var(--gold);padding:2px 6px;border-radius:10px;}
-
-/* TF rows */
-.tfrow{display:flex;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03);}
-.tfrow:last-child{border-bottom:none;}
-.tfname{font-size:10px;color:var(--gold);width:38px;}
-.tfbar{flex:1;height:3px;background:rgba(255,255,255,0.06);border-radius:2px;margin:0 10px;}
-.tffill{height:3px;border-radius:2px;}
-.tfsig{font-size:10px;width:58px;text-align:right;}
-.aup{color:var(--green);}.adn{color:var(--red);}.ant{color:var(--muted);}
-
-/* Indicators */
-.indrow{display:flex;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03);gap:8px;}
-.indrow:last-child{border-bottom:none;}
-.indname{font-size:10px;color:var(--muted);width:60px;}
-.indbar{flex:1;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;}
-.indfill{height:4px;border-radius:2px;}
-.indval{font-size:11px;font-weight:bold;width:52px;text-align:right;}
-
-/* Levels */
-.lvrow{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03);}
-.lvrow:last-child{border-bottom:none;}
-.lbadge{font-size:7px;letter-spacing:2px;padding:2px 6px;border-radius:4px;}
-.lbadge.res{background:rgba(255,51,85,0.12);color:var(--red);border:1px solid rgba(255,51,85,0.2);}
-.lbadge.sup{background:rgba(0,255,136,0.08);color:var(--green);border:1px solid rgba(0,255,136,0.15);}
-.lbadge.cur{background:rgba(255,215,0,0.12);color:var(--gold);border:1px solid rgba(255,215,0,0.2);}
-.lprice{font-family:var(--display);font-size:13px;}
-.ldist{font-size:9px;color:var(--muted);}
-
-/* Setup R StocksTrader */
-.setup-broker{background:var(--bg3);border:1px solid rgba(255,215,0,0.2);border-left:4px solid var(--gold);border-radius:10px;padding:14px;margin-bottom:12px;}
-.setup-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
-.setup-row:last-child{border-bottom:none;}
-.setup-key{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
-.setup-val{font-family:var(--display);font-size:15px;}
-.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
-.sitem{background:var(--bg3);border:1px solid rgba(255,255,255,0.05);border-radius:8px;padding:10px;}
-.silbl{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
-.sival{font-family:var(--display);font-size:14px;}
-.ce{color:var(--gold);}.csl{color:var(--red);}.ctp{color:var(--green);}
-.rrbadge{background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.2);border-radius:6px;padding:6px;text-align:center;font-size:11px;color:var(--green);margin-bottom:10px;}
-
-/* Analysis */
-.acard{background:var(--bg2);border:1px solid rgba(0,255,136,0.2);border-radius:12px;padding:14px;margin-bottom:12px;}
-.ahead{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:7px;border-bottom:1px solid rgba(0,255,136,0.1);}
-.atitle{font-size:8px;letter-spacing:3px;color:var(--green);}
-.asub{font-size:8px;color:var(--muted);margin-top:1px;}
-.atext{font-size:11px;line-height:2;color:#9aafc5;}
-
-/* Manual form */
-.finput{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px;}
-.finput label{display:block;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;}
-.finput input,.finput select{width:100%;background:none;border:none;color:var(--text);font-family:var(--mono);font-size:14px;outline:none;}
-.finput input:focus{color:var(--gold);}
-.analyze-btn{width:100%;background:linear-gradient(135deg,rgba(255,215,0,0.2),rgba(255,165,0,0.1));border:1px solid rgba(255,215,0,0.4);color:var(--gold);padding:14px;font-family:var(--display);font-size:11px;letter-spacing:3px;cursor:pointer;border-radius:10px;margin-top:4px;transition:all 0.2s;}
-.analyze-btn:active{transform:scale(0.98);}
-
-/* Info */
-.iitem{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:13px 15px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
-.iname{font-size:12px;color:var(--text);}
-.idesc{font-size:9px;color:var(--muted);margin-top:2px;}
-.iright{font-size:10px;color:var(--gold);}
-.isect-title{font-size:8px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:8px;margin-top:4px;}
-
-/* Buttons */
-.rbtn{background:rgba(255,215,0,0.07);border:1px solid var(--border);color:var(--gold);padding:12px;font-family:var(--mono);font-size:9px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;border-radius:10px;width:100%;margin-bottom:8px;transition:background 0.2s;}
-.rbtn:active{background:rgba(255,215,0,0.15);}
-.disc{font-size:9px;color:#2a3345;text-align:center;padding:6px;line-height:1.8;}
-
-/* Loading */
-.lwrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:18px;}
-.spinner{width:48px;height:48px;border:2px solid rgba(255,215,0,0.1);border-top-color:var(--gold);border-radius:50%;animation:spin 0.9s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg)}}
-.ltitle{font-family:var(--display);font-size:11px;letter-spacing:4px;color:var(--gold);}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>XAUUSD Trading Console</title>
+  <style>
+    :root{
+      --bg:#0f1720;--card:#0b1220;--muted:#9aa6b2;--green:#00d084;--red:#ff6b6b;
+      --accent:#1f2937; font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
+    }
+    body{margin:0;background:linear-gradient(180deg,#071021 0%, #071827 100%);color:#e6eef6}
+    .wrap{max-width:1100px;margin:18px auto;padding:18px}
+    .header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+    .logo{width:48px;height:48px;border-radius:8px;background:linear-gradient(135deg,#0ea5a4,#06b6d4)}
+    h1{font-size:18px;margin:0}
+    .grid{display:grid;grid-template-columns:2fr 1fr;gap:12px}
+    .card{background:var(--card);padding:12px;border-radius:8px;box-shadow:0 6px 18px rgba(2,6,23,0.6)}
+    canvas{width:100%;height:360px;background:linear-gradient(180deg,#071827,#021018);border-radius:6px}
+    .finput{display:flex;flex-direction:column;margin-bottom:8px}
+    .finput label{font-size:12px;color:var(--muted);margin-bottom:6px}
+    select,input{padding:8px;border-radius:6px;border:1px solid #1f2a36;background:#071827;color:#e6eef6}
+    .rbtn{padding:10px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.04);background:#0b1220;color:#e6eef6;cursor:pointer}
+    .rbtn:hover{opacity:0.95}
+    .muted{color:var(--muted);font-size:13px}
+    .small{font-size:12px;color:var(--muted)}
+    .ctitle{font-weight:600;margin-bottom:8px}
+    .footer{margin-top:12px;color:var(--muted);font-size:13px}
+    @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  </style>
 </head>
 <body>
-
-<header>
-  <div class="logo">XAU<span>/USD</span> LIVE</div>
-  <div class="hright">
-    <div class="htime" id="ht"></div>
-    <div class="dot" id="statusDot"></div>
-  </div>
-</header>
-
-<div class="cbar-wrap">
-  <span class="cbar-label">REFRESH</span>
-  <div class="cbar-bg"><div class="cbar-fill" id="cbar" style="width:100%"></div></div>
-  <span class="cbar-time" id="ctimer">15:00</span>
-</div>
-
-<nav class="nav">
-  <button class="ntab active" onclick="showTab('analysis')">◈ Auto</button>
-  <button class="ntab" onclick="showTab('levels')">◈ Úrovně</button>
-  <button class="ntab" onclick="showTab('setup')">◈ Setup</button>
-  <button class="ntab" onclick="showTab('manual')">◈ Manuál</button>
-  <button class="ntab" onclick="showTab('info')">◈ Info</button>
-</nav>
-
-<div class="main">
-
-  <!-- AUTO TAB -->
-  <div class="screen active" id="tab-analysis">
-    <div class="pcard a1">
-      <div class="plbl">◈ GOLD SPOT <span class="live-badge">● LIVE</span></div>
-      <div class="pval" id="livePrice">načítám...</div>
-      <div class="pchg" id="priceChange">–</div>
-      <div class="pstats">
-        <div class="stat"><div class="slbl">RSI 14</div><div class="sval" id="d_rsi">–</div></div>
-        <div class="stat"><div class="slbl">24h High</div><div class="sval up" id="d_high">–</div></div>
-        <div class="stat"><div class="slbl">24h Low</div><div class="sval down" id="d_low">–</div></div>
+  <div class="wrap">
+    <div class="header">
+      <div class="logo"></div>
+      <div>
+        <h1>XAUUSD Trading Console</h1>
+        <div class="small">Technická analýza a rychlé zadávání obchodů s TP a SL</div>
       </div>
     </div>
-    <div class="tv-wrap a2" id="tvWidget"></div>
-    <div id="signalBox"></div>
-    <div id="tfBox"></div>
-    <div id="indBox"></div>
-    <div id="analysisBox"></div>
-    <button class="rbtn" onclick="loadData()">↻ AKTUALIZOVAT ANALÝZU</button>
-    <div class="disc">⚠ Pouze informativní · Není finanční poradenství</div>
-  </div>
 
-  <!-- LEVELS TAB -->
-  <div class="screen" id="tab-levels">
-    <div id="levelsContent"><div class="lwrap"><div class="spinner"></div></div></div>
-  </div>
-
-  <!-- SETUP TAB -->
-  <div class="screen" id="tab-setup">
-    <div id="setupContent"><div class="lwrap"><div class="spinner"></div></div></div>
-  </div>
-
-  <!-- MANUAL TAB -->
-  <div class="screen" id="tab-manual">
-    <div class="card a1" style="background:linear-gradient(145deg,rgba(255,215,0,0.07),rgba(255,215,0,0.02));border-color:rgba(255,215,0,0.25)">
-      <div class="ctitle">◈ Zadejte data z TradingView</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-        <div class="finput"><label>Aktuální cena</label><input type="number" id="m_price" placeholder="4740.00" step="0.01"></div>
-        <div class="finput"><label>Předchozí close</label><input type="number" id="m_prev" placeholder="4720.00" step="0.01"></div>
-        <div class="finput"><label>RSI (14)</label><input type="number" id="m_rsi" placeholder="45" step="0.1"></div>
-        <div class="finput"><label>EMA 20</label><input type="number" id="m_ema20" placeholder="4750.00" step="0.01"></div>
-        <div class="finput"><label>EMA 50</label><input type="number" id="m_ema50" placeholder="4700.00" step="0.01"></div>
-        <div class="finput"><label>EMA 200</label><input type="number" id="m_ema200" placeholder="4500.00" step="0.01"></div>
-        <div class="finput"><label>High 24h</label><input type="number" id="m_high" placeholder="4780.00" step="0.01"></div>
-        <div class="finput"><label>Low 24h</label><input type="number" id="m_low" placeholder="4710.00" step="0.01"></div>
+    <div class="grid">
+      <!-- Graf a indikátory -->
+      <div class="card">
+        <div class="ctitle">Graf XAUUSD</div>
+        <canvas id="chartCanvas"></canvas>
+        <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
+          <div class="small">Timeframe</div>
+          <select id="tfSelect" onchange="renderDummyChart()">
+            <option value="M5">M5</option>
+            <option value="M15" selected>M15</option>
+            <option value="H1">H1</option>
+            <option value="H4">H4</option>
+          </select>
+          <div style="flex:1"></div>
+          <div class="small">Indicators</div>
+          <label style="margin-left:8px"><input id="showMA" type="checkbox" checked onchange="renderDummyChart()"> MA</label>
+          <label style="margin-left:8px"><input id="showRSI" type="checkbox" onchange="renderDummyChart()"> RSI</label>
+        </div>
       </div>
-      <div class="ctitle">◈ Timeframe signály</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-        <div class="finput"><label>1D trend</label><select id="t_1d"><option value="bearish">▼ Bearish</option><option value="neutral">— Neutral</option><option value="bullish">▲ Bullish</option></select></div>
-        <div class="finput"><label>4H trend</label><select id="t_4h"><option value="bearish">▼ Bearish</option><option value="neutral">— Neutral</option><option value="bullish">▲ Bullish</option></select></div>
-        <div class="finput"><label>1H trend</label><select id="t_1h"><option value="bearish">▼ Bearish</option><option value="neutral">— Neutral</option><option value="bullish">▲ Bullish</option></select></div>
-        <div class="finput"><label>15M trend</label><select id="t_15m"><option value="neutral">— Neutral</option><option value="bearish">▼ Bearish</option><option value="bullish">▲ Bullish</option></select></div>
+
+      <!-- Obchodní panel -->
+      <div class="card" id="rstraderPanel">
+        <div class="ctitle">Obchodní konzole</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+          <div class="finput">
+            <label>Směr</label>
+            <select id="trade_side">
+              <option value="BUY">BUY</option>
+              <option value="SELL">SELL</option>
+            </select>
+          </div>
+
+          <div class="finput">
+            <label>Typ vstupu</label>
+            <select id="trade_type" onchange="onEntryTypeChange()">
+              <option value="MARKET">Market</option>
+              <option value="LIMIT">Limit</option>
+              <option value="STOP">Stop</option>
+            </select>
+          </div>
+
+          <div class="finput">
+            <label>Vstupní cena</label>
+            <input id="trade_entryPrice" type="number" step="0.01" placeholder="auto (market)">
+          </div>
+
+          <div class="finput">
+            <label>Stop Loss cena</label>
+            <input id="trade_slPrice" type="number" step="0.01" placeholder="např. 2460.00">
+          </div>
+
+          <div class="finput">
+            <label>Take Profit cena</label>
+            <input id="trade_tpPrice" type="number" step="0.01" placeholder="např. 2490.00">
+          </div>
+
+          <div class="finput">
+            <label>Risk procento účtu</label>
+            <input id="trade_riskPercent" type="number" step="0.1" value="1.0" placeholder="1.0">
+          </div>
+
+          <div class="finput">
+            <label>USD za 1 lot za 1 USD pohybu</label>
+            <input id="trade_usdPerLot" type="number" step="0.01" value="1" placeholder="broker-specific">
+          </div>
+
+          <div class="finput">
+            <label>Velikost pozice (loty)</label>
+            <input id="trade_lots" type="text" readonly placeholder="vypočítáno">
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;">
+          <button class="rbtn" onclick="previewCalc()">Spočítat loty</button>
+          <button class="rbtn" onclick="sendOrder()" style="background:linear-gradient(135deg,rgba(0,255,136,0.08),rgba(0,255,136,0.02));border-color:rgba(0,255,136,0.15);color:var(--green);">ODESLAT OBCHOD</button>
+        </div>
+
+        <div id="trade_feedback" style="margin-top:10px;font-size:13px;color:var(--muted)"></div>
+        <div class="footer">Poznámka: Backend endpointy <code>/account</code> a <code>/order</code> musí být nasazeny samostatně.</div>
       </div>
-      <button class="analyze-btn" onclick="manualAnalyze()">⚡ ANALYZOVAT</button>
-    </div>
-    <div id="manualResult"></div>
-  </div>
-
-  <!-- INFO TAB -->
-  <div class="screen" id="tab-info">
-    <div style="padding:4px">
-      <div class="isect-title">◈ Status systému</div>
-      <div class="iitem"><div><div class="iname">Data robot</div><div class="idesc">GitHub Actions · každých 15 min</div></div><div class="iright" id="robotStatus">⏳</div></div>
-      <div class="iitem"><div><div class="iname">Poslední update</div><div class="idesc">Automatická aktualizace</div></div><div class="iright" id="lastUpdate">–</div></div>
-      <div class="iitem"><div><div class="iname">Zdroj dat</div><div class="idesc">Yahoo Finance XAUUSD=X (spot)</div></div><div class="iright">LIVE</div></div>
-      <div class="iitem"><div><div class="iname">Indikátory</div><div class="idesc">RSI · EMA 20/50/200 · MACD</div></div><div class="iright">AUTO</div></div>
-      <div class="isect-title" style="margin-top:12px">◈ Jak nainstalovat jako apku</div>
-      <div class="card"><div style="font-size:11px;line-height:2.2;color:var(--text)">
-        1. Otevřete v <b style="color:var(--gold)">Chrome</b><br>
-        2. Klepněte <b style="color:var(--gold)">⋮</b> vpravo nahoře<br>
-        3. <b style="color:var(--gold)">"Přidat na plochu"</b><br>
-        4. Potvrďte → ikona na ploše ✓
-      </div></div>
-      <div class="isect-title">◈ Upozornění</div>
-      <div class="card"><div style="font-size:10px;line-height:1.9;color:var(--muted)">Pouze informativní. Není finančním poradenstvím. Obchodujte zodpovědně.</div></div>
     </div>
   </div>
 
-</div><!-- end .main -->
+  <script>
+    // ---------- Dummy chart data and rendering ----------
+    let cachedData = { price: 2465.00 }; // fallback poslední cena
+    function renderDummyChart(){
+      const canvas = document.getElementById('chartCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+      // jednoduchý gradient background
+      const g = ctx.createLinearGradient(0,0,0,canvas.height);
+      g.addColorStop(0,'#071827'); g.addColorStop(1,'#021018');
+      ctx.fillStyle = g; ctx.fillRect(0,0,canvas.width,canvas.height);
 
-<script>
-// ── Helpers ───────────────────────────────────────────────────────────
-function f(n,d=2){return Number(n).toFixed(d);}
-function rc(v){if(v>70)return'var(--red)';if(v<30)return'var(--green)';return'var(--text)';}
-function ta(t){if(t==='bullish')return'<span class="aup">▲ BUY</span>';if(t==='bearish')return'<span class="adn">▼ SELL</span>';return'<span class="ant">— WAIT</span>';}
-function tbc(t){if(t==='bullish')return'var(--green)';if(t==='bearish')return'var(--red)';return'var(--muted)';}
+      // vykreslíme jednoduchou "svíčkovou" náhodnou sérii pro vizuál
+      const bars = 60;
+      const w = canvas.width / bars;
+      let base = canvas.height/2;
+      ctx.strokeStyle = '#2dd4bf'; ctx.lineWidth = 1.2;
+      for(let i=0;i<bars;i++){
+        const h = Math.sin(i/6 + Date.now()/4000)*30 + (Math.random()*20-10);
+        const x = i*w + 6;
+        ctx.beginPath();
+        ctx.moveTo(x, base);
+        ctx.lineTo(x, base - h);
+        ctx.stroke();
+      }
 
-// ── Time ──────────────────────────────────────────────────────────────
-function ut(){document.getElementById('ht').textContent=new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
-ut();setInterval(ut,1000);
-
-// ── Tabs ──────────────────────────────────────────────────────────────
-function showTab(n){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('tab-'+n).classList.add('active');
-  ['analysis','levels','setup','manual','info'].forEach((x,i)=>{if(x===n)document.querySelectorAll('.ntab')[i].classList.add('active');});
-}
-
-// ── SW ────────────────────────────────────────────────────────────────
-if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
-
-// ── TradingView Widget ────────────────────────────────────────────────
-let tvLoaded = false;
-function loadTVWidget(){
-  if(tvLoaded) return;
-  tvLoaded = true;
-  const c = document.getElementById('tvWidget');
-  const s = document.createElement('script');
-  s.src = 'https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js';
-  s.async = true;
-  s.innerHTML = JSON.stringify({
-    symbol:'OANDA:XAUUSD', width:'100%', height:'140', locale:'cs',
-    dateRange:'1M', colorTheme:'dark', isTransparent:true, autosize:true
-  });
-  c.appendChild(s);
-}
-
-// ── Countdown ─────────────────────────────────────────────────────────
-let countdown = 900;
-setInterval(()=>{
-  countdown--;
-  if(countdown<=0){countdown=900;loadData();}
-  const m=Math.floor(countdown/60), s=countdown%60;
-  document.getElementById('ctimer').textContent=`${m}:${s.toString().padStart(2,'0')}`;
-  document.getElementById('cbar').style.width=(countdown/900*100)+'%';
-},1000);
-
-// ── State ─────────────────────────────────────────────────────────────
-let cachedData = null;
-let lastPrice = 0;
-
-// ── Update live price display ─────────────────────────────────────────
-function updatePriceDisplay(price, data){
-  const el = document.getElementById('livePrice');
-  if(el && lastPrice > 0){
-    el.classList.remove('up-flash','down-flash');
-    void el.offsetWidth;
-    el.classList.add(price > lastPrice ? 'up-flash' : 'down-flash');
-  }
-  if(el) el.textContent = '$' + f(price, 2);
-
-  if(data){
-    const ch = document.getElementById('priceChange');
-    if(ch){
-      const chg = data.change||0, pct = data.changePct||0;
-      ch.className = 'pchg ' + (chg>=0?'up':'down');
-      ch.textContent = `${chg>=0?'▲':'▼'} $${f(Math.abs(chg),2)} · ${pct>=0?'+':''}${f(pct,2)}%`;
+      // price label
+      ctx.fillStyle = '#9aa6b2';
+      ctx.font = '14px Inter, Arial';
+      ctx.fillText('Last price: ' + cachedData.price.toFixed(2), 12, 20);
     }
-    const dr=document.getElementById('d_rsi'), dh=document.getElementById('d_high'), dl=document.getElementById('d_low');
-    if(dr){dr.textContent=f(data.rsi,1);dr.style.color=rc(data.rsi);}
-    if(dh) dh.textContent='$'+f(data.high24h,0);
-    if(dl) dl.textContent='$'+f(data.low24h,0);
-  }
-  lastPrice = price;
-}
+    renderDummyChart();
+    setInterval(renderDummyChart, 4000);
 
-// ── Load data.json ────────────────────────────────────────────────────
-async function loadData(){
-  try{
-    const r = await fetch('./data.json?t='+Date.now());
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    const d = await r.json();
-    if(d.status==='error') throw new Error(d.error||'Data error');
-    cachedData = d;
-    renderAll(d);
-    document.getElementById('statusDot').className='dot';
-    document.getElementById('robotStatus').textContent='✅ Online';
-    document.getElementById('lastUpdate').textContent=d.updated||'–';
-    loadTVWidget();
-  }catch(e){
-    document.getElementById('statusDot').className='dot red';
-    document.getElementById('robotStatus').textContent='❌ Offline';
-    const err=`<div class="lwrap"><div style="font-size:28px">⚠</div><div style="color:var(--red);font-size:11px;letter-spacing:3px">CHYBA</div><div style="color:var(--muted);font-size:10px;text-align:center;line-height:1.8;max-width:280px">${e.message}</div><button class="rbtn" style="max-width:240px;margin-top:8px" onclick="loadData()">↻ ZKUSIT ZNOVU</button></div>`;
-    ['signalBox','tfBox','indBox','analysisBox'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='';});
-    document.getElementById('levelsContent').innerHTML=err;
-    document.getElementById('setupContent').innerHTML=err;
-  }
-}
+    // ---------- Entry type control ----------
+    function onEntryTypeChange(){
+      const t = document.getElementById('trade_type').value;
+      const entry = document.getElementById('trade_entryPrice');
+      entry.disabled = (t === 'MARKET');
+      if(t === 'MARKET') entry.value = '';
+    }
 
-// ── Render all tabs ───────────────────────────────────────────────────
-function renderAll(d){
-  const price = d.price||0;
-  updatePriceDisplay(price, d);
+    // ---------- Lot size calculation ----------
+    function calcLotSize(accountBalanceUSD, riskPercent, entryPrice, slPrice, usdPerLot=1){
+      const riskUSD = accountBalanceUSD * (riskPercent / 100);
+      const slDistance = Math.abs(entryPrice - slPrice);
+      if(slDistance <= 0 || usdPerLot <= 0) return 0;
+      const lossPerLot = slDistance * usdPerLot;
+      const lots = riskUSD / lossPerLot;
+      // zaokrouhlení podle běžného kroku brokera, tady 0.01 lotu
+      const step = 0.01;
+      const rounded = Math.floor(lots / step) * step;
+      return Math.max(0, Number(rounded.toFixed(2)));
+    }
 
-  const sc = d.signal==='SELL'?'bearish':d.signal==='BUY'?'bullish':'neutral';
-  const rr = d.tp1&&d.sl&&d.entry ? f(Math.abs(d.tp1-d.entry)/Math.abs(d.sl-d.entry||1),1) : '2.0';
+    // ---------- Preview calculation ----------
+    async function previewCalc(){
+      const feedback = document.getElementById('trade_feedback');
+      feedback.textContent = 'Počítám...';
 
-  // Signal
-  document.getElementById('signalBox').innerHTML=`
-    <div class="sigcard ${sc} a2">
-      <div class="siglbl">◈ AI ROBOT SIGNÁL</div>
-      <div class="sigval">${d.signal}</div>
-      <div class="sigmeta">Shoda: ${d.confidence}% · Trend: ${(d.trend||'').toUpperCase()}<br>EMA200: $${f(d.ema200,0)} · MACD: ${f(d.macd,1)}</div>
-    </div>`;
+      const type = document.getElementById('trade_type').value;
+      const entryPriceInput = parseFloat(document.getElementById('trade_entryPrice').value) || 0;
+      const slPrice = parseFloat(document.getElementById('trade_slPrice').value) || 0;
+      const riskPercent = parseFloat(document.getElementById('trade_riskPercent').value) || 1;
+      const usdPerLot = parseFloat(document.getElementById('trade_usdPerLot').value) || 1;
 
-  // TF
-  document.getElementById('tfBox').innerHTML=`
-    <div class="card a3">
-      <div class="ctitle">◈ Multi-Timeframe <span class="cbadge">AUTO</span></div>
-      ${Object.entries(d.tf||{}).map(([tf,t])=>`<div class="tfrow"><span class="tfname">${tf}</span><div class="tfbar"><div class="tffill" style="width:${t==='bullish'?70:t==='bearish'?30:50}%;background:${tbc(t)}"></div></div><span class="tfsig">${ta(t)}</span></div>`).join('')}
-    </div>`;
+      // získat balance z backend
+      let accountBalance = 1000;
+      try{
+        const r = await fetch('/account');
+        if(r.ok){
+          const j = await r.json();
+          if(j && j.balance) accountBalance = Number(j.balance);
+        }
+      }catch(e){
+        // fallback
+      }
 
-  // Indicators
-  document.getElementById('indBox').innerHTML=`
-    <div class="card a4">
-      <div class="ctitle">◈ Indikátory</div>
-      <div class="indrow"><span class="indname">RSI 14</span><div class="indbar"><div class="indfill" style="width:${d.rsi}%;background:${rc(d.rsi)}"></div></div><span class="indval" style="color:${rc(d.rsi)}">${f(d.rsi,1)}</span></div>
-      <div class="indrow"><span class="indname">EMA 20</span><div class="indbar"><div class="indfill" style="width:60%;background:${price>d.ema20?'var(--green)':'var(--red)'}"></div></div><span class="indval" style="color:${price>d.ema20?'var(--green)':'var(--red)'}">${price>d.ema20?'↑':'↓'} $${f(d.ema20,0)}</span></div>
-      <div class="indrow"><span class="indname">EMA 50</span><div class="indbar"><div class="indfill" style="width:55%;background:${price>d.ema50?'var(--green)':'var(--red)'}"></div></div><span class="indval" style="color:${price>d.ema50?'var(--green)':'var(--red)'}">${price>d.ema50?'↑':'↓'} $${f(d.ema50,0)}</span></div>
-      <div class="indrow"><span class="indname">EMA 200</span><div class="indbar"><div class="indfill" style="width:50%;background:${price>d.ema200?'var(--green)':'var(--red)'}"></div></div><span class="indval" style="color:${price>d.ema200?'var(--green)':'var(--red)'}">${price>d.ema200?'↑':'↓'} $${f(d.ema200,0)}</span></div>
-      <div class="indrow"><span class="indname">MACD</span><div class="indbar"><div class="indfill" style="width:50%;background:${d.macd>0?'var(--green)':'var(--red)'}"></div></div><span class="indval" style="color:${d.macd>0?'var(--green)':'var(--red)'}">${f(d.macd,1)}</span></div>
-    </div>`;
+      let entry = entryPriceInput;
+      if(type === 'MARKET' && (!entry || entry === 0)){
+        entry = cachedData.price;
+      }
 
-  // Analysis
-  document.getElementById('analysisBox').innerHTML=`
-    <div class="acard a5">
-      <div class="ahead"><div style="font-size:16px">📊</div><div><div class="atitle">AUTOMATICKÁ ANALÝZA</div><div class="asub">GitHub Actions · ${d.updated||''}</div></div></div>
-      <div class="atext">${d.analysis||'–'}</div>
-    </div>`;
+      if(!entry || !slPrice){
+        feedback.textContent = 'Zadej vstupní cenu a SL pro výpočet.';
+        return;
+      }
 
-  // Levels tab
-  document.getElementById('levelsContent').innerHTML=`
-    <div class="card a1"><div class="ctitle">◈ Resistance zóny</div>${(d.resistance||[]).map((r,i)=>`<div class="lvrow"><span class="lbadge res">R${i+1}</span><span class="lprice" style="color:var(--red)">$${f(r,2)}</span><span class="ldist">+$${f(r-price,1)}</span></div>`).join('')}</div>
-    <div class="card a2"><div class="ctitle">◈ Aktuální cena</div><div class="lvrow"><span class="lbadge cur">LIVE</span><span class="lprice" style="color:var(--gold)">$${f(price,2)}</span><span class="ldist" style="color:${d.change>=0?'var(--green)':'var(--red)'}">${d.changePct>=0?'+':''}${f(d.changePct||0,2)}%</span></div></div>
-    <div class="card a3"><div class="ctitle">◈ Support zóny</div>${(d.support||[]).map((s,i)=>`<div class="lvrow"><span class="lbadge sup">S${i+1}</span><span class="lprice" style="color:var(--green)">$${f(s,2)}</span><span class="ldist">-$${f(price-s,1)}</span></div>`).join('')}</div>
-    <div class="card a4"><div class="ctitle">◈ Klouzavé průměry</div>${[[d.ema20,'EMA 20'],[d.ema50,'EMA 50'],[d.ema200,'EMA 200']].map(([v,n])=>`<div class="lvrow"><span style="font-size:10px;color:var(--muted)">${n}</span><span class="lprice" style="color:${price>v?'var(--green)':'var(--red)'}">$${f(v,1)}</span><span class="ldist" style="color:${price>v?'var(--green)':'var(--red)'}">${price>v?'▲ nad':'▼ pod'}</span></div>`).join('')}</div>
-    <button class="rbtn" onclick="loadData()">↻ AKTUALIZOVAT</button>`;
+      const lots = calcLotSize(accountBalance, riskPercent, entry, slPrice, usdPerLot);
+      document.getElementById('trade_lots').value = lots;
+      feedback.innerHTML = `<strong class="small">Risk</strong>: $${(accountBalance*(riskPercent/100)).toFixed(2)} · <strong class="small">Loty</strong>: ${lots}`;
+    }
 
-  // Setup tab – R StocksTrader formát
-  document.getElementById('setupContent').innerHTML=`
-    <div class="sigcard ${sc} a1"><div class="siglbl">◈ DOPORUČENÝ SETUP</div><div class="sigval">${d.signal}</div><div class="sigmeta">Shoda: ${d.confidence}% · ${(d.trend||'').toUpperCase()}</div></div>
-    <div class="setup-broker a2">
-      <div class="ctitle" style="border:none;margin-bottom:8px">◈ R StocksTrader příkaz</div>
-      <div class="setup-row"><span class="setup-key">Instrument</span><span class="setup-val" style="color:var(--gold)">XAUUSD</span></div>
-      <div class="setup-row"><span class="setup-key">Typ</span><span class="setup-val" style="color:${sc==='bearish'?'var(--red)':'var(--green)'}">${d.signal==='BUY'?'MARKET BUY':'MARKET SELL'}</span></div>
-      <div class="setup-row"><span class="setup-key">Vstup</span><span class="setup-val ce">$${f(d.entry,2)}</span></div>
-      <div class="setup-row"><span class="setup-key">Stop Loss</span><span class="setup-val csl">$${f(d.sl,2)}</span></div>
-      <div class="setup-row"><span class="setup-key">Take Profit 1</span><span class="setup-val ctp">$${f(d.tp1,2)}</span></div>
-      <div class="setup-row"><span class="setup-key">Take Profit 2</span><span class="setup-val ctp">$${f(d.tp2,2)}</span></div>
-    </div>
-    <div class="rrbadge a3">Risk / Reward = 1 : ${rr}</div>
-    <div class="card a3"><div class="ctitle">◈ Risk kalkulace</div>${[['0.01',1],['0.05',5],['0.10',10]].map(([lot,m])=>`<div class="lvrow"><span style="font-size:10px;color:var(--muted)">Lot ${lot}</span><span style="font-size:11px;color:var(--red)">Risk ~$${f(Math.abs((d.sl-d.entry)||15)*m,1)}</span></div>`).join('')}<div style="font-size:9px;color:var(--muted);margin-top:8px">* Přibližný výpočet</div></div>
-    <div class="acard a4"><div class="ahead"><div style="font-size:16px">🎯</div><div><div class="atitle">ZDŮVODNĚNÍ</div><div class="asub">${d.updated||''}</div></div></div><div class="atext">${d.analysis||'–'}</div></div>
-    <button class="rbtn" onclick="loadData()">↻ NOVÝ SETUP</button>
-    <div class="disc">⚠ Není finanční poradenství · Obchodujte zodpovědně</div>`;
-}
+    // ---------- Prepare payload ----------
+    function prepareOrderPayload(){
+      const side = document.getElementById('trade_side').value;
+      const type = document.getElementById('trade_type').value;
+      const entryPrice = parseFloat(document.getElementById('trade_entryPrice').value) || null;
+      const slPrice = parseFloat(document.getElementById('trade_slPrice').value) || null;
+      const tpPrice = parseFloat(document.getElementById('trade_tpPrice').value) || null;
+      const riskPercent = parseFloat(document.getElementById('trade_riskPercent').value) || 1;
+      const usdPerLot = parseFloat(document.getElementById('trade_usdPerLot').value) || 1;
+      const lots = parseFloat(document.getElementById('trade_lots').value) || null;
 
-// ── Manual analyze ────────────────────────────────────────────────────
-function manualAnalyze(){
-  const price=parseFloat(document.getElementById('m_price').value)||0;
-  if(!price){alert('Zadejte aktuální cenu!');return;}
-  const prev=parseFloat(document.getElementById('m_prev').value)||price;
-  const rsi=parseFloat(document.getElementById('m_rsi').value)||50;
-  const ema20=parseFloat(document.getElementById('m_ema20').value)||0;
-  const ema50=parseFloat(document.getElementById('m_ema50').value)||0;
-  const ema200=parseFloat(document.getElementById('m_ema200').value)||0;
-  const t1d=document.getElementById('t_1d').value;
-  const t4h=document.getElementById('t_4h').value;
-  const t1h=document.getElementById('t_1h').value;
-  const t15m=document.getElementById('t_15m').value;
+      return {
+        symbol: 'XAUUSD',
+        side,
+        type,
+        entryPrice,
+        slPrice,
+        tpPrice,
+        riskPercent,
+        usdPerLot,
+        lots
+      };
+    }
 
-  const change=price-prev, changePct=prev?(change/prev*100):0;
-  let bull=0,bear=0;
-  [t1d,t4h,t1h,t15m].forEach(t=>{if(t==='bullish')bull++;else if(t==='bearish')bear++;});
-  if(rsi<35)bull++;else if(rsi>65)bear++;
-  if(ema20&&price>ema20)bull++;else if(ema20)bear++;
-  if(ema50&&price>ema50)bull++;else if(ema50)bear++;
-  if(changePct>0)bull++;else bear++;
+    // ---------- Send order to backend ----------
+    async function sendOrder(){
+      const fb = document.getElementById('trade_feedback');
+      fb.textContent = 'Odesílám příkaz...';
 
-  const sig=bear>bull?'SELL':bull>bear?'BUY':'WAIT';
-  const sc=sig==='SELL'?'bearish':sig==='BUY'?'bullish':'neutral';
-  const conf=Math.round(Math.max(bull,bear)/(bull+bear||1)*100);
-  const now=new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'});
-  const res=[price+15,price+30,price+55];
-  const sup=[price-15,price-30,price-55];
-  const entry=sig==='SELL'?res[0]:sup[0];
-  const sl=sig==='SELL'?entry+12:entry-12;
-  const tp1=sig==='SELL'?price-25:price+25;
-  const tp2=sig==='SELL'?price-50:price+50;
-  const rr=f(Math.abs(tp1-entry)/Math.abs(sl-entry||1),1);
-  const txt=`Manuální analýza ke ${now}: Cena $${f(price,0)} je ${ema50&&price>ema50?'nad':'pod'} EMA50${ema50?' ($'+f(ema50,0)+')':''}. D1 trend ${t1d}. RSI ${f(rsi,0)}${rsi>70?' – překoupen':rsi<30?' – přeprodán':''}. Doporučení: ${sig} (${conf}% shoda).`;
+      if(!document.getElementById('trade_lots').value){
+        await previewCalc();
+      }
 
-  document.getElementById('manualResult').innerHTML=`
-    <div class="sigcard ${sc} a1" style="margin-top:12px">
-      <div class="siglbl">◈ MANUÁLNÍ SIGNÁL</div>
-      <div class="sigval">${sig}</div>
-      <div class="sigmeta">Shoda: ${conf}% · ${bull}× BUY · ${bear}× SELL</div>
-    </div>
-    <div class="setup-broker a2">
-      <div class="ctitle" style="border:none;margin-bottom:8px">◈ R StocksTrader příkaz</div>
-      <div class="setup-row"><span class="setup-key">Instrument</span><span class="setup-val" style="color:var(--gold)">XAUUSD</span></div>
-      <div class="setup-row"><span class="setup-key">Typ</span><span class="setup-val" style="color:${sc==='bearish'?'var(--red)':'var(--green)'}">${sig==='BUY'?'MARKET BUY':'MARKET SELL'}</span></div>
-      <div class="setup-row"><span class="setup-key">Vstup</span><span class="setup-val ce">$${f(entry,2)}</span></div>
-      <div class="setup-row"><span class="setup-key">Stop Loss</span><span class="setup-val csl">$${f(sl,2)}</span></div>
-      <div class="setup-row"><span class="setup-key">Take Profit 1</span><span class="setup-val ctp">$${f(tp1,2)}</span></div>
-      <div class="setup-row"><span class="setup-key">Take Profit 2</span><span class="setup-val ctp">$${f(tp2,2)}</span></div>
-    </div>
-    <div class="rrbadge">Risk / Reward = 1 : ${rr}</div>
-    <div class="card a3"><div class="ctitle">◈ Multi-Timeframe</div>${[['1D',t1d],['4H',t4h],['1H',t1h],['15M',t15m]].map(([tf,t])=>`<div class="tfrow"><span class="tfname">${tf}</span><div class="tfbar"><div class="tffill" style="width:${t==='bullish'?70:t==='bearish'?30:50}%;background:${tbc(t)}"></div></div><span class="tfsig">${ta(t)}</span></div>`).join('')}</div>
-    <div class="acard a4"><div class="ahead"><div style="font-size:16px">📊</div><div><div class="atitle">ANALÝZA</div><div class="asub">${now}</div></div></div><div class="atext">${txt}</div></div>
-    <div class="disc">⚠ Není finanční poradenství</div>`;
-  document.getElementById('manualResult').scrollIntoView({behavior:'smooth'});
-}
+      const payload = prepareOrderPayload();
 
-// ── Start ─────────────────────────────────────────────────────────────
-loadData();
-</script>
+      if(!payload.slPrice || !payload.tpPrice){
+        fb.textContent = 'Zadej SL a TP před odesláním.';
+        return;
+      }
+      if(!payload.lots || payload.lots <= 0){
+        fb.textContent = 'Velikost pozice je 0. Zkontroluj SL a risk.';
+        return;
+      }
+
+      try{
+        const res = await fetch('/order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if(!res.ok){
+          const txt = await res.text();
+          fb.innerHTML = `<span style="color:var(--red)"><strong>Chyba:</strong> ${res.status} ${txt}</span>`;
+          return;
+        }
+
+        const data = await res.json();
+        fb.innerHTML = `<span style="color:var(--green)"><strong>OK:</strong> Příkaz odeslán. ID: ${data.orderId || '—'}</span>`;
+      }catch(err){
+        fb.innerHTML = `<span style="color:var(--red)"><strong>Chyba:</strong> ${err.message}</span>`;
+      }
+    }
+
+    // ---------- Optional: load real price periodically (placeholder) ----------
+    async function refreshMarketPrice(){
+      // Pokud máš backend endpoint, můžeš sem volat reálnou cenu
+      // Příklad: const r = await fetch('/price?symbol=XAUUSD');
+      // fallback: simulace drobné změny
+      cachedData.price = (cachedData.price + (Math.random()-0.5)*0.6);
+      setTimeout(refreshMarketPrice, 5000);
+    }
+    refreshMarketPrice();
+  </script>
 </body>
 </html>
