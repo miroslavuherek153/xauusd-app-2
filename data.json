@@ -1,18 +1,18 @@
 {
-  "price": 4587.63,
-  "change": -34.8,
-  "changePct": -0.73,
+  "price": 4583.54,
+  "change": -38.89,
+  "changePct": -0.84,
   "high24h": 4635.97,
-  "low24h": 4585.35,
-  "rsi": 42.25,
-  "ema20": 4609.89,
-  "ema50": 4605.06,
-  "ema200": 4655.0,
-  "macd": 2.2066,
+  "low24h": 4581.12,
+  "rsi": 39.7,
+  "ema20": 4609.2,
+  "ema50": 4604.78,
+  "ema200": 4654.93,
+  "macd": 1.6296,
   "trend": "neutral",
   "signal": "WAIT",
   "confidence": 50,
-  "entry": 4587.63,
+  "entry": 4583.54,
   "sl": null,
   "tp1": null,
   "tp2": null,
@@ -31,6 +31,6 @@
     3647.76,
     3648.09
   ],
-  "analysis": "Aktuální trend: NEUTRAL. RSI je 42.3, což naznačuje neutrální zónu. Volatilita je nízká až střední. Systém doporučuje vyčkat.",
-  "updated": "2026-05-01 07:32 UTC"
+  "analysis": "Aktuální trend: NEUTRAL. RSI je 39.7, což naznačuje neutrální zónu. Volatilita je nízká až střední. Systém doporučuje vyčkat.",
+  "updated": "2026-05-01 07:53 UTC"
 }
