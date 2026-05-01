@@ -2,7 +2,7 @@ name: Update XAUUSD data
 
 on:
   schedule:
-    - cron: "*/15 * * * *"  # každých 15 minut
+    - cron: "*/15 * * * *"
   workflow_dispatch:
 
 jobs:
@@ -21,11 +21,12 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install requests pandas yfinance ta
+          pip install requests pandas ta
 
       - name: Run data updater
         env:
           GOLDAPI_KEY: ${{ secrets.GOLDAPI_KEY }}
+          ALPHAVANTAGE_KEY: ${{ secrets.ALPHAVANTAGE_KEY }}
         run: |
           python scripts/update_data.py
 
