@@ -6,13 +6,12 @@ import ta
 from datetime import datetime, timezone
 
 GOLDAPI_KEY = os.environ["GOLDAPI_KEY"]
-ALPHAVANTAGE_KEY = os.environ["ALPHAVANTAGE_KEY"]
+TWELVEDATA_KEY = os.environ["TWELVEDATA_KEY"]
 
 GOLDAPI_LIVE = "https://www.goldapi.io/api/XAU/USD"
-ALPHAVANTAGE_URL = (
-    "https://www.alphavantage.co/query"
-    "?function=FX_INTRADAY&from_symbol=XAU&to_symbol=USD"
-    "&interval=60min&outputsize=full&apikey={key}"
+TWELVEDATA_URL = (
+    "https://api.twelvedata.com/time_series"
+    "?symbol=XAU/USD&interval=1h&outputsize=5000&apikey={key}"
 )
 
 
@@ -31,33 +30,26 @@ def fetch_goldapi_live():
 
 
 def fetch_history():
-    url = ALPHAVANTAGE_URL.format(key=ALPHAVANTAGE_KEY)
+    url = TWELVEDATA_URL.format(key=TWELVEDATA_KEY)
     r = requests.get(url, timeout=15)
     r.raise_for_status()
     data = r.json()
 
-    key = None
-    for k in data.keys():
-        if "Time Series" in k:
-            key = k
-            break
-    if key is None:
-        raise RuntimeError(f"AlphaVantage response has no time series: {data}")
+    if "values" not in data:
+        raise RuntimeError(f"TwelveData error: {data}")
 
-    ts = data[key]
-    df = pd.DataFrame.from_dict(ts, orient="index")
-    df.index = pd.to_datetime(df.index)
+    df = pd.DataFrame(data["values"])
+    df["time"] = pd.to_datetime(df["datetime"])
     df = df.rename(
         columns={
-            "1. open": "Open",
-            "2. high": "High",
-            "3. low": "Low",
-            "4. close": "Close",
+            "open": "Open",
+            "high": "High",
+            "low": "Low",
+            "close": "Close",
         }
     )
-    df = df[["Open", "High", "Low", "Close"]].astype(float)
-    df = df.sort_index()
-    df = df.reset_index().rename(columns={"index": "time"})
+    df = df[["time", "Open", "High", "Low", "Close"]].astype(float)
+    df = df.sort_values("time").reset_index(drop=True)
     return df
 
 
@@ -118,9 +110,9 @@ def generate_analysis(trend, signal, rsi, atr, price):
     )
 
     if atr / price > 0.01:
-        parts.append("Volatilita je zvýšená (ATR je relativně vysoké vůči ceně).")
+        parts.append("Volatilita je zvýšená.")
     else:
-        parts.append("Volatilita je spíše nižší až střední.")
+        parts.append("Volatilita je nízká až střední.")
 
     if signal == "BUY":
         parts.append("Systém preferuje nákup.")
