@@ -2,24 +2,24 @@ import os
 import json
 import requests
 import pandas as pd
-import yfinance as yf
 import ta
 from datetime import datetime, timezone
 
 GOLDAPI_KEY = os.environ["GOLDAPI_KEY"]
 
-SYMBOL_YF = "GOLD=X"  # Yahoo Finance symbol
-GOLDAPI_URL = "https://www.goldapi.io/api/XAU/USD"
+# GoldAPI endpoints
+GOLDAPI_LIVE = "https://www.goldapi.io/api/XAU/USD"
+GOLDAPI_HISTORY = "https://www.goldapi.io/api/XAU/USD/history?period=1h&limit=500"
 
 
-def fetch_goldapi():
-    headers = {"x-access-token": GOLDAPI_KEY, "Content-Type": "application/json"}
-    r = requests.get(GOLDAPI_URL, headers=headers, timeout=10)
+def fetch_goldapi_live():
+    headers = {"x-access-token": GOLDAPI_KEY}
+    r = requests.get(GOLDAPI_LIVE, headers=headers, timeout=10)
     r.raise_for_status()
     d = r.json()
+
     return {
         "price": float(d["price"]),
-        "open": float(d.get("open_price", d["price"])),
         "high24h": float(d.get("high_price", d["price"])),
         "low24h": float(d.get("low_price", d["price"])),
         "change": float(d.get("ch", 0.0)),
@@ -28,13 +28,29 @@ def fetch_goldapi():
 
 
 def fetch_history():
-    # 60 dní 1h svíčky
-    data = yf.download(SYMBOL_YF, period="60d", interval="1h", auto_adjust=False)
-    data = data.dropna()
-    return data
+    headers = {"x-access-token": GOLDAPI_KEY}
+    r = requests.get(GOLDAPI_HISTORY, headers=headers, timeout=10)
+    r.raise_for_status()
+    data = r.json()["data"]
+
+    df = pd.DataFrame(data)
+    df["time"] = pd.to_datetime(df["time"], unit="s")
+
+    df = df.rename(columns={
+        "open": "Open",
+        "high": "High",
+        "low": "Low",
+        "close": "Close"
+    })
+
+    df = df[["time", "Open", "High", "Low", "Close"]]
+    df = df.sort_values("time")
+    df = df.reset_index(drop=True)
+
+    return df
 
 
-def compute_indicators(df: pd.DataFrame):
+def compute_indicators(df):
     close = df["Close"]
 
     df["ema20"] = ta.trend.EMAIndicator(close, window=20).ema_indicator()
@@ -43,10 +59,9 @@ def compute_indicators(df: pd.DataFrame):
 
     df["rsi"] = ta.momentum.RSIIndicator(close, window=14).rsi()
 
-    macd = ta.trend.MACD(close, window_slow=26, window_fast=12, window_sign=9)
+    macd = ta.trend.MACD(close)
     df["macd"] = macd.macd()
     df["macd_signal"] = macd.macd_signal()
-    df["macd_hist"] = macd.macd_diff()
 
     atr = ta.volatility.AverageTrueRange(
         high=df["High"], low=df["Low"], close=close, window=14
@@ -57,19 +72,14 @@ def compute_indicators(df: pd.DataFrame):
 
 
 def detect_trend(row):
-    ema20, ema50, ema200 = row["ema20"], row["ema50"], row["ema200"]
-    rsi = row["rsi"]
-    macd = row["macd"]
-
-    if ema20 > ema50 > ema200 and rsi > 55 and macd > 0:
+    if row["ema20"] > row["ema50"] > row["ema200"] and row["rsi"] > 55 and row["macd"] > 0:
         return "bullish"
-    if ema20 < ema50 < ema200 and rsi < 45 and macd < 0:
+    if row["ema20"] < row["ema50"] < row["ema200"] and row["rsi"] < 45 and row["macd"] < 0:
         return "bearish"
     return "neutral"
 
 
-def build_tf_view(df: pd.DataFrame):
-    # jednoduché MTF z posledních svíček
+def build_tf_view(df):
     out = {}
     last = df.iloc[-1]
 
@@ -79,14 +89,11 @@ def build_tf_view(df: pd.DataFrame):
         out["4H"] = detect_trend(df.iloc[-4:].mean(numeric_only=True))
     if len(df) >= 24:
         out["1D"] = detect_trend(df.iloc[-24:].mean(numeric_only=True))
-    if len(df) >= 96:
-        out["4D"] = detect_trend(df.iloc[-96:].mean(numeric_only=True))
 
     return out
 
 
-def find_levels(series: pd.Series, n=3, mode="support"):
-    # velmi jednoduchý výběr extrémů
+def find_levels(series, n=3, mode="support"):
     vals = series.sort_values(ascending=(mode == "resistance"))
     uniq = vals.drop_duplicates().tolist()
     return uniq[:n]
@@ -96,70 +103,58 @@ def generate_analysis(trend, signal, rsi, atr, price):
     parts = []
 
     parts.append(f"Aktuální trend: {trend.upper()}.")
-    parts.append(f"RSI je {rsi:.1f}, což naznačuje {'přeprodanost' if rsi < 30 else 'překoupenost' if rsi > 70 else 'neutrální zónu'}.")
-
-    if atr / price > 0.01:
-        parts.append("Volatilita je zvýšená (ATR je relativně vysoké vůči ceně).")
-    else:
-        parts.append("Volatilita je spíše nižší až střední.")
+    parts.append(f"RSI: {rsi:.1f}.")
+    parts.append(f"Volatilita (ATR): {atr:.2f}.")
 
     if signal == "BUY":
-        parts.append("Systém aktuálně preferuje nákupní scénář.")
+        parts.append("Systém preferuje nákup.")
     elif signal == "SELL":
-        parts.append("Systém aktuálně preferuje prodejní scénář.")
+        parts.append("Systém preferuje prodej.")
     else:
-        parts.append("Systém doporučuje vyčkat na jasnější signál.")
+        parts.append("Systém doporučuje vyčkat.")
 
     return " ".join(parts)
 
 
 def main():
-    live = fetch_goldapi()
+    live = fetch_goldapi_live()
     hist = fetch_history()
     hist = compute_indicators(hist)
 
     last = hist.iloc[-1]
 
     trend = detect_trend(last)
-
     price = live["price"]
-    atr = float(last["atr"])
     rsi = float(last["rsi"])
-    ema20 = float(last["ema20"])
-    ema50 = float(last["ema50"])
-    ema200 = float(last["ema200"])
+    atr = float(last["atr"])
     macd_val = float(last["macd"])
 
-    # jednoduchá logika signálu
+    # Signál
     signal = "WAIT"
     confidence = 50
 
     if trend == "bullish" and rsi > 50 and macd_val > 0:
         signal = "BUY"
-        confidence = 70
-        if rsi > 60:
-            confidence = 80
+        confidence = 75
     elif trend == "bearish" and rsi < 50 and macd_val < 0:
         signal = "SELL"
-        confidence = 70
-        if rsi < 40:
-            confidence = 80
+        confidence = 75
 
-    # ATR-based SL/TP
-    atr_mult_sl = 1.5
-    atr_mult_tp1 = 2.0
-    atr_mult_tp2 = 3.5
+    # SL/TP
+    atr_sl = 1.5
+    atr_tp1 = 2.0
+    atr_tp2 = 3.5
 
     if signal == "BUY":
         entry = price
-        sl = price - atr_mult_sl * atr
-        tp1 = price + atr_mult_tp1 * atr
-        tp2 = price + atr_mult_tp2 * atr
+        sl = price - atr_sl * atr
+        tp1 = price + atr_tp1 * atr
+        tp2 = price + atr_tp2 * atr
     elif signal == "SELL":
         entry = price
-        sl = price + atr_mult_sl * atr
-        tp1 = price - atr_mult_tp1 * atr
-        tp2 = price - atr_mult_tp2 * atr
+        sl = price + atr_sl * atr
+        tp1 = price - atr_tp1 * atr
+        tp2 = price - atr_tp2 * atr
     else:
         entry = price
         sl = None
@@ -182,17 +177,17 @@ def main():
         "high24h": round(live["high24h"], 2),
         "low24h": round(live["low24h"], 2),
         "rsi": round(rsi, 2),
-        "ema20": round(ema20, 2),
-        "ema50": round(ema50, 2),
-        "ema200": round(ema200, 2),
+        "ema20": round(float(last["ema20"]), 2),
+        "ema50": round(float(last["ema50"]), 2),
+        "ema200": round(float(last["ema200"]), 2),
         "macd": round(macd_val, 4),
         "trend": trend,
         "signal": signal,
         "confidence": confidence,
-        "entry": round(entry, 2) if entry is not None else None,
-        "sl": round(sl, 2) if sl is not None else None,
-        "tp1": round(tp1, 2) if tp1 is not None else None,
-        "tp2": round(tp2, 2) if tp2 is not None else None,
+        "entry": round(entry, 2),
+        "sl": round(sl, 2) if sl else None,
+        "tp1": round(tp1, 2) if tp1 else None,
+        "tp2": round(tp2, 2) if tp2 else None,
         "tf": tf_view,
         "support": [round(x, 2) for x in support],
         "resistance": [round(x, 2) for x in resistance],
