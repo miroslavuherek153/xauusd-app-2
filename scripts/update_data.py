@@ -6,10 +6,14 @@ import ta
 from datetime import datetime, timezone
 
 GOLDAPI_KEY = os.environ["GOLDAPI_KEY"]
+ALPHAVANTAGE_KEY = os.environ["ALPHAVANTAGE_KEY"]
 
-# GoldAPI endpoints
 GOLDAPI_LIVE = "https://www.goldapi.io/api/XAU/USD"
-GOLDAPI_HISTORY = "https://www.goldapi.io/api/XAU/USD/history?period=1h&limit=500"
+ALPHAVANTAGE_URL = (
+    "https://www.alphavantage.co/query"
+    "?function=FX_INTRADAY&from_symbol=XAU&to_symbol=USD"
+    "&interval=60min&outputsize=full&apikey={key}"
+)
 
 
 def fetch_goldapi_live():
@@ -17,7 +21,6 @@ def fetch_goldapi_live():
     r = requests.get(GOLDAPI_LIVE, headers=headers, timeout=10)
     r.raise_for_status()
     d = r.json()
-
     return {
         "price": float(d["price"]),
         "high24h": float(d.get("high_price", d["price"])),
@@ -28,25 +31,33 @@ def fetch_goldapi_live():
 
 
 def fetch_history():
-    headers = {"x-access-token": GOLDAPI_KEY}
-    r = requests.get(GOLDAPI_HISTORY, headers=headers, timeout=10)
+    url = ALPHAVANTAGE_URL.format(key=ALPHAVANTAGE_KEY)
+    r = requests.get(url, timeout=15)
     r.raise_for_status()
-    data = r.json()["data"]
+    data = r.json()
 
-    df = pd.DataFrame(data)
-    df["time"] = pd.to_datetime(df["time"], unit="s")
+    key = None
+    for k in data.keys():
+        if "Time Series" in k:
+            key = k
+            break
+    if key is None:
+        raise RuntimeError(f"AlphaVantage response has no time series: {data}")
 
-    df = df.rename(columns={
-        "open": "Open",
-        "high": "High",
-        "low": "Low",
-        "close": "Close"
-    })
-
-    df = df[["time", "Open", "High", "Low", "Close"]]
-    df = df.sort_values("time")
-    df = df.reset_index(drop=True)
-
+    ts = data[key]
+    df = pd.DataFrame.from_dict(ts, orient="index")
+    df.index = pd.to_datetime(df.index)
+    df = df.rename(
+        columns={
+            "1. open": "Open",
+            "2. high": "High",
+            "3. low": "Low",
+            "4. close": "Close",
+        }
+    )
+    df = df[["Open", "High", "Low", "Close"]].astype(float)
+    df = df.sort_index()
+    df = df.reset_index().rename(columns={"index": "time"})
     return df
 
 
@@ -84,7 +95,6 @@ def build_tf_view(df):
     last = df.iloc[-1]
 
     out["1H"] = detect_trend(last)
-
     if len(df) >= 4:
         out["4H"] = detect_trend(df.iloc[-4:].mean(numeric_only=True))
     if len(df) >= 24:
@@ -101,10 +111,16 @@ def find_levels(series, n=3, mode="support"):
 
 def generate_analysis(trend, signal, rsi, atr, price):
     parts = []
-
     parts.append(f"Aktuální trend: {trend.upper()}.")
-    parts.append(f"RSI: {rsi:.1f}.")
-    parts.append(f"Volatilita (ATR): {atr:.2f}.")
+    parts.append(
+        f"RSI je {rsi:.1f}, což naznačuje "
+        f"{'přeprodanost' if rsi < 30 else 'překoupenost' if rsi > 70 else 'neutrální zónu'}."
+    )
+
+    if atr / price > 0.01:
+        parts.append("Volatilita je zvýšená (ATR je relativně vysoké vůči ceně).")
+    else:
+        parts.append("Volatilita je spíše nižší až střední.")
 
     if signal == "BUY":
         parts.append("Systém preferuje nákup.")
@@ -129,7 +145,6 @@ def main():
     atr = float(last["atr"])
     macd_val = float(last["macd"])
 
-    # Signál
     signal = "WAIT"
     confidence = 50
 
@@ -140,7 +155,6 @@ def main():
         signal = "SELL"
         confidence = 75
 
-    # SL/TP
     atr_sl = 1.5
     atr_tp1 = 2.0
     atr_tp2 = 3.5
@@ -162,12 +176,10 @@ def main():
         tp2 = None
 
     tf_view = build_tf_view(hist)
-
     support = find_levels(hist["Low"], n=3, mode="support")
     resistance = find_levels(hist["High"], n=3, mode="resistance")
 
     updated = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-
     analysis = generate_analysis(trend, signal, rsi, atr, price)
 
     data = {
