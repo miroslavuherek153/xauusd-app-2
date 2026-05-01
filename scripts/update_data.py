@@ -39,7 +39,11 @@ def fetch_history():
         raise RuntimeError(f"TwelveData error: {data}")
 
     df = pd.DataFrame(data["values"])
+
+    # čas
     df["time"] = pd.to_datetime(df["datetime"])
+
+    # přejmenování OHLC
     df = df.rename(
         columns={
             "open": "Open",
@@ -48,7 +52,14 @@ def fetch_history():
             "close": "Close",
         }
     )
-    df = df[["time", "Open", "High", "Low", "Close"]].astype(float)
+
+    # převod jen OHLC na float
+    df["Open"] = df["Open"].astype(float)
+    df["High"] = df["High"].astype(float)
+    df["Low"] = df["Low"].astype(float)
+    df["Close"] = df["Close"].astype(float)
+
+    df = df[["time", "Open", "High", "Low", "Close"]]
     df = df.sort_values("time").reset_index(drop=True)
     return df
 
