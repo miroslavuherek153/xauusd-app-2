@@ -1,24 +1,24 @@
 {
-  "price": 4575.93,
-  "change": -46.5,
-  "changePct": -1.01,
-  "high24h": 4635.97,
+  "price": 4638.43,
+  "change": 16.01,
+  "changePct": 0.35,
+  "high24h": 4660.41,
   "low24h": 4560.4,
-  "rsi": 41.21,
-  "ema20": 4595.5,
-  "ema50": 4599.21,
-  "ema200": 4651.47,
-  "macd": -7.6874,
-  "trend": "bearish",
-  "signal": "SELL",
-  "confidence": 75,
-  "entry": 4575.93,
-  "sl": 4621.62,
-  "tp1": 4515.0,
-  "tp2": 4469.3,
+  "rsi": 63.23,
+  "ema20": 4604.84,
+  "ema50": 4602.69,
+  "ema200": 4650.33,
+  "macd": 2.7227,
+  "trend": "neutral",
+  "signal": "WAIT",
+  "confidence": 50,
+  "entry": 4638.43,
+  "sl": null,
+  "tp1": null,
+  "tp2": null,
   "tf": {
-    "1H": "bearish",
-    "4H": "bearish",
+    "1H": "neutral",
+    "4H": "neutral",
     "1D": "neutral"
   },
   "support": [
@@ -31,6 +31,6 @@
     3647.76,
     3648.09
   ],
-  "analysis": "Aktuální trend: BEARISH. RSI je 41.2, což naznačuje neutrální zónu. Volatilita je nízká až střední. Systém preferuje prodej.",
-  "updated": "2026-05-01 11:43 UTC"
+  "analysis": "Aktuální trend: NEUTRAL. RSI je 63.2, což naznačuje neutrální zónu. Volatilita je nízká až střední. Systém doporučuje vyčkat.",
+  "updated": "2026-05-01 15:34 UTC"
 }
