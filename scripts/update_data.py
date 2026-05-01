@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 
 GOLDAPI_KEY = os.environ["GOLDAPI_KEY"]
 
-SYMBOL_YF = "XAUUSD=X"  # Yahoo Finance symbol
+SYMBOL_YF = "GOLD=X"  # Yahoo Finance symbol
 GOLDAPI_URL = "https://www.goldapi.io/api/XAU/USD"
 
 
