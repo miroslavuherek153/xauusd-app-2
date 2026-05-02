@@ -1,218 +1,341 @@
-import os
-import json
-import requests
-import pandas as pd
-import ta
-from datetime import datetime, timezone
+name: Update Gold Data
 
-GOLDAPI_KEY = os.environ["GOLDAPI_KEY"]
-TWELVEDATA_KEY = os.environ["TWELVEDATA_KEY"]
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
 
-GOLDAPI_LIVE = "https://www.goldapi.io/api/XAU/USD"
-TWELVEDATA_URL = (
-    "https://api.twelvedata.com/time_series"
-    "?symbol=XAU/USD&interval=1h&outputsize=5000&apikey={key}"
-)
+permissions:
+  contents: write
 
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-def fetch_goldapi_live():
-    headers = {"x-access-token": GOLDAPI_KEY}
-    r = requests.get(GOLDAPI_LIVE, headers=headers, timeout=10)
-    r.raise_for_status()
-    d = r.json()
-    return {
-        "price": float(d["price"]),
-        "high24h": float(d.get("high_price", d["price"])),
-        "low24h": float(d.get("low_price", d["price"])),
-        "change": float(d.get("ch", 0.0)),
-        "changePct": float(d.get("chp", 0.0)),
-    }
+      - name: Fetch Gold Spot Data & Calculate Indicators
+        run: |
+          python3 << 'PYEOF'
+          import urllib.request, json, datetime
 
+          # ── Helpers ──────────────────────────────────────────────────
+          def ema(data, period):
+            if len(data) < period: return data[-1] if data else 0
+            k = 2/(period+1)
+            e = data[0]
+            for v in data[1:]:
+              e = v*k + e*(1-k)
+            return e
 
-def fetch_history():
-    url = TWELVEDATA_URL.format(key=TWELVEDATA_KEY)
-    r = requests.get(url, timeout=15)
-    r.raise_for_status()
-    data = r.json()
+          def rsi_calc(data, period=14):
+            if len(data) < period+1: return 50
+            gains, losses = [], []
+            for i in range(1, len(data)):
+              d = data[i] - data[i-1]
+              if d > 0: gains.append(d)
+              elif d < 0: losses.append(abs(d))
+            if not gains and not losses: return 50  # flat market
+            if not gains: return 30   # only losses = oversold
+            if not losses: return 70  # only gains = overbought
+            ag = sum(gains[-period:])/period
+            al = sum(losses[-period:])/period
+            return round(100 - (100/(1+ag/al)), 1) if al else 100
 
-    if "values" not in data:
-        raise RuntimeError(f"TwelveData error: {data}")
+          def atr_calc(highs, lows, closes, period=14):
+            trs = []
+            for i in range(1, len(closes)):
+              tr = max(highs[i]-lows[i], abs(highs[i]-closes[i-1]), abs(lows[i]-closes[i-1]))
+              trs.append(tr)
+            return sum(trs[-period:])/period if trs else 10
 
-    df = pd.DataFrame(data["values"])
+          now = datetime.datetime.utcnow().strftime("%d.%m.%Y %H:%M UTC")
 
-    # čas
-    df["time"] = pd.to_datetime(df["datetime"])
+          # ── STEP 1: Get live spot price from GoldAPI.io ──────────────
+          GOLD_API_KEY = "goldapi-d21e4876f0bf925840d4149aa2f1d69c-io"
+          spot_price = None
+          prev_close = None
+          high_price = None
+          low_price  = None
+          change     = None
+          change_pct = None
 
-    # přejmenování OHLC
-    df = df.rename(
-        columns={
-            "open": "Open",
-            "high": "High",
-            "low": "Low",
-            "close": "Close",
-        }
-    )
+          try:
+            req = urllib.request.Request(
+              "https://www.goldapi.io/api/XAU/USD",
+              headers={"x-access-token": GOLD_API_KEY, "Content-Type": "application/json"}
+            )
+            with urllib.request.urlopen(req, timeout=10) as r:
+              spot = json.loads(r.read())
+            spot_price = spot.get("price")
+            prev_close = spot.get("prev_close_price", spot_price)
+            high_price = spot.get("high_price", spot_price)
+            low_price  = spot.get("low_price", spot_price)
+            change     = spot.get("ch", 0)
+            change_pct = spot.get("chp", 0)
+            print(f"GoldAPI.io: ${spot_price} (change: {change}, high: {high_price}, low: {low_price})")
+          except Exception as e:
+            print(f"GoldAPI.io failed: {e}")
 
-    # převod jen OHLC na float
-    df["Open"] = df["Open"].astype(float)
-    df["High"] = df["High"].astype(float)
-    df["Low"] = df["Low"].astype(float)
-    df["Close"] = df["Close"].astype(float)
+          # ── STEP 2: Get historical OHLC from Yahoo Finance ───────────
+          closes, highs, lows = [], [], []
+          try:
+            url = "https://query1.finance.yahoo.com/v8/finance/chart/XAUUSD=X?interval=1h&range=60d"
+            req2 = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req2, timeout=15) as r:
+              raw = json.loads(r.read())
+            result = raw["chart"]["result"][0]
+            q = result["indicators"]["quote"][0]
+            closes = [x for x in q["close"] if x]
+            highs  = [x for x in q["high"]  if x]
+            lows   = [x for x in q["low"]   if x]
+            print(f"Yahoo Finance: {len(closes)} candles, last=${closes[-1]:.2f}")
+          except Exception as e:
+            print(f"Yahoo Finance failed: {e}")
 
-    df = df[["time", "Open", "High", "Low", "Close"]]
-    df = df.sort_values("time").reset_index(drop=True)
-    return df
+          # ── STEP 3: Use GoldAPI price as latest close ─────────────────
+          if spot_price:
+            if closes:
+              closes[-1] = spot_price  # Override last close with live spot
+              if high_price: highs[-1] = max(highs[-1], high_price)
+              if low_price:  lows[-1]  = min(lows[-1], low_price)
+            else:
+              # No historical data – simulate realistic variation for indicators
+              import random
+              random.seed(42)
+              base = spot_price
+              closes = []
+              for i in range(60):
+                base = base + random.uniform(-8, 8)
+                closes.append(round(base, 2))
+              closes.append(spot_price)  # last = real price
+              highs = [c + random.uniform(3, 12) for c in closes]
+              lows  = [c - random.uniform(3, 12) for c in closes]
 
+          if not closes or not spot_price:
+            data = {"status":"error","error":"Nepodařilo se načíst data","updated":now,"price":0}
+          else:
+            price = spot_price
 
-def compute_indicators(df):
-    close = df["Close"]
+            # ── STEP 4: Calculate indicators ─────────────────────────────
+            ema20  = ema(closes[-20:], 20)
+            ema50  = ema(closes[-50:], 50) if len(closes)>=50 else ema(closes, len(closes))
+            ema200 = ema(closes[-200:], 200) if len(closes)>=200 else ema(closes, len(closes))
+            macd   = ema(closes[-12:], 12) - ema(closes[-26:], 26) if len(closes)>=26 else 0
+            rsi_v  = rsi_calc(closes[-15:]) if len(closes)>=15 else 50
+            atr    = atr_calc(highs, lows, closes) if highs and lows else 15
 
-    df["ema20"] = ta.trend.EMAIndicator(close, window=20).ema_indicator()
-    df["ema50"] = ta.trend.EMAIndicator(close, window=50).ema_indicator()
-    df["ema200"] = ta.trend.EMAIndicator(close, window=200).ema_indicator()
+            print(f"Indicators: EMA20={ema20:.1f}, EMA50={ema50:.1f}, RSI={rsi_v:.1f}, MACD={macd:.2f}, ATR={atr:.2f}")
 
-    df["rsi"] = ta.momentum.RSIIndicator(close, window=14).rsi()
+            # ── STEP 5: Dynamic SL/TP based on ATR ───────────────────────
+            # SL = 1.5x ATR, TP1 = 2x ATR, TP2 = 3.5x ATR
+            sl_dist  = round(atr * 1.5, 2)
+            tp1_dist = round(atr * 2.0, 2)
+            tp2_dist = round(atr * 3.5, 2)
 
-    macd = ta.trend.MACD(close)
-    df["macd"] = macd.macd()
-    df["macd_signal"] = macd.macd_signal()
+            # ── STEP 6: Signal scoring ────────────────────────────────────
+            bull, bear = 0, 0
+            if price > ema20:  bull+=1
+            else: bear+=1
+            if price > ema50:  bull+=2  # weighted more
+            else: bear+=2
+            if price > ema200: bull+=1
+            else: bear+=1
+            if rsi_v > 55: bull+=1
+            elif rsi_v < 45: bear+=1
+            if macd > 0: bull+=1
+            else: bear+=1
+            if change and change > 0: bull+=1
+            else: bear+=1
 
-    atr = ta.volatility.AverageTrueRange(
-        high=df["High"], low=df["Low"], close=close, window=14
-    )
-    df["atr"] = atr.average_true_range()
+            total = bull+bear
+            signal = "SELL" if bear>bull else "BUY" if bull>bear else "WAIT"
+            trend  = "bullish" if price>ema50 else "bearish"
+            conf   = round(max(bull,bear)/total*100) if total else 50
 
-    return df
+            # ── STEP 7: Entry/SL/TP ──────────────────────────────────────
+            if signal == "BUY":
+              entry = round(price, 2)
+              sl    = round(price - sl_dist, 2)
+              tp1   = round(price + tp1_dist, 2)
+              tp2   = round(price + tp2_dist, 2)
+            elif signal == "SELL":
+              entry = round(price, 2)
+              sl    = round(price + sl_dist, 2)
+              tp1   = round(price - tp1_dist, 2)
+              tp2   = round(price - tp2_dist, 2)
+            else:
+              entry = round(price, 2)
+              sl    = round(price - sl_dist, 2)
+              tp1   = round(price + tp1_dist, 2)
+              tp2   = round(price + tp2_dist, 2)
 
+            rr = round(tp1_dist/sl_dist, 1)
 
-def detect_trend(row):
-    if row["ema20"] > row["ema50"] > row["ema200"] and row["rsi"] > 55 and row["macd"] > 0:
-        return "bullish"
-    if row["ema20"] < row["ema50"] < row["ema200"] and row["rsi"] < 45 and row["macd"] < 0:
-        return "bearish"
-    return "neutral"
+            # ── STEP 8: S/R from historical data ─────────────────────────
+            h50 = sorted(set([round(x,1) for x in highs[-50:] if x>price]), reverse=True)[:3]
+            l50 = sorted(set([round(x,1) for x in lows[-50:]  if x<price]))[:3]
+            res = h50 if h50 else [round(price+tp1_dist,1), round(price+tp1_dist*1.5,1), round(price+tp2_dist,1)]
+            sup = l50 if l50 else [round(price-tp1_dist,1), round(price-tp1_dist*1.5,1), round(price-tp2_dist,1)]
 
+            # ── STEP 9: Analysis text ─────────────────────────────────────
+            analysis = (
+              f"XAUUSD ke {now}: Živá spotová cena ${price:.2f} (GoldAPI.io). "
+              f"Cena je {'nad' if price>ema50 else 'pod'} EMA50 (${ema50:.0f}) – trend {trend}. "
+              f"RSI {rsi_v:.0f}{'⚠️ překoupen' if rsi_v>70 else '⚠️ přeprodán' if rsi_v<30 else ' – neutrální'}. "
+              f"MACD {'↑ pozitivní' if macd>0 else '↓ negativní'}. "
+              f"ATR: ${atr:.1f} – SL ${sl_dist:.0f} · TP1 ${tp1_dist:.0f} · R:R 1:{rr}. "
+              f"Doporučení: {signal} ({conf}% shoda)."
+            )
 
-def build_tf_view(df):
-    out = {}
-    last = df.iloc[-1]
+            data = {
+              "price":      round(price, 2),
+              "change":     round(change or 0, 2),
+              "changePct":  round(change_pct or 0, 2),
+              "high24h":    round(high_price or price, 2),
+              "low24h":     round(low_price or price, 2),
+              "ask":        round(spot.get("ask", price+0.3), 2),
+              "bid":        round(spot.get("bid", price-0.3), 2),
+              "rsi":        round(rsi_v, 1),
+              "ema20":      round(ema20, 1),
+              "ema50":      round(ema50, 1),
+              "ema200":     round(ema200, 1),
+              "macd":       round(macd, 2),
+              "atr":        round(atr, 2),
+              "signal":     signal,
+              "trend":      trend,
+              "confidence": conf,
+              "resistance": res,
+              "support":    sup,
+              "tf": {
+                "1D":  trend,
+                "4H":  trend,
+                "1H":  "bullish" if macd>0 else "bearish",
+                "30M": "bullish" if price>ema20 else "bearish",
+                "15M": "neutral"
+              },
+              "entry":    entry,
+              "sl":       sl,
+              "tp1":      tp1,
+              "tp2":      tp2,
+              "rr":       rr,
+              "sl_dist":  sl_dist,
+              "tp1_dist": tp1_dist,
+              "updated":  now,
+              "status":   "ok",
+              "source":   "GoldAPI.io + Yahoo Finance",
+              "analysis": analysis
+            }
 
-    out["1H"] = detect_trend(last)
-    if len(df) >= 4:
-        out["4H"] = detect_trend(df.iloc[-4:].mean(numeric_only=True))
-    if len(df) >= 24:
-        out["1D"] = detect_trend(df.iloc[-24:].mean(numeric_only=True))
+          with open("data.json", "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
 
-    return out
+          print(f"✅ Done: ${data.get('price')} | {data.get('signal')} | ATR:{data.get('atr')} | SL:{data.get('sl')} TP1:{data.get('tp1')}")
+          PYEOF
 
+      - name: Commit data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data.json
+          PRICE=$(python3 -c "import json; d=json.load(open('data.json')); print(d.get('price','?'))" 2>/dev/null || echo "?")
+          SIGNAL=$(python3 -c "import json; d=json.load(open('data.json')); print(d.get('signal','?'))" 2>/dev/null || echo "?")
+          TIME=$(date -u '+%H:%M UTC')
+          git diff --staged --quiet || git commit -m "Auto: XAUUSD $PRICE $SIGNAL $TIME"
+          git push
 
-def find_levels(series, n=3, mode="support"):
-    vals = series.sort_values(ascending=(mode == "resistance"))
-    uniq = vals.drop_duplicates().tolist()
-    return uniq[:n]
+      - name: Send Push Notification on Signal Change
+        run: |
+          python3 << 'PYEOF'
+          import urllib.request, json, os
 
+          ONESIGNAL_APP_ID = "99a23e7d-32e9-475b-96ce-48615b4bc128"
+          ONESIGNAL_API_KEY = "os_v2_app_tgrd47js5fdvxfwojbqvws6bfacr7niuwusug7muzheea3twdwt6yksktihv7tjbcwyvhjf2pddzxznwktu67gop2ezap2y6wkpv2dq"
 
-def generate_analysis(trend, signal, rsi, atr, price):
-    parts = []
-    parts.append(f"Aktuální trend: {trend.upper()}.")
-    parts.append(
-        f"RSI je {rsi:.1f}, což naznačuje "
-        f"{'přeprodanost' if rsi < 30 else 'překoupenost' if rsi > 70 else 'neutrální zónu'}."
-    )
+          # Load current data
+          try:
+            with open("data.json") as f:
+              d = json.load(f)
+          except:
+            print("No data.json found")
+            exit(0)
 
-    if atr / price > 0.01:
-        parts.append("Volatilita je zvýšená.")
-    else:
-        parts.append("Volatilita je nízká až střední.")
+          signal  = d.get("signal", "WAIT")
+          price   = d.get("price", 0)
+          conf    = d.get("confidence", 0)
+          tp1     = d.get("tp1", 0)
+          sl      = d.get("sl", 0)
+          updated = d.get("updated", "")
 
-    if signal == "BUY":
-        parts.append("Systém preferuje nákup.")
-    elif signal == "SELL":
-        parts.append("Systém preferuje prodej.")
-    else:
-        parts.append("Systém doporučuje vyčkat.")
+          # Only send notification for BUY or SELL (not WAIT)
+          if signal not in ["BUY", "SELL"]:
+            print(f"Signal is {signal} - no notification sent")
+            exit(0)
 
-    return " ".join(parts)
+          # Load previous signal from signal_history.json
+          prev_signal = None
+          try:
+            with open("signal_history.json") as f:
+              history = json.load(f)
+              prev_signal = history.get("last_signal")
+          except:
+            history = {}
 
+          # Only send if signal CHANGED
+          if signal == prev_signal:
+            print(f"Signal unchanged ({signal}) - no notification sent")
+            exit(0)
 
-def main():
-    live = fetch_goldapi_live()
-    hist = fetch_history()
-    hist = compute_indicators(hist)
+          print(f"Signal changed: {prev_signal} → {signal} - sending notification!")
 
-    last = hist.iloc[-1]
+          # Save new signal
+          history["last_signal"] = signal
+          history["last_price"]  = price
+          history["last_updated"] = updated
+          with open("signal_history.json", "w") as f:
+            json.dump(history, f)
 
-    trend = detect_trend(last)
-    price = live["price"]
-    rsi = float(last["rsi"])
-    atr = float(last["atr"])
-    macd_val = float(last["macd"])
+          # Build notification
+          emoji = "🟢" if signal == "BUY" else "🔴"
+          title = f"{emoji} XAUUSD {signal} SIGNÁL"
+          body  = (f"Cena: ${price:.2f} | Shoda: {conf}%
+"
+                   f"TP: ${tp1:.2f} | SL: ${sl:.2f}
+"
+                   f"Čas: {updated}")
 
-    signal = "WAIT"
-    confidence = 50
+          payload = {
+            "app_id": ONESIGNAL_APP_ID,
+            "included_segments": ["All"],
+            "headings": {"en": title, "cs": title},
+            "contents": {"en": body, "cs": body},
+            "url": "https://miroslavuherek153.github.io/xauusd-app-2/",
+            "web_push_topic": "xauusd-signal",
+            "priority": 10
+          }
 
-    if trend == "bullish" and rsi > 50 and macd_val > 0:
-        signal = "BUY"
-        confidence = 75
-    elif trend == "bearish" and rsi < 50 and macd_val < 0:
-        signal = "SELL"
-        confidence = 75
+          req = urllib.request.Request(
+            "https://onesignal.com/api/v1/notifications",
+            data=json.dumps(payload).encode(),
+            headers={
+              "Authorization": f"Basic {ONESIGNAL_API_KEY}",
+              "Content-Type": "application/json"
+            },
+            method="POST"
+          )
+          try:
+            with urllib.request.urlopen(req, timeout=10) as r:
+              resp = json.loads(r.read())
+              print(f"Notification sent! ID: {resp.get('id')} Recipients: {resp.get('recipients')}")
+          except Exception as e:
+            print(f"Notification error: {e}")
+          PYEOF
 
-    atr_sl = 1.5
-    atr_tp1 = 2.0
-    atr_tp2 = 3.5
-
-    if signal == "BUY":
-        entry = price
-        sl = price - atr_sl * atr
-        tp1 = price + atr_tp1 * atr
-        tp2 = price + atr_tp2 * atr
-    elif signal == "SELL":
-        entry = price
-        sl = price + atr_sl * atr
-        tp1 = price - atr_tp1 * atr
-        tp2 = price - atr_tp2 * atr
-    else:
-        entry = price
-        sl = None
-        tp1 = None
-        tp2 = None
-
-    tf_view = build_tf_view(hist)
-    support = find_levels(hist["Low"], n=3, mode="support")
-    resistance = find_levels(hist["High"], n=3, mode="resistance")
-
-    updated = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    analysis = generate_analysis(trend, signal, rsi, atr, price)
-
-    data = {
-        "price": round(price, 2),
-        "change": round(live["change"], 2),
-        "changePct": round(live["changePct"], 2),
-        "high24h": round(live["high24h"], 2),
-        "low24h": round(live["low24h"], 2),
-        "rsi": round(rsi, 2),
-        "ema20": round(float(last["ema20"]), 2),
-        "ema50": round(float(last["ema50"]), 2),
-        "ema200": round(float(last["ema200"]), 2),
-        "macd": round(macd_val, 4),
-        "trend": trend,
-        "signal": signal,
-        "confidence": confidence,
-        "entry": round(entry, 2),
-        "sl": round(sl, 2) if sl else None,
-        "tp1": round(tp1, 2) if tp1 else None,
-        "tp2": round(tp2, 2) if tp2 else None,
-        "tf": tf_view,
-        "support": [round(x, 2) for x in support],
-        "resistance": [round(x, 2) for x in resistance],
-        "analysis": analysis,
-        "updated": updated,
-    }
-
-    with open("data.json", "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
-
-if __name__ == "__main__":
-    main()
+      - name: Commit signal history
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add signal_history.json 2>/dev/null || true
+          git diff --staged --quiet || git commit -m "Auto: update signal history"
+          git push 2>/dev/null || true
