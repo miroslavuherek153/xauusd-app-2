@@ -258,6 +258,11 @@ header{flex-shrink:0;background:rgba(5,8,16,0.98);border-bottom:1px solid var(--
         3. <b style="color:var(--gold)">"Přidat na plochu"</b><br>
         4. Potvrďte → ikona na ploše ✓
       </div></div>
+      <div class="isect-title">◈ Push notifikace</div>
+      <div class="iitem" style="cursor:pointer" onclick="requestNotificationPermission()">
+        <div><div class="iname">🔔 Notifikace BUY/SELL</div><div class="idesc">Klepněte pro povolení push notifikací</div></div>
+        <div class="iright" id="notifBtn">Aktivovat</div>
+      </div>
       <div class="isect-title">◈ Upozornění</div>
       <div class="card"><div style="font-size:10px;line-height:1.9;color:var(--muted)">Pouze informativní. Není finančním poradenstvím. Obchodujte zodpovědně.</div></div>
     </div>
@@ -286,6 +291,48 @@ function showTab(n){
 
 // ── SW ────────────────────────────────────────────────────────────────
 if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+
+// ── OneSignal Push Notifications ─────────────────────────────────────
+const ONESIGNAL_APP_ID = "99a23e7d-32e9-475b-96ce-48615b4bc128";
+
+function initOneSignal() {
+  if(typeof OneSignal !== 'undefined') return;
+  const script = document.createElement('script');
+  script.src = 'https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js';
+  script.defer = true;
+  script.onload = () => {
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.init({
+        appId: ONESIGNAL_APP_ID,
+        safari_web_id: "",
+        notifyButton: { enable: false },
+        allowLocalhostAsSecureOrigin: true,
+      });
+      console.log("OneSignal initialized");
+    });
+  };
+  document.head.appendChild(script);
+}
+initOneSignal();
+
+async function requestNotificationPermission() {
+  try {
+    if(typeof OneSignal === 'undefined') { initOneSignal(); }
+    OneSignalDeferred.push(async function(OneSignal) {
+      const permission = await OneSignal.Notifications.requestPermission();
+      if(permission) {
+        alert("✅ Notifikace povoleny! Obdržíte upozornění při každém novém signálu BUY/SELL.");
+        document.getElementById('notifBtn').textContent = '🔔 Notifikace aktivní';
+        document.getElementById('notifBtn').style.color = 'var(--green)';
+      } else {
+        alert("❌ Notifikace zamítnuty. Povolte je v nastavení prohlížeče.");
+      }
+    });
+  } catch(e) {
+    alert("Chyba: " + e.message);
+  }
+}
 
 // ── TradingView Widget ────────────────────────────────────────────────
 let tvLoaded = false;
