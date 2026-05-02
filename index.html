@@ -248,7 +248,8 @@ header{flex-shrink:0;background:rgba(5,8,16,0.98);border-bottom:1px solid var(--
       <div class="isect-title">◈ Status systému</div>
       <div class="iitem"><div><div class="iname">Data robot</div><div class="idesc">GitHub Actions · každých 15 min</div></div><div class="iright" id="robotStatus">⏳</div></div>
       <div class="iitem"><div><div class="iname">Poslední update</div><div class="idesc">Automatická aktualizace</div></div><div class="iright" id="lastUpdate">–</div></div>
-      <div class="iitem"><div><div class="iname">Zdroj dat</div><div class="idesc">Yahoo Finance XAUUSD=X (spot)</div></div><div class="iright">LIVE</div></div>
+      <div class="iitem"><div><div class="iname">Živá cena</div><div class="idesc">GoldAPI.io · FOREXCOM XAUUSD spot</div></div><div class="iright" style="color:var(--green)">●LIVE</div></div>
+      <div class="iitem"><div><div class="iname">Historická data</div><div class="idesc">Yahoo Finance XAUUSD=X · RSI/EMA/MACD</div></div><div class="iright">AUTO</div></div>
       <div class="iitem"><div><div class="iname">Indikátory</div><div class="idesc">RSI · EMA 20/50/200 · MACD</div></div><div class="iright">AUTO</div></div>
       <div class="isect-title" style="margin-top:12px">◈ Jak nainstalovat jako apku</div>
       <div class="card"><div style="font-size:11px;line-height:2.2;color:var(--text)">
@@ -377,7 +378,7 @@ function renderAll(d){
     <div class="sigcard ${sc} a2">
       <div class="siglbl">◈ AI ROBOT SIGNÁL</div>
       <div class="sigval">${d.signal}</div>
-      <div class="sigmeta">Shoda: ${d.confidence}% · Trend: ${(d.trend||'').toUpperCase()}<br>EMA200: $${f(d.ema200,0)} · MACD: ${f(d.macd,1)}</div>
+      <div class="sigmeta">Shoda: ${d.confidence}% · Trend: ${(d.trend||'').toUpperCase()}<br>EMA200: $${f(d.ema200,0)} · MACD: ${f(d.macd,1)} · ATR: $${f(d.atr||0,1)}</div>
     </div>`;
 
   // TF
@@ -425,7 +426,7 @@ function renderAll(d){
       <div class="setup-row"><span class="setup-key">Take Profit 1</span><span class="setup-val ctp">$${f(d.tp1,2)}</span></div>
       <div class="setup-row"><span class="setup-key">Take Profit 2</span><span class="setup-val ctp">$${f(d.tp2,2)}</span></div>
     </div>
-    <div class="rrbadge a3">Risk / Reward = 1 : ${rr}</div>
+    <div class="rrbadge a3">Risk / Reward = 1 : ${rr} · ATR: $${f(d.atr||0,1)} · SL dist: $${f(d.sl_dist||0,0)}</div>
     <div class="card a3"><div class="ctitle">◈ Risk kalkulace</div>${[['0.01',1],['0.05',5],['0.10',10]].map(([lot,m])=>`<div class="lvrow"><span style="font-size:10px;color:var(--muted)">Lot ${lot}</span><span style="font-size:11px;color:var(--red)">Risk ~$${f(Math.abs((d.sl-d.entry)||15)*m,1)}</span></div>`).join('')}<div style="font-size:9px;color:var(--muted);margin-top:8px">* Přibližný výpočet</div></div>
     <div class="acard a4"><div class="ahead"><div style="font-size:16px">🎯</div><div><div class="atitle">ZDŮVODNĚNÍ</div><div class="asub">${d.updated||''}</div></div></div><div class="atext">${d.analysis||'–'}</div></div>
     <button class="rbtn" onclick="loadData()">↻ NOVÝ SETUP</button>
