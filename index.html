@@ -12,151 +12,325 @@
 <link rel="manifest" href="manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-:root{--gold:#FFD700;--green:#00FF88;--red:#FF3355;--bg:#050810;--bg2:#0a0f1e;--bg3:#0f1628;--border:rgba(255,215,0,0.15);--text:#c8d8f0;--muted:#556677;--mono:'Share Tech Mono',monospace;--display:'Orbitron',sans-serif;}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;overflow:hidden;}
-body{background:var(--bg);color:var(--text);font-family:var(--mono);display:flex;flex-direction:column;background-image:radial-gradient(ellipse at 20% 0%,rgba(255,215,0,0.06) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(0,80,255,0.04) 0%,transparent 50%);}
+/* ── Variables ─────────────────────────────────────────────────────── */
+:root {
+  --gold:    #FFD700;
+  --green:   #00FF88;
+  --red:     #FF3355;
+  --bg:      #050810;
+  --bg2:     #0a0f1e;
+  --bg3:     #0f1628;
+  --border:  rgba(255,215,0,0.15);
+  --text:    #c8d8f0;
+  --muted:   #556677;
+  --mono:    'Share Tech Mono', monospace;
+  --display: 'Orbitron', sans-serif;
+}
 
-/* Header */
-header{flex-shrink:0;background:rgba(5,8,16,0.98);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;}
-.logo{font-family:var(--display);font-size:14px;font-weight:900;color:var(--gold);letter-spacing:2px;text-shadow:0 0 15px rgba(255,215,0,0.3);}
-.logo span{color:var(--text);font-weight:400;font-size:12px;}
-.hright{display:flex;align-items:center;gap:10px;}
-.dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite;}
-.dot.red{background:var(--red);box-shadow:0 0 8px var(--red);}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.2}}
-.htime{font-size:9px;color:var(--muted);}
+/* ── Reset ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  display: flex;
+  flex-direction: column;
+  background-image:
+    radial-gradient(ellipse at 20% 0%,  rgba(255,215,0,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 100%, rgba(0,80,255,0.04)  0%, transparent 50%);
+}
 
-/* Countdown bar */
-.cbar-wrap{flex-shrink:0;background:var(--bg2);border-bottom:1px solid var(--border);padding:5px 16px;display:flex;align-items:center;gap:10px;}
-.cbar-label{font-size:8px;letter-spacing:2px;color:var(--muted);}
-.cbar-bg{flex:1;height:3px;background:rgba(255,255,255,0.06);border-radius:2px;}
-.cbar-fill{height:3px;border-radius:2px;background:var(--gold);transition:width 1s linear;}
-.cbar-time{font-size:9px;color:var(--gold);width:40px;text-align:right;}
+/* ── Header ────────────────────────────────────────────────────────── */
+header {
+  flex-shrink: 0;
+  background: rgba(5,8,16,0.98);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.logo { font-family: var(--display); font-size: 14px; font-weight: 900; color: var(--gold); letter-spacing: 2px; text-shadow: 0 0 15px rgba(255,215,0,0.3); }
+.logo span { color: var(--text); font-weight: 400; font-size: 12px; }
+.hright { display: flex; align-items: center; gap: 10px; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite; }
+.dot.red { background: var(--red); box-shadow: 0 0 8px var(--red); }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.2; } }
+.htime { font-size: 9px; color: var(--muted); }
 
-/* Nav */
-.nav{flex-shrink:0;display:flex;background:var(--bg2);border-bottom:1px solid var(--border);}
-.ntab{flex:1;padding:9px 2px;text-align:center;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--mono);transition:all 0.2s;}
-.ntab.active{color:var(--gold);border-bottom-color:var(--gold);background:rgba(255,215,0,0.04);}
+/* ── Countdown bar ─────────────────────────────────────────────────── */
+.cbar-wrap { flex-shrink: 0; background: var(--bg2); border-bottom: 1px solid var(--border); padding: 5px 16px; display: flex; align-items: center; gap: 10px; }
+.cbar-label { font-size: 8px; letter-spacing: 2px; color: var(--muted); }
+.cbar-bg { flex: 1; height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px; }
+.cbar-fill { height: 3px; border-radius: 2px; background: var(--gold); transition: width 1s linear; }
+.cbar-time { font-size: 9px; color: var(--gold); width: 40px; text-align: right; }
 
-/* Main */
-.main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:20px;}
-.screen{display:none;padding:12px;}
-.screen.active{display:block;}
+/* ── Nav ───────────────────────────────────────────────────────────── */
+.nav { flex-shrink: 0; display: flex; background: var(--bg2); border-bottom: 1px solid var(--border); }
+.ntab {
+  flex: 1; padding: 9px 2px; text-align: center; font-size: 8px; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent;
+  background: none; border-top: none; border-left: none; border-right: none; font-family: var(--mono); transition: all 0.2s;
+}
+.ntab.active { color: var(--gold); border-bottom-color: var(--gold); background: rgba(255,215,0,0.04); }
+/* AI tab has a special glow when active */
+.ntab.ai-tab.active { color: #a78bfa; border-bottom-color: #a78bfa; background: rgba(167,139,250,0.04); }
 
-/* Animations */
-@keyframes su{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.a1{animation:su 0.3s ease both;}.a2{animation:su 0.3s ease 0.06s both;}.a3{animation:su 0.3s ease 0.12s both;}.a4{animation:su 0.3s ease 0.18s both;}.a5{animation:su 0.3s ease 0.24s both;}
-@keyframes flashGreen{from{color:var(--green);text-shadow:0 0 20px var(--green);}to{color:#fff;}}
-@keyframes flashRed{from{color:var(--red);text-shadow:0 0 20px var(--red);}to{color:#fff;}}
-.up-flash{animation:flashGreen 1.5s ease;}
-.down-flash{animation:flashRed 1.5s ease;}
+/* ── Main ──────────────────────────────────────────────────────────── */
+.main { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 20px; }
+.screen { display: none; padding: 12px; }
+.screen.active { display: block; }
 
-/* Price card */
-.pcard{background:linear-gradient(145deg,rgba(255,215,0,0.08),rgba(255,215,0,0.02));border:1px solid rgba(255,215,0,0.25);border-radius:12px;padding:16px;margin-bottom:12px;position:relative;overflow:hidden;}
-.pcard::after{content:'AU';position:absolute;bottom:-8px;right:12px;font-family:var(--display);font-size:60px;font-weight:900;color:rgba(255,215,0,0.04);pointer-events:none;}
-.plbl{font-size:8px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;}
-.live-badge{background:rgba(0,255,136,0.15);color:var(--green);font-size:7px;padding:2px 6px;border-radius:10px;letter-spacing:2px;border:1px solid rgba(0,255,136,0.3);}
-.pval{font-family:var(--display);font-size:32px;font-weight:900;color:#fff;transition:all 0.3s;}
-.pchg{font-size:11px;margin-top:4px;}
-.up{color:var(--green);}.down{color:var(--red);}.nc{color:var(--muted);}
-.pstats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px;}
-.stat{background:rgba(0,0,0,0.3);border-radius:6px;padding:7px;}
-.slbl{font-size:7px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
-.sval{font-size:11px;color:var(--text);margin-top:2px;}
+/* ── Animations ────────────────────────────────────────────────────── */
+@keyframes su { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.a1 { animation: su 0.3s ease both; }
+.a2 { animation: su 0.3s ease 0.06s both; }
+.a3 { animation: su 0.3s ease 0.12s both; }
+.a4 { animation: su 0.3s ease 0.18s both; }
+.a5 { animation: su 0.3s ease 0.24s both; }
+@keyframes flashGreen { from { color: var(--green); text-shadow: 0 0 20px var(--green); } to { color: #fff; } }
+@keyframes flashRed   { from { color: var(--red);   text-shadow: 0 0 20px var(--red);   } to { color: #fff; } }
+.up-flash   { animation: flashGreen 1.5s ease; }
+.down-flash { animation: flashRed   1.5s ease; }
 
-/* TradingView widget */
-.tv-wrap{border-radius:12px;overflow:hidden;margin-bottom:12px;height:140px;border:1px solid var(--border);}
+/* ── Price card ────────────────────────────────────────────────────── */
+.pcard {
+  background: linear-gradient(145deg, rgba(255,215,0,0.08), rgba(255,215,0,0.02));
+  border: 1px solid rgba(255,215,0,0.25);
+  border-radius: 12px; padding: 16px; margin-bottom: 12px; position: relative; overflow: hidden;
+}
+.pcard::after { content: 'AU'; position: absolute; bottom: -8px; right: 12px; font-family: var(--display); font-size: 60px; font-weight: 900; color: rgba(255,215,0,0.04); pointer-events: none; }
+.plbl { font-size: 8px; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
+.live-badge { background: rgba(0,255,136,0.15); color: var(--green); font-size: 7px; padding: 2px 6px; border-radius: 10px; letter-spacing: 2px; border: 1px solid rgba(0,255,136,0.3); }
+.pval { font-family: var(--display); font-size: 32px; font-weight: 900; color: #fff; transition: all 0.3s; }
+.pchg { font-size: 11px; margin-top: 4px; }
+.up { color: var(--green); } .down { color: var(--red); } .nc { color: var(--muted); }
+.pstats { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin-top: 12px; }
+.stat { background: rgba(0,0,0,0.3); border-radius: 6px; padding: 7px; }
+.slbl { font-size: 7px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
+.sval { font-size: 11px; color: var(--text); margin-top: 2px; }
 
-/* Signal */
-.sigcard{border-radius:12px;padding:14px;margin-bottom:12px;text-align:center;border:1px solid;}
-.sigcard.bearish{background:rgba(255,51,85,0.08);border-color:rgba(255,51,85,0.4);}
-.sigcard.bullish{background:rgba(0,255,136,0.06);border-color:rgba(0,255,136,0.3);}
-.sigcard.neutral{background:rgba(255,215,0,0.05);border-color:rgba(255,215,0,0.3);}
-.siglbl{font-size:8px;letter-spacing:4px;color:var(--muted);margin-bottom:4px;}
-.sigval{font-family:var(--display);font-size:26px;font-weight:900;letter-spacing:6px;}
-.sigcard.bearish .sigval{color:var(--red);text-shadow:0 0 20px rgba(255,51,85,0.5);}
-.sigcard.bullish .sigval{color:var(--green);text-shadow:0 0 20px rgba(0,255,136,0.4);}
-.sigcard.neutral .sigval{color:var(--gold);}
-.sigmeta{font-size:10px;color:var(--muted);margin-top:5px;line-height:1.7;}
+/* ── TradingView ───────────────────────────────────────────────────── */
+.tv-wrap { border-radius: 12px; overflow: hidden; margin-bottom: 12px; height: 140px; border: 1px solid var(--border); }
 
-/* Card */
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;}
-.ctitle{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid rgba(255,215,0,0.08);display:flex;justify-content:space-between;align-items:center;}
-.cbadge{font-size:8px;background:rgba(255,215,0,0.1);color:var(--gold);padding:2px 6px;border-radius:10px;}
+/* ── Signal card ───────────────────────────────────────────────────── */
+.sigcard { border-radius: 12px; padding: 14px; margin-bottom: 12px; text-align: center; border: 1px solid; }
+.sigcard.bearish { background: rgba(255,51,85,0.08);   border-color: rgba(255,51,85,0.4); }
+.sigcard.bullish { background: rgba(0,255,136,0.06);   border-color: rgba(0,255,136,0.3); }
+.sigcard.neutral { background: rgba(255,215,0,0.05);   border-color: rgba(255,215,0,0.3); }
+.siglbl { font-size: 8px; letter-spacing: 4px; color: var(--muted); margin-bottom: 4px; }
+.sigval { font-family: var(--display); font-size: 26px; font-weight: 900; letter-spacing: 6px; }
+.sigcard.bearish .sigval { color: var(--red);  text-shadow: 0 0 20px rgba(255,51,85,0.5); }
+.sigcard.bullish .sigval { color: var(--green); text-shadow: 0 0 20px rgba(0,255,136,0.4); }
+.sigcard.neutral .sigval { color: var(--gold); }
+.sigmeta { font-size: 10px; color: var(--muted); margin-top: 5px; line-height: 1.7; }
 
-/* TF rows */
-.tfrow{display:flex;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03);}
-.tfrow:last-child{border-bottom:none;}
-.tfname{font-size:10px;color:var(--gold);width:38px;}
-.tfbar{flex:1;height:3px;background:rgba(255,255,255,0.06);border-radius:2px;margin:0 10px;}
-.tffill{height:3px;border-radius:2px;}
-.tfsig{font-size:10px;width:58px;text-align:right;}
-.aup{color:var(--green);}.adn{color:var(--red);}.ant{color:var(--muted);}
+/* ── Card ──────────────────────────────────────────────────────────── */
+.card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+.ctitle { font-size: 8px; letter-spacing: 3px; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; padding-bottom: 7px; border-bottom: 1px solid rgba(255,215,0,0.08); display: flex; justify-content: space-between; align-items: center; }
+.cbadge { font-size: 8px; background: rgba(255,215,0,0.1); color: var(--gold); padding: 2px 6px; border-radius: 10px; }
 
-/* Indicators */
-.indrow{display:flex;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03);gap:8px;}
-.indrow:last-child{border-bottom:none;}
-.indname{font-size:10px;color:var(--muted);width:60px;}
-.indbar{flex:1;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;}
-.indfill{height:4px;border-radius:2px;}
-.indval{font-size:11px;font-weight:bold;width:52px;text-align:right;}
+/* ── TF rows ───────────────────────────────────────────────────────── */
+.tfrow { display: flex; align-items: center; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+.tfrow:last-child { border-bottom: none; }
+.tfname { font-size: 10px; color: var(--gold); width: 38px; }
+.tfbar { flex: 1; height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px; margin: 0 10px; }
+.tffill { height: 3px; border-radius: 2px; }
+.tfsig { font-size: 10px; width: 58px; text-align: right; }
+.aup { color: var(--green); } .adn { color: var(--red); } .ant { color: var(--muted); }
 
-/* Levels */
-.lvrow{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03);}
-.lvrow:last-child{border-bottom:none;}
-.lbadge{font-size:7px;letter-spacing:2px;padding:2px 6px;border-radius:4px;}
-.lbadge.res{background:rgba(255,51,85,0.12);color:var(--red);border:1px solid rgba(255,51,85,0.2);}
-.lbadge.sup{background:rgba(0,255,136,0.08);color:var(--green);border:1px solid rgba(0,255,136,0.15);}
-.lbadge.cur{background:rgba(255,215,0,0.12);color:var(--gold);border:1px solid rgba(255,215,0,0.2);}
-.lprice{font-family:var(--display);font-size:13px;}
-.ldist{font-size:9px;color:var(--muted);}
+/* ── Indicators ────────────────────────────────────────────────────── */
+.indrow { display: flex; align-items: center; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.03); gap: 8px; }
+.indrow:last-child { border-bottom: none; }
+.indname { font-size: 10px; color: var(--muted); width: 60px; }
+.indbar { flex: 1; height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; }
+.indfill { height: 4px; border-radius: 2px; }
+.indval { font-size: 11px; font-weight: bold; width: 52px; text-align: right; }
 
-/* Setup R StocksTrader */
-.setup-broker{background:var(--bg3);border:1px solid rgba(255,215,0,0.2);border-left:4px solid var(--gold);border-radius:10px;padding:14px;margin-bottom:12px;}
-.setup-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
-.setup-row:last-child{border-bottom:none;}
-.setup-key{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
-.setup-val{font-family:var(--display);font-size:15px;}
-.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
-.sitem{background:var(--bg3);border:1px solid rgba(255,255,255,0.05);border-radius:8px;padding:10px;}
-.silbl{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
-.sival{font-family:var(--display);font-size:14px;}
-.ce{color:var(--gold);}.csl{color:var(--red);}.ctp{color:var(--green);}
-.rrbadge{background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.2);border-radius:6px;padding:6px;text-align:center;font-size:11px;color:var(--green);margin-bottom:10px;}
+/* ── Levels ────────────────────────────────────────────────────────── */
+.lvrow { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+.lvrow:last-child { border-bottom: none; }
+.lbadge { font-size: 7px; letter-spacing: 2px; padding: 2px 6px; border-radius: 4px; }
+.lbadge.res { background: rgba(255,51,85,0.12); color: var(--red);   border: 1px solid rgba(255,51,85,0.2); }
+.lbadge.sup { background: rgba(0,255,136,0.08);  color: var(--green); border: 1px solid rgba(0,255,136,0.15); }
+.lbadge.cur { background: rgba(255,215,0,0.12);  color: var(--gold);  border: 1px solid rgba(255,215,0,0.2); }
+.lprice { font-family: var(--display); font-size: 13px; }
+.ldist { font-size: 9px; color: var(--muted); }
 
-/* Analysis */
-.acard{background:var(--bg2);border:1px solid rgba(0,255,136,0.2);border-radius:12px;padding:14px;margin-bottom:12px;}
-.ahead{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:7px;border-bottom:1px solid rgba(0,255,136,0.1);}
-.atitle{font-size:8px;letter-spacing:3px;color:var(--green);}
-.asub{font-size:8px;color:var(--muted);margin-top:1px;}
-.atext{font-size:11px;line-height:2;color:#9aafc5;}
+/* ── Setup ─────────────────────────────────────────────────────────── */
+.setup-broker { background: var(--bg3); border: 1px solid rgba(255,215,0,0.2); border-left: 4px solid var(--gold); border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+.setup-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.setup-row:last-child { border-bottom: none; }
+.setup-key { font-size: 9px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
+.setup-val { font-family: var(--display); font-size: 15px; }
+.ce { color: var(--gold); } .csl { color: var(--red); } .ctp { color: var(--green); }
+.rrbadge { background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.2); border-radius: 6px; padding: 6px; text-align: center; font-size: 11px; color: var(--green); margin-bottom: 10px; }
 
-/* Manual form */
-.finput{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px;}
-.finput label{display:block;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;}
-.finput input,.finput select{width:100%;background:none;border:none;color:var(--text);font-family:var(--mono);font-size:14px;outline:none;}
-.finput input:focus{color:var(--gold);}
-.analyze-btn{width:100%;background:linear-gradient(135deg,rgba(255,215,0,0.2),rgba(255,165,0,0.1));border:1px solid rgba(255,215,0,0.4);color:var(--gold);padding:14px;font-family:var(--display);font-size:11px;letter-spacing:3px;cursor:pointer;border-radius:10px;margin-top:4px;transition:all 0.2s;}
-.analyze-btn:active{transform:scale(0.98);}
+/* ── Analysis card ─────────────────────────────────────────────────── */
+.acard { background: var(--bg2); border: 1px solid rgba(0,255,136,0.2); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+.ahead { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding-bottom: 7px; border-bottom: 1px solid rgba(0,255,136,0.1); }
+.atitle { font-size: 8px; letter-spacing: 3px; color: var(--green); }
+.asub { font-size: 8px; color: var(--muted); margin-top: 1px; }
+.atext { font-size: 11px; line-height: 2; color: #9aafc5; }
 
-/* Info */
-.iitem{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:13px 15px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
-.iname{font-size:12px;color:var(--text);}
-.idesc{font-size:9px;color:var(--muted);margin-top:2px;}
-.iright{font-size:10px;color:var(--gold);}
-.isect-title{font-size:8px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:8px;margin-top:4px;}
+/* ── Manual form ───────────────────────────────────────────────────── */
+.finput { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 10px; }
+.finput label { display: block; font-size: 8px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 4px; }
+.finput input, .finput select { width: 100%; background: none; border: none; color: var(--text); font-family: var(--mono); font-size: 14px; outline: none; }
+.finput input:focus { color: var(--gold); }
+.analyze-btn { width: 100%; background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,165,0,0.1)); border: 1px solid rgba(255,215,0,0.4); color: var(--gold); padding: 14px; font-family: var(--display); font-size: 11px; letter-spacing: 3px; cursor: pointer; border-radius: 10px; margin-top: 4px; transition: all 0.2s; }
+.analyze-btn:active { transform: scale(0.98); }
+.analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* Buttons */
-.rbtn{background:rgba(255,215,0,0.07);border:1px solid var(--border);color:var(--gold);padding:12px;font-family:var(--mono);font-size:9px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;border-radius:10px;width:100%;margin-bottom:8px;transition:background 0.2s;}
-.rbtn:active{background:rgba(255,215,0,0.15);}
-.disc{font-size:9px;color:#2a3345;text-align:center;padding:6px;line-height:1.8;}
+/* ── Info ──────────────────────────────────────────────────────────── */
+.iitem { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 13px 15px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+.iname { font-size: 12px; color: var(--text); }
+.idesc { font-size: 9px; color: var(--muted); margin-top: 2px; }
+.iright { font-size: 10px; color: var(--gold); }
+.isect-title { font-size: 8px; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; margin-bottom: 8px; margin-top: 4px; }
 
-/* Loading */
-.lwrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:18px;}
-.spinner{width:48px;height:48px;border:2px solid rgba(255,215,0,0.1);border-top-color:var(--gold);border-radius:50%;animation:spin 0.9s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg)}}
-.ltitle{font-family:var(--display);font-size:11px;letter-spacing:4px;color:var(--gold);}
+/* ── Buttons ───────────────────────────────────────────────────────── */
+.rbtn { background: rgba(255,215,0,0.07); border: 1px solid var(--border); color: var(--gold); padding: 12px; font-family: var(--mono); font-size: 9px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; border-radius: 10px; width: 100%; margin-bottom: 8px; transition: background 0.2s; }
+.rbtn:active { background: rgba(255,215,0,0.15); }
+.disc { font-size: 9px; color: #2a3345; text-align: center; padding: 6px; line-height: 1.8; }
+
+/* ── Loading ───────────────────────────────────────────────────────── */
+.lwrap { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; gap: 18px; }
+.spinner { width: 48px; height: 48px; border: 2px solid rgba(255,215,0,0.1); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.ltitle { font-family: var(--display); font-size: 11px; letter-spacing: 4px; color: var(--gold); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   AI TAB — Claude analýza
+   ══════════════════════════════════════════════════════════════════════ */
+.ai-panel { padding: 12px; }
+
+/* Top signal banner */
+.ai-signal-banner {
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 14px;
+  text-align: center;
+  border: 1px solid rgba(167,139,250,0.3);
+  background: linear-gradient(145deg, rgba(167,139,250,0.06), rgba(99,102,241,0.03));
+  position: relative;
+  overflow: hidden;
+}
+.ai-signal-banner::before { content: '✦'; position: absolute; top: -6px; right: 16px; font-size: 52px; color: rgba(167,139,250,0.05); pointer-events: none; }
+.ai-banner-lbl { font-size: 8px; letter-spacing: 4px; color: #a78bfa; margin-bottom: 6px; }
+.ai-banner-sig { font-family: var(--display); font-size: 28px; font-weight: 900; letter-spacing: 6px; }
+.ai-banner-sig.buy  { color: var(--green); text-shadow: 0 0 18px rgba(0,255,136,0.4); }
+.ai-banner-sig.sell { color: var(--red);   text-shadow: 0 0 18px rgba(255,51,85,0.4); }
+.ai-banner-sig.wait { color: var(--gold); }
+.ai-banner-sig.idle { color: var(--muted); font-size: 18px; letter-spacing: 3px; }
+.ai-banner-meta { font-size: 10px; color: var(--muted); margin-top: 5px; line-height: 1.7; }
+
+/* Input grid */
+.ai-input-card {
+  background: var(--bg2);
+  border: 1px solid rgba(167,139,250,0.2);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 12px;
+}
+.ai-ctitle { font-size: 8px; letter-spacing: 3px; text-transform: uppercase; color: #a78bfa; margin-bottom: 10px; padding-bottom: 7px; border-bottom: 1px solid rgba(167,139,250,0.1); }
+.ai-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.ai-grid4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.ai-finput { background: var(--bg3); border: 1px solid rgba(167,139,250,0.15); border-radius: 8px; padding: 9px 10px; }
+.ai-finput label { display: block; font-size: 8px; letter-spacing: 2px; color: #7c6fa0; text-transform: uppercase; margin-bottom: 3px; }
+.ai-finput input, .ai-finput select { width: 100%; background: none; border: none; color: var(--text); font-family: var(--mono); font-size: 13px; outline: none; }
+.ai-finput input:focus { color: #a78bfa; }
+.ai-finput select option { background: var(--bg3); }
+
+/* Run button */
+.ai-run-btn {
+  width: 100%;
+  background: linear-gradient(135deg, rgba(167,139,250,0.18), rgba(99,102,241,0.08));
+  border: 1px solid rgba(167,139,250,0.45);
+  color: #a78bfa;
+  padding: 14px;
+  font-family: var(--display);
+  font-size: 11px;
+  letter-spacing: 3px;
+  cursor: pointer;
+  border-radius: 10px;
+  margin-top: 4px;
+  transition: all 0.2s;
+}
+.ai-run-btn:hover { background: linear-gradient(135deg, rgba(167,139,250,0.25), rgba(99,102,241,0.12)); }
+.ai-run-btn:active { transform: scale(0.99); }
+.ai-run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Output streaming area */
+.ai-output-card {
+  background: var(--bg3);
+  border: 1px solid rgba(167,139,250,0.2);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 12px;
+  display: none;
+}
+.ai-output-card.visible { display: block; }
+.ai-out-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(167,139,250,0.12);
+}
+.ai-out-title { font-size: 8px; letter-spacing: 3px; color: #a78bfa; text-transform: uppercase; }
+.ai-out-ts { font-size: 9px; color: var(--muted); margin-left: auto; }
+.ai-out-text { font-size: 11px; line-height: 2; color: #9aafc5; white-space: pre-wrap; }
+
+/* Streaming cursor */
+.ai-cursor {
+  display: inline-block; width: 7px; height: 12px;
+  background: #a78bfa; margin-left: 1px; vertical-align: middle;
+  animation: blink 0.75s step-end infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+/* Metrics row inside output */
+.ai-metrics { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 12px; }
+.ai-metric { background: var(--bg2); border: 1px solid rgba(167,139,250,0.12); border-radius: 8px; padding: 8px; text-align: center; }
+.ai-metric-lbl { font-size: 7px; letter-spacing: 2px; color: #7c6fa0; text-transform: uppercase; }
+.ai-metric-val { font-family: var(--display); font-size: 14px; color: #a78bfa; margin-top: 3px; }
+
+/* Trade box (entry/sl/tp) */
+.ai-trade-box {
+  background: var(--bg2);
+  border: 1px solid rgba(167,139,250,0.15);
+  border-left: 3px solid #a78bfa;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+.ai-trade-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+.ai-trade-row:last-child { border-bottom: none; }
+.ai-trade-key { font-size: 9px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
+.ai-trade-val { font-family: var(--display); font-size: 14px; }
+
+/* Error */
+.ai-error { color: var(--red); font-size: 11px; text-align: center; padding: 12px; border: 1px solid rgba(255,51,85,0.2); border-radius: 10px; margin-top: 8px; background: rgba(255,51,85,0.04); }
+
+/* Preset bar */
+.ai-presets { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.ai-preset {
+  font-family: var(--mono); font-size: 8px; letter-spacing: 1px;
+  padding: 5px 10px; border: 1px solid rgba(167,139,250,0.3); border-radius: 20px;
+  background: rgba(167,139,250,0.07); color: #a78bfa; cursor: pointer; transition: all 0.15s;
+}
+.ai-preset:hover { background: rgba(167,139,250,0.15); }
+.ai-preset:active { transform: scale(0.97); }
+
+/* Auto-fill notice */
+.ai-autofill-notice {
+  font-size: 8px; letter-spacing: 1px; color: var(--green);
+  background: rgba(0,255,136,0.06); border: 1px solid rgba(0,255,136,0.2);
+  border-radius: 6px; padding: 6px 10px; margin-bottom: 8px; text-align: center; display: none;
+}
 </style>
 </head>
 <body>
@@ -176,16 +350,17 @@ header{flex-shrink:0;background:rgba(5,8,16,0.98);border-bottom:1px solid var(--
 </div>
 
 <nav class="nav">
-  <button class="ntab active" onclick="showTab('analysis')">◈ Auto</button>
-  <button class="ntab" onclick="showTab('levels')">◈ Úrovně</button>
-  <button class="ntab" onclick="showTab('setup')">◈ Setup</button>
-  <button class="ntab" onclick="showTab('manual')">◈ Manuál</button>
-  <button class="ntab" onclick="showTab('info')">◈ Info</button>
+  <button class="ntab active"   onclick="showTab('analysis')">◈ Auto</button>
+  <button class="ntab"          onclick="showTab('levels')">◈ Úrovně</button>
+  <button class="ntab"          onclick="showTab('setup')">◈ Setup</button>
+  <button class="ntab"          onclick="showTab('manual')">◈ Manuál</button>
+  <button class="ntab ai-tab"   onclick="showTab('ai')">✦ AI</button>
+  <button class="ntab"          onclick="showTab('info')">◈ Info</button>
 </nav>
 
 <div class="main">
 
-  <!-- AUTO TAB -->
+  <!-- ── AUTO TAB ───────────────────────────────────────────────── -->
   <div class="screen active" id="tab-analysis">
     <div class="pcard a1">
       <div class="plbl">◈ GOLD SPOT <span class="live-badge">● LIVE</span></div>
@@ -202,33 +377,35 @@ header{flex-shrink:0;background:rgba(5,8,16,0.98);border-bottom:1px solid var(--
     <div id="tfBox"></div>
     <div id="indBox"></div>
     <div id="analysisBox"></div>
+    <!-- Quick AI shortcut button -->
+    <button class="rbtn a5" style="border-color:rgba(167,139,250,0.3);color:#a78bfa;background:rgba(167,139,250,0.06);" onclick="openAiTabWithData()">✦ OTEVŘÍT AI ANALÝZU</button>
     <button class="rbtn" onclick="loadData()">↻ AKTUALIZOVAT ANALÝZU</button>
     <div class="disc">⚠ Pouze informativní · Není finanční poradenství</div>
   </div>
 
-  <!-- LEVELS TAB -->
+  <!-- ── LEVELS TAB ─────────────────────────────────────────────── -->
   <div class="screen" id="tab-levels">
     <div id="levelsContent"><div class="lwrap"><div class="spinner"></div></div></div>
   </div>
 
-  <!-- SETUP TAB -->
+  <!-- ── SETUP TAB ──────────────────────────────────────────────── -->
   <div class="screen" id="tab-setup">
     <div id="setupContent"><div class="lwrap"><div class="spinner"></div></div></div>
   </div>
 
-  <!-- MANUAL TAB -->
+  <!-- ── MANUAL TAB ─────────────────────────────────────────────── -->
   <div class="screen" id="tab-manual">
     <div class="card a1" style="background:linear-gradient(145deg,rgba(255,215,0,0.07),rgba(255,215,0,0.02));border-color:rgba(255,215,0,0.25)">
       <div class="ctitle">◈ Zadejte data z TradingView</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-        <div class="finput"><label>Aktuální cena</label><input type="number" id="m_price" placeholder="4740.00" step="0.01"></div>
-        <div class="finput"><label>Předchozí close</label><input type="number" id="m_prev" placeholder="4720.00" step="0.01"></div>
+        <div class="finput"><label>Aktuální cena</label><input type="number" id="m_price" placeholder="3320.00" step="0.01"></div>
+        <div class="finput"><label>Předchozí close</label><input type="number" id="m_prev" placeholder="3300.00" step="0.01"></div>
         <div class="finput"><label>RSI (14)</label><input type="number" id="m_rsi" placeholder="45" step="0.1"></div>
-        <div class="finput"><label>EMA 20</label><input type="number" id="m_ema20" placeholder="4750.00" step="0.01"></div>
-        <div class="finput"><label>EMA 50</label><input type="number" id="m_ema50" placeholder="4700.00" step="0.01"></div>
-        <div class="finput"><label>EMA 200</label><input type="number" id="m_ema200" placeholder="4500.00" step="0.01"></div>
-        <div class="finput"><label>High 24h</label><input type="number" id="m_high" placeholder="4780.00" step="0.01"></div>
-        <div class="finput"><label>Low 24h</label><input type="number" id="m_low" placeholder="4710.00" step="0.01"></div>
+        <div class="finput"><label>EMA 20</label><input type="number" id="m_ema20" placeholder="3300.00" step="0.01"></div>
+        <div class="finput"><label>EMA 50</label><input type="number" id="m_ema50" placeholder="3280.00" step="0.01"></div>
+        <div class="finput"><label>EMA 200</label><input type="number" id="m_ema200" placeholder="3180.00" step="0.01"></div>
+        <div class="finput"><label>High 24h</label><input type="number" id="m_high" placeholder="3350.00" step="0.01"></div>
+        <div class="finput"><label>Low 24h</label><input type="number" id="m_low" placeholder="3290.00" step="0.01"></div>
       </div>
       <div class="ctitle">◈ Timeframe signály</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
@@ -242,15 +419,107 @@ header{flex-shrink:0;background:rgba(5,8,16,0.98);border-bottom:1px solid var(--
     <div id="manualResult"></div>
   </div>
 
-  <!-- INFO TAB -->
+  <!-- ══════════════════════════════════════════════════════════════
+       AI TAB — Claude AI Analýza
+       ══════════════════════════════════════════════════════════════ -->
+  <div class="screen" id="tab-ai">
+    <div class="ai-panel">
+
+      <!-- Signal banner -->
+      <div class="ai-signal-banner a1">
+        <div class="ai-banner-lbl">✦ CLAUDE AI SIGNÁL</div>
+        <div class="ai-banner-sig idle" id="aiBannerSig">ČEKÁ NA DATA</div>
+        <div class="ai-banner-meta" id="aiBannerMeta">Vyplňte tržní data a spusťte analýzu</div>
+      </div>
+
+      <!-- Inputs -->
+      <div class="ai-input-card a2">
+        <div class="ai-ctitle">✦ Tržní data</div>
+
+        <!-- Auto-fill notice -->
+        <div class="ai-autofill-notice" id="aiAutofillNotice">
+          ✓ Data načtena automaticky z Auto záložky
+        </div>
+
+        <!-- Preset buttons -->
+        <div class="ai-presets">
+          <button class="ai-preset" onclick="aiLoadPreset('bull')">▲ Bullish demo</button>
+          <button class="ai-preset" onclick="aiLoadPreset('bear')">▼ Bearish demo</button>
+          <button class="ai-preset" onclick="aiLoadPreset('neutral')">— Neutral demo</button>
+        </div>
+
+        <div class="ai-grid2">
+          <div class="ai-finput"><label>Cena (USD)</label><input id="ai_price" type="number" placeholder="3320.00" step="0.01"></div>
+          <div class="ai-finput"><label>Změna 24h (%)</label><input id="ai_chg" type="number" placeholder="+0.42" step="0.01"></div>
+          <div class="ai-finput"><label>RSI (14)</label><input id="ai_rsi" type="number" placeholder="52.5" step="0.1"></div>
+          <div class="ai-finput"><label>ATR (14)</label><input id="ai_atr" type="number" placeholder="28.0" step="0.1"></div>
+          <div class="ai-finput"><label>EMA 20</label><input id="ai_ema20" type="number" placeholder="3295.0" step="0.1"></div>
+          <div class="ai-finput"><label>EMA 50</label><input id="ai_ema50" type="number" placeholder="3280.0" step="0.1"></div>
+          <div class="ai-finput"><label>EMA 200</label><input id="ai_ema200" type="number" placeholder="3180.0" step="0.1"></div>
+          <div class="ai-finput"><label>MACD</label><input id="ai_macd" type="number" placeholder="4.2" step="0.1"></div>
+        </div>
+
+        <div class="ai-ctitle" style="margin-top:4px">✦ Timeframe signály</div>
+        <div class="ai-grid4">
+          <div class="ai-finput"><label>1D</label>
+            <select id="ai_t1d"><option value="bullish">▲ BUY</option><option value="neutral">— WAIT</option><option value="bearish">▼ SELL</option></select>
+          </div>
+          <div class="ai-finput"><label>4H</label>
+            <select id="ai_t4h"><option value="bullish">▲ BUY</option><option value="neutral">— WAIT</option><option value="bearish">▼ SELL</option></select>
+          </div>
+          <div class="ai-finput"><label>1H</label>
+            <select id="ai_t1h"><option value="neutral">— WAIT</option><option value="bullish">▲ BUY</option><option value="bearish">▼ SELL</option></select>
+          </div>
+          <div class="ai-finput"><label>15M</label>
+            <select id="ai_t15m"><option value="neutral">— WAIT</option><option value="bullish">▲ BUY</option><option value="bearish">▼ SELL</option></select>
+          </div>
+        </div>
+
+        <button class="ai-run-btn" id="aiRunBtn" onclick="runAIAnalysis()">✦ SPUSTIT CLAUDE AI ANALÝZU</button>
+        <div id="aiError"></div>
+      </div>
+
+      <!-- Streaming output -->
+      <div class="ai-output-card" id="aiOutputCard">
+        <div class="ai-out-head">
+          <span class="ai-out-title">✦ Claude AI výstup</span>
+          <span id="aiSigPill" style="margin-left:6px"></span>
+          <span class="ai-out-ts" id="aiOutTs"></span>
+        </div>
+        <!-- Trade levels -->
+        <div class="ai-trade-box" id="aiTradeBox" style="display:none">
+          <div class="ai-trade-row"><span class="ai-trade-key">Instrument</span><span class="ai-trade-val" style="color:var(--gold)">XAUUSD</span></div>
+          <div class="ai-trade-row"><span class="ai-trade-key">Typ</span><span class="ai-trade-val" id="aiTradeType">–</span></div>
+          <div class="ai-trade-row"><span class="ai-trade-key">Entry</span><span class="ai-trade-val ce" id="aiTradeEntry">–</span></div>
+          <div class="ai-trade-row"><span class="ai-trade-key">Stop Loss</span><span class="ai-trade-val csl" id="aiTradeSL">–</span></div>
+          <div class="ai-trade-row"><span class="ai-trade-key">Take Profit 1</span><span class="ai-trade-val ctp" id="aiTradeTP1">–</span></div>
+          <div class="ai-trade-row"><span class="ai-trade-key">Take Profit 2</span><span class="ai-trade-val ctp" id="aiTradeTP2">–</span></div>
+          <div class="ai-trade-row"><span class="ai-trade-key">R/R Ratio</span><span class="ai-trade-val" style="color:#a78bfa" id="aiTradeRR">–</span></div>
+        </div>
+        <!-- Metrics -->
+        <div class="ai-metrics" id="aiMetrics" style="display:none">
+          <div class="ai-metric"><div class="ai-metric-lbl">RSI 14</div><div class="ai-metric-val" id="aiMRsi">–</div></div>
+          <div class="ai-metric"><div class="ai-metric-lbl">TF shoda</div><div class="ai-metric-val" id="aiMTf">–</div></div>
+          <div class="ai-metric"><div class="ai-metric-lbl">ATR risk</div><div class="ai-metric-val" id="aiMAtr">–</div></div>
+        </div>
+        <!-- Streaming text -->
+        <div class="ai-out-text" id="aiOutText"></div>
+      </div>
+
+      <div class="disc">⚠ AI analýza je pouze informativní · Není finanční poradenství · Obchodujte zodpovědně</div>
+    </div>
+  </div>
+
+  <!-- ── INFO TAB ───────────────────────────────────────────────── -->
   <div class="screen" id="tab-info">
     <div style="padding:4px">
       <div class="isect-title">◈ Status systému</div>
       <div class="iitem"><div><div class="iname">Data robot</div><div class="idesc">GitHub Actions · každých 15 min</div></div><div class="iright" id="robotStatus">⏳</div></div>
       <div class="iitem"><div><div class="iname">Poslední update</div><div class="idesc">Automatická aktualizace</div></div><div class="iright" id="lastUpdate">–</div></div>
       <div class="iitem"><div><div class="iname">Živá cena</div><div class="idesc">GoldAPI.io · FOREXCOM XAUUSD spot</div></div><div class="iright" style="color:var(--green)">●LIVE</div></div>
+      <div class="iitem"><div><div class="iname">Claude AI</div><div class="idesc">Anthropic claude-sonnet-4 · streaming</div></div><div class="iright" style="color:#a78bfa">✦ LIVE</div></div>
       <div class="iitem"><div><div class="iname">Historická data</div><div class="idesc">Yahoo Finance XAUUSD=X · RSI/EMA/MACD</div></div><div class="iright">AUTO</div></div>
-      <div class="iitem"><div><div class="iname">Indikátory</div><div class="idesc">RSI · EMA 20/50/200 · MACD</div></div><div class="iright">AUTO</div></div>
+
       <div class="isect-title" style="margin-top:12px">◈ Jak nainstalovat jako apku</div>
       <div class="card"><div style="font-size:11px;line-height:2.2;color:var(--text)">
         1. Otevřete v <b style="color:var(--gold)">Chrome</b><br>
@@ -258,11 +527,13 @@ header{flex-shrink:0;background:rgba(5,8,16,0.98);border-bottom:1px solid var(--
         3. <b style="color:var(--gold)">"Přidat na plochu"</b><br>
         4. Potvrďte → ikona na ploše ✓
       </div></div>
+
       <div class="isect-title">◈ Push notifikace</div>
       <div class="iitem" style="cursor:pointer" onclick="requestNotificationPermission()">
         <div><div class="iname">🔔 Notifikace BUY/SELL</div><div class="idesc">Klepněte pro povolení push notifikací</div></div>
         <div class="iright" id="notifBtn">Aktivovat</div>
       </div>
+
       <div class="isect-title">◈ Upozornění</div>
       <div class="card"><div style="font-size:10px;line-height:1.9;color:var(--muted)">Pouze informativní. Není finančním poradenstvím. Obchodujte zodpovědně.</div></div>
     </div>
@@ -271,172 +542,159 @@ header{flex-shrink:0;background:rgba(5,8,16,0.98);border-bottom:1px solid var(--
 </div><!-- end .main -->
 
 <script>
-// ── Helpers ───────────────────────────────────────────────────────────
-function f(n,d=2){return Number(n).toFixed(d);}
-function rc(v){if(v>70)return'var(--red)';if(v<30)return'var(--green)';return'var(--text)';}
-function ta(t){if(t==='bullish')return'<span class="aup">▲ BUY</span>';if(t==='bearish')return'<span class="adn">▼ SELL</span>';return'<span class="ant">— WAIT</span>';}
-function tbc(t){if(t==='bullish')return'var(--green)';if(t==='bearish')return'var(--red)';return'var(--muted)';}
+// ── Helpers ────────────────────────────────────────────────────────────
+function f(n, d=2) { return isNaN(n) ? '–' : Number(n).toFixed(d); }
+function rc(v) { if (v > 70) return 'var(--red)'; if (v < 30) return 'var(--green)'; return 'var(--text)'; }
+function ta(t) { if (t==='bullish') return '<span class="aup">▲ BUY</span>'; if (t==='bearish') return '<span class="adn">▼ SELL</span>'; return '<span class="ant">— WAIT</span>'; }
+function tbc(t) { if (t==='bullish') return 'var(--green)'; if (t==='bearish') return 'var(--red)'; return 'var(--muted)'; }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-// ── Time ──────────────────────────────────────────────────────────────
-function ut(){document.getElementById('ht').textContent=new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
-ut();setInterval(ut,1000);
+// ── Clock ──────────────────────────────────────────────────────────────
+function ut() { document.getElementById('ht').textContent = new Date().toLocaleTimeString('cs-CZ', {hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
+ut(); setInterval(ut, 1000);
 
-// ── Tabs ──────────────────────────────────────────────────────────────
-function showTab(n){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
+// ── Tabs ───────────────────────────────────────────────────────────────
+const TAB_NAMES = ['analysis','levels','setup','manual','ai','info'];
+function showTab(n) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.ntab').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-'+n).classList.add('active');
-  ['analysis','levels','setup','manual','info'].forEach((x,i)=>{if(x===n)document.querySelectorAll('.ntab')[i].classList.add('active');});
+  TAB_NAMES.forEach((x,i) => { if (x===n) document.querySelectorAll('.ntab')[i].classList.add('active'); });
 }
 
-// ── SW ────────────────────────────────────────────────────────────────
-if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+// ── Service Worker ─────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
 
-// ── OneSignal Push Notifications ─────────────────────────────────────
+// ── OneSignal ──────────────────────────────────────────────────────────
 const ONESIGNAL_APP_ID = "99a23e7d-32e9-475b-96ce-48615b4bc128";
-
 function initOneSignal() {
-  if(typeof OneSignal !== 'undefined') return;
+  if (typeof OneSignal !== 'undefined') return;
   const script = document.createElement('script');
   script.src = 'https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js';
   script.defer = true;
   script.onload = () => {
     window.OneSignalDeferred = window.OneSignalDeferred || [];
     OneSignalDeferred.push(async function(OneSignal) {
-      await OneSignal.init({
-        appId: ONESIGNAL_APP_ID,
-        safari_web_id: "",
-        notifyButton: { enable: false },
-        allowLocalhostAsSecureOrigin: true,
-      });
-      console.log("OneSignal initialized");
+      await OneSignal.init({ appId: ONESIGNAL_APP_ID, notifyButton: { enable: false }, allowLocalhostAsSecureOrigin: true });
     });
   };
   document.head.appendChild(script);
 }
 initOneSignal();
-
 async function requestNotificationPermission() {
   try {
-    if(typeof OneSignal === 'undefined') { initOneSignal(); }
+    if (typeof OneSignal === 'undefined') initOneSignal();
     OneSignalDeferred.push(async function(OneSignal) {
-      const permission = await OneSignal.Notifications.requestPermission();
-      if(permission) {
-        alert("✅ Notifikace povoleny! Obdržíte upozornění při každém novém signálu BUY/SELL.");
-        document.getElementById('notifBtn').textContent = '🔔 Notifikace aktivní';
-        document.getElementById('notifBtn').style.color = 'var(--green)';
-      } else {
-        alert("❌ Notifikace zamítnuty. Povolte je v nastavení prohlížeče.");
-      }
+      const ok = await OneSignal.Notifications.requestPermission();
+      document.getElementById('notifBtn').textContent = ok ? '🔔 Aktivní' : '❌ Zamítnuto';
+      document.getElementById('notifBtn').style.color = ok ? 'var(--green)' : 'var(--red)';
     });
-  } catch(e) {
-    alert("Chyba: " + e.message);
-  }
+  } catch(e) { alert('Chyba: '+e.message); }
 }
 
-// ── TradingView Widget ────────────────────────────────────────────────
+// ── TradingView widget ─────────────────────────────────────────────────
 let tvLoaded = false;
-function loadTVWidget(){
-  if(tvLoaded) return;
+function loadTVWidget() {
+  if (tvLoaded) return;
   tvLoaded = true;
   const c = document.getElementById('tvWidget');
   const s = document.createElement('script');
   s.src = 'https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js';
   s.async = true;
-  s.innerHTML = JSON.stringify({
-    symbol:'OANDA:XAUUSD', width:'100%', height:'140', locale:'cs',
-    dateRange:'1M', colorTheme:'dark', isTransparent:true, autosize:true
-  });
+  s.innerHTML = JSON.stringify({ symbol:'OANDA:XAUUSD', width:'100%', height:'140', locale:'cs', dateRange:'1M', colorTheme:'dark', isTransparent:true, autosize:true });
   c.appendChild(s);
 }
 
-// ── Countdown ─────────────────────────────────────────────────────────
+// ── Countdown ──────────────────────────────────────────────────────────
 let countdown = 900;
-setInterval(()=>{
+setInterval(() => {
   countdown--;
-  if(countdown<=0){countdown=900;loadData();}
-  const m=Math.floor(countdown/60), s=countdown%60;
-  document.getElementById('ctimer').textContent=`${m}:${s.toString().padStart(2,'0')}`;
-  document.getElementById('cbar').style.width=(countdown/900*100)+'%';
-},1000);
+  if (countdown <= 0) { countdown = 900; loadData(); }
+  const m = Math.floor(countdown/60), s = countdown % 60;
+  document.getElementById('ctimer').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+  document.getElementById('cbar').style.width = (countdown/900*100)+'%';
+}, 1000);
 
-// ── State ─────────────────────────────────────────────────────────────
+// ── State ──────────────────────────────────────────────────────────────
 let cachedData = null;
-let lastPrice = 0;
+let lastPrice  = 0;
 
-// ── Update live price display ─────────────────────────────────────────
-function updatePriceDisplay(price, data){
+// ── Update price display ───────────────────────────────────────────────
+function updatePriceDisplay(price, data) {
   const el = document.getElementById('livePrice');
-  if(el && lastPrice > 0){
+  if (el && lastPrice > 0) {
     el.classList.remove('up-flash','down-flash');
     void el.offsetWidth;
     el.classList.add(price > lastPrice ? 'up-flash' : 'down-flash');
   }
-  if(el) el.textContent = '$' + f(price, 2);
-
-  if(data){
+  if (el) el.textContent = '$' + f(price, 2);
+  if (data) {
     const ch = document.getElementById('priceChange');
-    if(ch){
+    if (ch) {
       const chg = data.change||0, pct = data.changePct||0;
-      ch.className = 'pchg ' + (chg>=0?'up':'down');
+      ch.className = 'pchg '+(chg >= 0 ? 'up' : 'down');
       ch.textContent = `${chg>=0?'▲':'▼'} $${f(Math.abs(chg),2)} · ${pct>=0?'+':''}${f(pct,2)}%`;
     }
     const dr=document.getElementById('d_rsi'), dh=document.getElementById('d_high'), dl=document.getElementById('d_low');
-    if(dr){dr.textContent=f(data.rsi,1);dr.style.color=rc(data.rsi);}
-    if(dh) dh.textContent='$'+f(data.high24h,0);
-    if(dl) dl.textContent='$'+f(data.low24h,0);
+    if (dr) { dr.textContent = f(data.rsi,1); dr.style.color = rc(data.rsi); }
+    if (dh) dh.textContent = '$'+f(data.high24h,0);
+    if (dl) dl.textContent = '$'+f(data.low24h,0);
   }
   lastPrice = price;
 }
 
-// ── Load data.json ────────────────────────────────────────────────────
-async function loadData(){
-  try{
+// ── Load data.json ─────────────────────────────────────────────────────
+async function loadData() {
+  try {
     const r = await fetch('./data.json?t='+Date.now());
-    if(!r.ok) throw new Error('HTTP '+r.status);
+    if (!r.ok) throw new Error('HTTP '+r.status);
     const d = await r.json();
-    if(d.status==='error') throw new Error(d.error||'Data error');
+    if (d.status === 'error') throw new Error(d.error || 'Data error');
     cachedData = d;
     renderAll(d);
-    document.getElementById('statusDot').className='dot';
-    document.getElementById('robotStatus').textContent='✅ Online';
-    document.getElementById('lastUpdate').textContent=d.updated||'–';
+    document.getElementById('statusDot').className = 'dot';
+    document.getElementById('robotStatus').textContent = '✅ Online';
+    document.getElementById('lastUpdate').textContent = d.updated || '–';
     loadTVWidget();
-  }catch(e){
-    document.getElementById('statusDot').className='dot red';
-    document.getElementById('robotStatus').textContent='❌ Offline';
-    const err=`<div class="lwrap"><div style="font-size:28px">⚠</div><div style="color:var(--red);font-size:11px;letter-spacing:3px">CHYBA</div><div style="color:var(--muted);font-size:10px;text-align:center;line-height:1.8;max-width:280px">${e.message}</div><button class="rbtn" style="max-width:240px;margin-top:8px" onclick="loadData()">↻ ZKUSIT ZNOVU</button></div>`;
-    ['signalBox','tfBox','indBox','analysisBox'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='';});
-    document.getElementById('levelsContent').innerHTML=err;
-    document.getElementById('setupContent').innerHTML=err;
+  } catch(e) {
+    document.getElementById('statusDot').className = 'dot red';
+    document.getElementById('robotStatus').textContent = '❌ Offline';
+    const err = `<div class="lwrap"><div style="font-size:28px">⚠</div><div style="color:var(--red);font-size:11px;letter-spacing:3px">CHYBA</div><div style="color:var(--muted);font-size:10px;text-align:center;line-height:1.8;max-width:280px">${esc(e.message)}</div><button class="rbtn" style="max-width:240px;margin-top:8px" onclick="loadData()">↻ ZKUSIT ZNOVU</button></div>`;
+    ['signalBox','tfBox','indBox','analysisBox'].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = ''; });
+    document.getElementById('levelsContent').innerHTML = err;
+    document.getElementById('setupContent').innerHTML  = err;
   }
 }
 
-// ── Render all tabs ───────────────────────────────────────────────────
-function renderAll(d){
-  const price = d.price||0;
+// ── Render all tabs ────────────────────────────────────────────────────
+function renderAll(d) {
+  const price = d.price || 0;
   updatePriceDisplay(price, d);
-
-  const sc = d.signal==='SELL'?'bearish':d.signal==='BUY'?'bullish':'neutral';
+  const sc = d.signal==='SELL' ? 'bearish' : d.signal==='BUY' ? 'bullish' : 'neutral';
   const rr = d.tp1&&d.sl&&d.entry ? f(Math.abs(d.tp1-d.entry)/Math.abs(d.sl-d.entry||1),1) : '2.0';
 
   // Signal
-  document.getElementById('signalBox').innerHTML=`
+  document.getElementById('signalBox').innerHTML = `
     <div class="sigcard ${sc} a2">
       <div class="siglbl">◈ AI ROBOT SIGNÁL</div>
-      <div class="sigval">${d.signal}</div>
-      <div class="sigmeta">Shoda: ${d.confidence}% · Trend: ${(d.trend||'').toUpperCase()}<br>EMA200: $${f(d.ema200,0)} · MACD: ${f(d.macd,1)} · ATR: $${f(d.atr||0,1)}</div>
+      <div class="sigval">${esc(d.signal)}</div>
+      <div class="sigmeta">Shoda: ${d.confidence}% · Trend: ${esc((d.trend||'').toUpperCase())}<br>EMA200: $${f(d.ema200,0)} · MACD: ${f(d.macd,1)} · ATR: $${f(d.atr||0,1)}</div>
     </div>`;
 
   // TF
-  document.getElementById('tfBox').innerHTML=`
+  document.getElementById('tfBox').innerHTML = `
     <div class="card a3">
       <div class="ctitle">◈ Multi-Timeframe <span class="cbadge">AUTO</span></div>
-      ${Object.entries(d.tf||{}).map(([tf,t])=>`<div class="tfrow"><span class="tfname">${tf}</span><div class="tfbar"><div class="tffill" style="width:${t==='bullish'?70:t==='bearish'?30:50}%;background:${tbc(t)}"></div></div><span class="tfsig">${ta(t)}</span></div>`).join('')}
+      ${Object.entries(d.tf||{}).map(([tf,t]) => `
+        <div class="tfrow">
+          <span class="tfname">${esc(tf)}</span>
+          <div class="tfbar"><div class="tffill" style="width:${t==='bullish'?70:t==='bearish'?30:50}%;background:${tbc(t)}"></div></div>
+          <span class="tfsig">${ta(t)}</span>
+        </div>`).join('')}
     </div>`;
 
   // Indicators
-  document.getElementById('indBox').innerHTML=`
+  document.getElementById('indBox').innerHTML = `
     <div class="card a4">
       <div class="ctitle">◈ Indikátory</div>
       <div class="indrow"><span class="indname">RSI 14</span><div class="indbar"><div class="indfill" style="width:${d.rsi}%;background:${rc(d.rsi)}"></div></div><span class="indval" style="color:${rc(d.rsi)}">${f(d.rsi,1)}</span></div>
@@ -447,23 +705,23 @@ function renderAll(d){
     </div>`;
 
   // Analysis
-  document.getElementById('analysisBox').innerHTML=`
+  document.getElementById('analysisBox').innerHTML = `
     <div class="acard a5">
-      <div class="ahead"><div style="font-size:16px">📊</div><div><div class="atitle">AUTOMATICKÁ ANALÝZA</div><div class="asub">GitHub Actions · ${d.updated||''}</div></div></div>
-      <div class="atext">${d.analysis||'–'}</div>
+      <div class="ahead"><div style="font-size:16px">📊</div><div><div class="atitle">AUTOMATICKÁ ANALÝZA</div><div class="asub">GitHub Actions · ${esc(d.updated||'')}</div></div></div>
+      <div class="atext">${esc(d.analysis||'–')}</div>
     </div>`;
 
   // Levels tab
-  document.getElementById('levelsContent').innerHTML=`
-    <div class="card a1"><div class="ctitle">◈ Resistance zóny</div>${(d.resistance||[]).map((r,i)=>`<div class="lvrow"><span class="lbadge res">R${i+1}</span><span class="lprice" style="color:var(--red)">$${f(r,2)}</span><span class="ldist">+$${f(r-price,1)}</span></div>`).join('')}</div>
+  document.getElementById('levelsContent').innerHTML = `
+    <div class="card a1"><div class="ctitle">◈ Resistance zóny</div>${(d.resistance||[]).map((r,i) => `<div class="lvrow"><span class="lbadge res">R${i+1}</span><span class="lprice" style="color:var(--red)">$${f(r,2)}</span><span class="ldist">+$${f(r-price,1)}</span></div>`).join('')}</div>
     <div class="card a2"><div class="ctitle">◈ Aktuální cena</div><div class="lvrow"><span class="lbadge cur">LIVE</span><span class="lprice" style="color:var(--gold)">$${f(price,2)}</span><span class="ldist" style="color:${d.change>=0?'var(--green)':'var(--red)'}">${d.changePct>=0?'+':''}${f(d.changePct||0,2)}%</span></div></div>
-    <div class="card a3"><div class="ctitle">◈ Support zóny</div>${(d.support||[]).map((s,i)=>`<div class="lvrow"><span class="lbadge sup">S${i+1}</span><span class="lprice" style="color:var(--green)">$${f(s,2)}</span><span class="ldist">-$${f(price-s,1)}</span></div>`).join('')}</div>
-    <div class="card a4"><div class="ctitle">◈ Klouzavé průměry</div>${[[d.ema20,'EMA 20'],[d.ema50,'EMA 50'],[d.ema200,'EMA 200']].map(([v,n])=>`<div class="lvrow"><span style="font-size:10px;color:var(--muted)">${n}</span><span class="lprice" style="color:${price>v?'var(--green)':'var(--red)'}">$${f(v,1)}</span><span class="ldist" style="color:${price>v?'var(--green)':'var(--red)'}">${price>v?'▲ nad':'▼ pod'}</span></div>`).join('')}</div>
+    <div class="card a3"><div class="ctitle">◈ Support zóny</div>${(d.support||[]).map((s,i) => `<div class="lvrow"><span class="lbadge sup">S${i+1}</span><span class="lprice" style="color:var(--green)">$${f(s,2)}</span><span class="ldist">-$${f(price-s,1)}</span></div>`).join('')}</div>
+    <div class="card a4"><div class="ctitle">◈ Klouzavé průměry</div>${[[d.ema20,'EMA 20'],[d.ema50,'EMA 50'],[d.ema200,'EMA 200']].map(([v,n]) => `<div class="lvrow"><span style="font-size:10px;color:var(--muted)">${n}</span><span class="lprice" style="color:${price>v?'var(--green)':'var(--red)'}">$${f(v,1)}</span><span class="ldist" style="color:${price>v?'var(--green)':'var(--red)'}">${price>v?'▲ nad':'▼ pod'}</span></div>`).join('')}</div>
     <button class="rbtn" onclick="loadData()">↻ AKTUALIZOVAT</button>`;
 
-  // Setup tab – R StocksTrader formát
-  document.getElementById('setupContent').innerHTML=`
-    <div class="sigcard ${sc} a1"><div class="siglbl">◈ DOPORUČENÝ SETUP</div><div class="sigval">${d.signal}</div><div class="sigmeta">Shoda: ${d.confidence}% · ${(d.trend||'').toUpperCase()}</div></div>
+  // Setup tab
+  document.getElementById('setupContent').innerHTML = `
+    <div class="sigcard ${sc} a1"><div class="siglbl">◈ DOPORUČENÝ SETUP</div><div class="sigval">${esc(d.signal)}</div><div class="sigmeta">Shoda: ${d.confidence}% · ${esc((d.trend||'').toUpperCase())}</div></div>
     <div class="setup-broker a2">
       <div class="ctitle" style="border:none;margin-bottom:8px">◈ R StocksTrader příkaz</div>
       <div class="setup-row"><span class="setup-key">Instrument</span><span class="setup-val" style="color:var(--gold)">XAUUSD</span></div>
@@ -474,48 +732,43 @@ function renderAll(d){
       <div class="setup-row"><span class="setup-key">Take Profit 2</span><span class="setup-val ctp">$${f(d.tp2,2)}</span></div>
     </div>
     <div class="rrbadge a3">Risk / Reward = 1 : ${rr} · ATR: $${f(d.atr||0,1)} · SL dist: $${f(d.sl_dist||0,0)}</div>
-    <div class="card a3"><div class="ctitle">◈ Risk kalkulace</div>${[['0.01',1],['0.05',5],['0.10',10]].map(([lot,m])=>`<div class="lvrow"><span style="font-size:10px;color:var(--muted)">Lot ${lot}</span><span style="font-size:11px;color:var(--red)">Risk ~$${f(Math.abs((d.sl-d.entry)||15)*m,1)}</span></div>`).join('')}<div style="font-size:9px;color:var(--muted);margin-top:8px">* Přibližný výpočet</div></div>
-    <div class="acard a4"><div class="ahead"><div style="font-size:16px">🎯</div><div><div class="atitle">ZDŮVODNĚNÍ</div><div class="asub">${d.updated||''}</div></div></div><div class="atext">${d.analysis||'–'}</div></div>
+    <div class="card a3"><div class="ctitle">◈ Risk kalkulace</div>${[['0.01',1],['0.05',5],['0.10',10]].map(([lot,m]) => `<div class="lvrow"><span style="font-size:10px;color:var(--muted)">Lot ${lot}</span><span style="font-size:11px;color:var(--red)">Risk ~$${f(Math.abs((d.sl-d.entry)||15)*m,1)}</span></div>`).join('')}<div style="font-size:9px;color:var(--muted);margin-top:8px">* Přibližný výpočet</div></div>
+    <div class="acard a4"><div class="ahead"><div style="font-size:16px">🎯</div><div><div class="atitle">ZDŮVODNĚNÍ</div><div class="asub">${esc(d.updated||'')}</div></div></div><div class="atext">${esc(d.analysis||'–')}</div></div>
     <button class="rbtn" onclick="loadData()">↻ NOVÝ SETUP</button>
     <div class="disc">⚠ Není finanční poradenství · Obchodujte zodpovědně</div>`;
 }
 
-// ── Manual analyze ────────────────────────────────────────────────────
-function manualAnalyze(){
-  const price=parseFloat(document.getElementById('m_price').value)||0;
-  if(!price){alert('Zadejte aktuální cenu!');return;}
-  const prev=parseFloat(document.getElementById('m_prev').value)||price;
-  const rsi=parseFloat(document.getElementById('m_rsi').value)||50;
-  const ema20=parseFloat(document.getElementById('m_ema20').value)||0;
-  const ema50=parseFloat(document.getElementById('m_ema50').value)||0;
-  const ema200=parseFloat(document.getElementById('m_ema200').value)||0;
-  const t1d=document.getElementById('t_1d').value;
-  const t4h=document.getElementById('t_4h').value;
-  const t1h=document.getElementById('t_1h').value;
-  const t15m=document.getElementById('t_15m').value;
+// ── Manual analyze ─────────────────────────────────────────────────────
+function manualAnalyze() {
+  const price = parseFloat(document.getElementById('m_price').value)||0;
+  if (!price) { alert('Zadejte aktuální cenu!'); return; }
+  const prev  = parseFloat(document.getElementById('m_prev').value)||price;
+  const rsi   = parseFloat(document.getElementById('m_rsi').value)||50;
+  const ema20 = parseFloat(document.getElementById('m_ema20').value)||0;
+  const ema50 = parseFloat(document.getElementById('m_ema50').value)||0;
+  const t1d   = document.getElementById('t_1d').value;
+  const t4h   = document.getElementById('t_4h').value;
+  const t1h   = document.getElementById('t_1h').value;
+  const t15m  = document.getElementById('t_15m').value;
+  const change = price-prev, changePct = prev ? (change/prev*100) : 0;
+  let bull=0, bear=0;
+  [t1d,t4h,t1h,t15m].forEach(t => { if (t==='bullish') bull++; else if (t==='bearish') bear++; });
+  if (rsi<35) bull++; else if (rsi>65) bear++;
+  if (ema20&&price>ema20) bull++; else if (ema20) bear++;
+  if (ema50&&price>ema50) bull++; else if (ema50) bear++;
+  if (changePct>0) bull++; else bear++;
+  const sig = bear>bull ? 'SELL' : bull>bear ? 'BUY' : 'WAIT';
+  const sc  = sig==='SELL' ? 'bearish' : sig==='BUY' ? 'bullish' : 'neutral';
+  const conf = Math.round(Math.max(bull,bear)/(bull+bear||1)*100);
+  const now  = new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'});
+  const entry= sig==='SELL' ? price+15 : sig==='BUY' ? price-15 : price;
+  const sl   = sig==='SELL' ? entry+18 : sig==='BUY' ? entry-18 : entry-18;
+  const tp1  = sig==='SELL' ? price-30 : sig==='BUY' ? price+30 : price+30;
+  const tp2  = sig==='SELL' ? price-60 : sig==='BUY' ? price+60 : price+60;
+  const rr   = f(Math.abs(tp1-entry)/Math.abs(sl-entry||1),1);
+  const txt  = `Manuální analýza ke ${now}: Cena $${f(price,0)} je ${ema50&&price>ema50?'nad':'pod'} EMA50${ema50?' ($'+f(ema50,0)+')':''}. D1 trend ${t1d}. RSI ${f(rsi,0)}${rsi>70?' – překoupen':rsi<30?' – přeprodán':''}. Doporučení: ${sig} (${conf}% shoda).`;
 
-  const change=price-prev, changePct=prev?(change/prev*100):0;
-  let bull=0,bear=0;
-  [t1d,t4h,t1h,t15m].forEach(t=>{if(t==='bullish')bull++;else if(t==='bearish')bear++;});
-  if(rsi<35)bull++;else if(rsi>65)bear++;
-  if(ema20&&price>ema20)bull++;else if(ema20)bear++;
-  if(ema50&&price>ema50)bull++;else if(ema50)bear++;
-  if(changePct>0)bull++;else bear++;
-
-  const sig=bear>bull?'SELL':bull>bear?'BUY':'WAIT';
-  const sc=sig==='SELL'?'bearish':sig==='BUY'?'bullish':'neutral';
-  const conf=Math.round(Math.max(bull,bear)/(bull+bear||1)*100);
-  const now=new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'});
-  const res=[price+15,price+30,price+55];
-  const sup=[price-15,price-30,price-55];
-  const entry=sig==='SELL'?res[0]:sup[0];
-  const sl=sig==='SELL'?entry+12:entry-12;
-  const tp1=sig==='SELL'?price-25:price+25;
-  const tp2=sig==='SELL'?price-50:price+50;
-  const rr=f(Math.abs(tp1-entry)/Math.abs(sl-entry||1),1);
-  const txt=`Manuální analýza ke ${now}: Cena $${f(price,0)} je ${ema50&&price>ema50?'nad':'pod'} EMA50${ema50?' ($'+f(ema50,0)+')':''}. D1 trend ${t1d}. RSI ${f(rsi,0)}${rsi>70?' – překoupen':rsi<30?' – přeprodán':''}. Doporučení: ${sig} (${conf}% shoda).`;
-
-  document.getElementById('manualResult').innerHTML=`
+  document.getElementById('manualResult').innerHTML = `
     <div class="sigcard ${sc} a1" style="margin-top:12px">
       <div class="siglbl">◈ MANUÁLNÍ SIGNÁL</div>
       <div class="sigval">${sig}</div>
@@ -531,13 +784,276 @@ function manualAnalyze(){
       <div class="setup-row"><span class="setup-key">Take Profit 2</span><span class="setup-val ctp">$${f(tp2,2)}</span></div>
     </div>
     <div class="rrbadge">Risk / Reward = 1 : ${rr}</div>
-    <div class="card a3"><div class="ctitle">◈ Multi-Timeframe</div>${[['1D',t1d],['4H',t4h],['1H',t1h],['15M',t15m]].map(([tf,t])=>`<div class="tfrow"><span class="tfname">${tf}</span><div class="tfbar"><div class="tffill" style="width:${t==='bullish'?70:t==='bearish'?30:50}%;background:${tbc(t)}"></div></div><span class="tfsig">${ta(t)}</span></div>`).join('')}</div>
-    <div class="acard a4"><div class="ahead"><div style="font-size:16px">📊</div><div><div class="atitle">ANALÝZA</div><div class="asub">${now}</div></div></div><div class="atext">${txt}</div></div>
+    <div class="card a3">
+      <div class="ctitle">◈ Multi-Timeframe</div>
+      ${[['1D',t1d],['4H',t4h],['1H',t1h],['15M',t15m]].map(([tf,t]) => `
+        <div class="tfrow"><span class="tfname">${tf}</span><div class="tfbar"><div class="tffill" style="width:${t==='bullish'?70:t==='bearish'?30:50}%;background:${tbc(t)}"></div></div><span class="tfsig">${ta(t)}</span></div>`).join('')}
+    </div>
+    <div class="acard a4"><div class="ahead"><div style="font-size:16px">📊</div><div><div class="atitle">ANALÝZA</div><div class="asub">${now}</div></div></div><div class="atext">${esc(txt)}</div></div>
     <div class="disc">⚠ Není finanční poradenství</div>`;
   document.getElementById('manualResult').scrollIntoView({behavior:'smooth'});
 }
 
-// ── Start ─────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════
+// AI TAB — Claude API integration
+// ══════════════════════════════════════════════════════════════════════
+
+const AI_PRESETS = {
+  bull:    { price:3340.5, chg:0.85,  rsi:62,   atr:31.2, ema20:3315, ema50:3288, ema200:3175, macd:8.4,  t1d:'bullish', t4h:'bullish', t1h:'bullish', t15m:'neutral' },
+  bear:    { price:3285.2, chg:-1.24, rsi:34,   atr:35.8, ema20:3310, ema50:3330, ema200:3190, macd:-6.2, t1d:'bearish', t4h:'bearish', t1h:'bearish', t15m:'neutral' },
+  neutral: { price:3308.0, chg:0.05,  rsi:52,   atr:22.5, ema20:3305, ema50:3302, ema200:3185, macd:1.1,  t1d:'neutral', t4h:'bullish', t1h:'bearish', t15m:'neutral' }
+};
+
+function aiLoadPreset(k) {
+  const p = AI_PRESETS[k];
+  document.getElementById('ai_price').value   = p.price;
+  document.getElementById('ai_chg').value     = p.chg;
+  document.getElementById('ai_rsi').value     = p.rsi;
+  document.getElementById('ai_atr').value     = p.atr;
+  document.getElementById('ai_ema20').value   = p.ema20;
+  document.getElementById('ai_ema50').value   = p.ema50;
+  document.getElementById('ai_ema200').value  = p.ema200;
+  document.getElementById('ai_macd').value    = p.macd;
+  document.getElementById('ai_t1d').value     = p.t1d;
+  document.getElementById('ai_t4h').value     = p.t4h;
+  document.getElementById('ai_t1h').value     = p.t1h;
+  document.getElementById('ai_t15m').value    = p.t15m;
+  document.getElementById('aiError').innerHTML = '';
+  document.getElementById('aiAutofillNotice').style.display = 'none';
+}
+
+// Autofill AI tab from cached data.json
+function openAiTabWithData() {
+  if (cachedData) {
+    const d = cachedData;
+    document.getElementById('ai_price').value  = d.price  || '';
+    document.getElementById('ai_chg').value    = d.changePct || '';
+    document.getElementById('ai_rsi').value    = d.rsi    || '';
+    document.getElementById('ai_atr').value    = d.atr    || '';
+    document.getElementById('ai_ema20').value  = d.ema20  || '';
+    document.getElementById('ai_ema50').value  = d.ema50  || '';
+    document.getElementById('ai_ema200').value = d.ema200 || '';
+    document.getElementById('ai_macd').value   = d.macd   || '';
+    if (d.tf) {
+      const tfMap = {'1D':'ai_t1d','4H':'ai_t4h','1H':'ai_t1h','15M':'ai_t15m'};
+      Object.entries(tfMap).forEach(([k,id]) => {
+        const el = document.getElementById(id);
+        if (el && d.tf[k]) el.value = d.tf[k];
+      });
+    }
+    document.getElementById('aiAutofillNotice').style.display = 'block';
+  }
+  showTab('ai');
+}
+
+// Build the Claude prompt
+function buildAIPrompt(d) {
+  const above = (p,e) => p > e ? 'nad' : 'pod';
+  const rsiZ  = d.rsi > 70 ? 'překoupena' : d.rsi < 30 ? 'přeprodána' : 'neutrální';
+  const tfs   = [d.t1d, d.t4h, d.t1h, d.t15m];
+  const bull  = tfs.filter(x=>x==='bullish').length;
+  const bear  = tfs.filter(x=>x==='bearish').length;
+  const trend = bull > bear ? 'bullish' : bear > bull ? 'bearish' : 'smíšený';
+
+  return `Jsi profesionální trader a technický analytik specializovaný na XAUUSD (zlato/dolar). Tvým úkolem je poskytnout přesnou obchodní analýzu na základě dat níže.
+
+=== AKTUÁLNÍ TRŽNÍ DATA ===
+Cena XAUUSD:  $${d.price.toFixed(2)}
+Změna 24h:    ${d.chg >= 0 ? '+' : ''}${d.chg.toFixed(2)}%
+RSI (14):     ${d.rsi.toFixed(1)} [zóna: ${rsiZ}]
+ATR (14):     $${d.atr.toFixed(1)} [průměrný denní rozsah]
+EMA 20:       $${d.ema20.toFixed(1)} → cena je ${above(d.price,d.ema20)} EMA20
+EMA 50:       $${d.ema50.toFixed(1)} → cena je ${above(d.price,d.ema50)} EMA50
+EMA 200:      $${d.ema200.toFixed(1)} → cena je ${above(d.price,d.ema200)} EMA200
+MACD:         ${d.macd.toFixed(1)} [${d.macd > 0 ? 'pozitivní momentum' : 'negativní momentum'}]
+
+=== MULTI-TIMEFRAME ===
+Daily (1D):  ${d.t1d}
+4H:          ${d.t4h}
+1H:          ${d.t1h}
+15M:         ${d.t15m}
+Trend celkem: ${trend} (${bull}× bullish / ${bear}× bearish)
+
+=== POKYNY PRO ANALÝZU ===
+Napiš analýzu v češtině, strukturovanou takto (bez markdown, bez hvězdiček):
+
+SIGNÁL: [BUY / SELL / WAIT]
+VSTUP: $[číslo]
+STOP LOSS: $[číslo — vypočítej z ATR × 1.0]
+TAKE PROFIT 1: $[číslo — vypočítej z ATR × 1.5]
+TAKE PROFIT 2: $[číslo — vypočítej z ATR × 2.5]
+
+ZDŮVODNĚNÍ:
+[3-4 věty o klíčových technických důvodech pro signál]
+
+KLÍČOVÁ RIZIKA:
+[2 konkrétní rizika nebo faktory které by mohly signál invalidovat]
+
+CONFLUENCE (co se shoduje):
+[Vypis co potvrzuje signál a co mu odporuje]
+
+TRŽNÍ KONTEXT:
+[1-2 věty o širším kontextu — úroveň ceny historicky, důležité zóny]
+
+Buď konkrétní a stručný. Max 250 slov celkem.`;
+}
+
+// Parse levels from streamed text
+function parseLevels(text, sig) {
+  const num = (regex) => {
+    const m = text.match(regex);
+    return m ? parseFloat(m[1].replace(',','.')) : null;
+  };
+  return {
+    entry: num(/VSTUP:\s*\$?([\d.,]+)/i),
+    sl:    num(/STOP\s*LOSS:\s*\$?([\d.,]+)/i),
+    tp1:   num(/TAKE\s*PROFIT\s*1:\s*\$?([\d.,]+)/i),
+    tp2:   num(/TAKE\s*PROFIT\s*2:\s*\$?([\d.,]+)/i),
+    sig:   text.match(/SIGNÁL:\s*(BUY|SELL|WAIT)/i)?.[1]?.toUpperCase() || sig
+  };
+}
+
+// Main AI analysis function
+async function runAIAnalysis() {
+  const price = parseFloat(document.getElementById('ai_price').value) || 0;
+  if (!price) {
+    document.getElementById('aiError').innerHTML = '<div class="ai-error">⚠ Zadejte nejprve aktuální cenu zlata</div>';
+    return;
+  }
+  document.getElementById('aiError').innerHTML = '';
+
+  const d = {
+    price,
+    chg:   parseFloat(document.getElementById('ai_chg').value)   || 0,
+    rsi:   parseFloat(document.getElementById('ai_rsi').value)   || 50,
+    atr:   parseFloat(document.getElementById('ai_atr').value)   || 25,
+    ema20: parseFloat(document.getElementById('ai_ema20').value) || 0,
+    ema50: parseFloat(document.getElementById('ai_ema50').value) || 0,
+    ema200:parseFloat(document.getElementById('ai_ema200').value)|| 0,
+    macd:  parseFloat(document.getElementById('ai_macd').value)  || 0,
+    t1d:   document.getElementById('ai_t1d').value,
+    t4h:   document.getElementById('ai_t4h').value,
+    t1h:   document.getElementById('ai_t1h').value,
+    t15m:  document.getElementById('ai_t15m').value,
+  };
+
+  const btn = document.getElementById('aiRunBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ ANALYZUJI...';
+
+  // Reset output
+  const card = document.getElementById('aiOutputCard');
+  card.classList.add('visible');
+  document.getElementById('aiOutText').innerHTML = '<span class="ai-cursor"></span>';
+  document.getElementById('aiOutTs').textContent = new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  document.getElementById('aiMetrics').style.display = 'none';
+  document.getElementById('aiTradeBox').style.display = 'none';
+  document.getElementById('aiSigPill').innerHTML = '';
+
+  // Reset banner
+  const banner = document.getElementById('aiBannerSig');
+  banner.className = 'ai-banner-sig idle';
+  banner.textContent = 'ANALYZUJI...';
+  document.getElementById('aiBannerMeta').textContent = 'Claude AI zpracovává data...';
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        stream: true,
+        messages: [{ role: 'user', content: buildAIPrompt(d) }]
+      })
+    });
+
+    if (!resp.ok) {
+      const errBody = await resp.text();
+      throw new Error(`API ${resp.status}: ${errBody.slice(0,120)}`);
+    }
+
+    const reader  = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText  = '';
+    const outEl   = document.getElementById('aiOutText');
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const lines = decoder.decode(value).split('\n');
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const raw = line.slice(6).trim();
+        if (raw === '[DONE]') break;
+        try {
+          const j = JSON.parse(raw);
+          if (j.type === 'content_block_delta' && j.delta?.text) {
+            fullText += j.delta.text;
+            outEl.innerHTML = esc(fullText) + '<span class="ai-cursor"></span>';
+          }
+        } catch {}
+      }
+    }
+
+    // Final render — remove cursor
+    outEl.innerHTML = esc(fullText);
+
+    // Parse signal from response
+    const lvl = parseLevels(fullText, d.t1d === 'bullish' ? 'BUY' : 'SELL');
+
+    // Update banner
+    const sigClass = lvl.sig==='BUY' ? 'buy' : lvl.sig==='SELL' ? 'sell' : 'wait';
+    banner.className = 'ai-banner-sig '+sigClass;
+    banner.textContent = lvl.sig || 'WAIT';
+    document.getElementById('aiBannerMeta').textContent =
+      `RSI: ${f(d.rsi,1)} · ATR: $${f(d.atr,1)} · ${new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'})}`;
+
+    // Signal pill
+    const pillColors = { BUY:'rgba(0,255,136,0.15)', SELL:'rgba(255,51,85,0.12)', WAIT:'rgba(255,215,0,0.1)' };
+    const pillText   = { BUY:'var(--green)', SELL:'var(--red)', WAIT:'var(--gold)' };
+    const s = lvl.sig || 'WAIT';
+    document.getElementById('aiSigPill').innerHTML = `<span style="display:inline-flex;align-items:center;font-family:var(--display);font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;letter-spacing:2px;background:${pillColors[s]||pillColors.WAIT};color:${pillText[s]||pillText.WAIT}">${s==='BUY'?'▲':s==='SELL'?'▼':'—'} ${s}</span>`;
+
+    // Trade levels box
+    if (lvl.entry) {
+      const rr = lvl.tp1 && lvl.sl ? f(Math.abs(lvl.tp1-lvl.entry)/Math.abs(lvl.sl-lvl.entry||1),2) : '–';
+      document.getElementById('aiTradeType').textContent  = lvl.sig==='BUY' ? 'MARKET BUY' : 'MARKET SELL';
+      document.getElementById('aiTradeType').style.color  = lvl.sig==='BUY' ? 'var(--green)' : 'var(--red)';
+      document.getElementById('aiTradeEntry').textContent = '$'+f(lvl.entry,2);
+      document.getElementById('aiTradeSL').textContent    = '$'+f(lvl.sl,2);
+      document.getElementById('aiTradeTP1').textContent   = '$'+f(lvl.tp1,2);
+      document.getElementById('aiTradeTP2').textContent   = '$'+f(lvl.tp2,2);
+      document.getElementById('aiTradeRR').textContent    = '1 : '+rr;
+      document.getElementById('aiTradeBox').style.display = 'block';
+    }
+
+    // Metrics
+    const bull = [d.t1d,d.t4h,d.t1h,d.t15m].filter(x=>x==='bullish').length;
+    const bear = [d.t1d,d.t4h,d.t1h,d.t15m].filter(x=>x==='bearish').length;
+    document.getElementById('aiMRsi').textContent = f(d.rsi,1);
+    document.getElementById('aiMRsi').style.color = rc(d.rsi);
+    document.getElementById('aiMTf').textContent  = Math.max(bull,bear)+'/4';
+    document.getElementById('aiMTf').style.color  = bull>bear?'var(--green)':'var(--red)';
+    document.getElementById('aiMAtr').textContent = '$'+f(d.atr,0);
+    document.getElementById('aiMetrics').style.display = 'grid';
+
+    card.scrollIntoView({behavior:'smooth'});
+
+  } catch(e) {
+    document.getElementById('aiOutText').innerHTML = '';
+    document.getElementById('aiError').innerHTML = `<div class="ai-error">⚠ Chyba: ${esc(e.message)}</div>`;
+    banner.className = 'ai-banner-sig idle';
+    banner.textContent = 'CHYBA';
+    document.getElementById('aiBannerMeta').textContent = e.message.slice(0,60);
+    card.classList.remove('visible');
+  }
+
+  btn.disabled = false;
+  btn.textContent = '✦ SPUSTIT CLAUDE AI ANALÝZU';
+}
+
+// ── Init ───────────────────────────────────────────────────────────────
 loadData();
 </script>
 </body>
