@@ -194,8 +194,9 @@ header{flex-shrink:0;background:rgba(5,8,16,0.98);border-bottom:1px solid var(--
 
   <!-- AUTO -->
   <div class="screen active" id="tab-analysis">
+    <div id="ageBadge" style="display:none"></div>
     <div class="pcard a1">
-      <div class="plbl">◈ GOLD SPOT <span class="live-badge">● LIVE</span></div>
+      <div class="plbl">◈ GOLD SPOT <span class="live-badge" id="liveBadge">● LIVE</span></div>
       <div class="pval" id="livePrice">načítám...</div>
       <div class="pchg" id="priceChange">–</div>
       <div class="pstats">
@@ -210,7 +211,7 @@ header{flex-shrink:0;background:rgba(5,8,16,0.98);border-bottom:1px solid var(--
     <div id="indBox"></div>
     <div id="analysisBox"></div>
     <button class="rbtn a5" style="border-color:rgba(74,222,128,0.3);color:#4ade80;background:rgba(74,222,128,0.06)" onclick="openAiWithData()">◈ OTEVŘÍT AI ANALÝZU</button>
-    <button class="rbtn" onclick="loadData()">↻ AKTUALIZOVAT</button>
+    <button class="rbtn" onclick="loadData()">↻ AKTUALIZOVAT DATA</button>
     <div class="disc">⚠ Pouze informativní · Není finanční poradenství</div>
   </div>
 
@@ -357,8 +358,52 @@ async function requestNotif(){try{OneSignalDeferred.push(async function(OS){cons
 let tvLoaded=false;
 function loadTV(){if(tvLoaded)return;tvLoaded=true;const c=document.getElementById('tvWidget');const s=document.createElement('script');s.src='https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js';s.async=true;s.innerHTML=JSON.stringify({symbol:'OANDA:XAUUSD',width:'100%',height:'140',locale:'cs',dateRange:'1M',colorTheme:'dark',isTransparent:true,autosize:true});c.appendChild(s)}
 
-let countdown=900;
-setInterval(()=>{countdown--;if(countdown<=0){countdown=900;loadData()}const m=Math.floor(countdown/60),s=countdown%60;document.getElementById('ctimer').textContent=`${m}:${s.toString().padStart(2,'0')}`;document.getElementById('cbar').style.width=(countdown/900*100)+'%'},1000);
+// Kontrola stáří dat
+function checkDataAge(updatedStr) {
+  const badge = document.getElementById('ageBadge');
+  if (!badge || !updatedStr) return;
+  let updated;
+  try {
+    updated = new Date(updatedStr);
+    if (isNaN(updated)) {
+      const m = updatedStr.match(/(\d+)\.(\d+)\.(\d+)\s+(\d+):(\d+)/);
+      if (m) updated = new Date(Date.UTC(+m[3], +m[2]-1, +m[1], +m[4], +m[5]));
+    }
+  } catch(e) { return; }
+  if (!updated || isNaN(updated)) return;
+  const ageMin = Math.floor((Date.now() - updated.getTime()) / 60000);
+  if (ageMin < 20) {
+    badge.textContent = `✓ DATA ČERSTVÁ · aktualizováno před ${ageMin} min`;
+    badge.style.cssText = 'display:block;background:rgba(0,255,136,0.08);color:var(--green);border:1px solid rgba(0,255,136,0.25);border-radius:8px;padding:6px 12px;font-size:9px;letter-spacing:2px;text-align:center;margin-bottom:10px';
+  } else if (ageMin < 60) {
+    badge.textContent = `⚠ DATA STARÁ ${ageMin} MIN · robot mohl selhat`;
+    badge.style.cssText = 'display:block;background:rgba(255,165,0,0.08);color:orange;border:1px solid rgba(255,165,0,0.3);border-radius:8px;padding:7px 12px;font-size:9px;letter-spacing:2px;text-align:center;margin-bottom:10px';
+  } else {
+    const ageH = Math.floor(ageMin/60), ageM = ageMin%60;
+    badge.textContent = `🔴 DATA STARÁ ${ageH}h ${ageM}min · SIGNÁL NESPOLEHLIVÝ · oprav robota!`;
+    badge.style.cssText = 'display:block;background:rgba(255,51,85,0.1);color:var(--red);border:1px solid rgba(255,51,85,0.4);border-radius:8px;padding:8px 12px;font-size:9px;letter-spacing:2px;text-align:center;margin-bottom:10px;font-weight:bold';
+  }
+}
+
+// Živá cena z Yahoo Finance přes CORS proxy
+async function fetchLivePrice() {
+  try {
+    const r = await fetch('https://query1.finance.yahoo.com/v8/finance/chart/GC%3DF?interval=1m&range=1d', {signal: AbortSignal.timeout(5000)});
+    if (!r.ok) return;
+    const j = await r.json();
+    const p = j?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    if (p && p > 0) {
+      updatePrice(p, null);
+      document.getElementById('liveBadge').textContent = '● LIVE';
+    }
+  } catch(e) {}
+}
+
+let countdown=180;
+setInterval(()=>{countdown--;if(countdown<=0){countdown=180;loadData();fetchLivePrice()}const m=Math.floor(countdown/60),s=countdown%60;document.getElementById('ctimer').textContent=`${m}:${s.toString().padStart(2,'0')}`;document.getElementById('cbar').style.width=(countdown/180*100)+'%'},1000);
+
+// Živá cena každých 30 sekund
+setInterval(fetchLivePrice, 30000);
 
 let cachedData=null,lastPrice=0;
 
@@ -378,7 +423,7 @@ async function loadData(){
     if(!r.ok)throw new Error('HTTP '+r.status);
     const d=await r.json();
     if(d.status==='error')throw new Error(d.error||'Chyba dat');
-    cachedData=d;renderAll(d);
+    cachedData=d;renderAll(d);checkDataAge(d.updated);
     document.getElementById('statusDot').className='dot';
     document.getElementById('robotStatus').textContent='✅ Online';
     document.getElementById('lastUpdate').textContent=d.updated||'–';
@@ -548,6 +593,7 @@ async function runAI(){
 }
 
 loadData();
+fetchLivePrice();
 </script>
 </body>
 </html>
