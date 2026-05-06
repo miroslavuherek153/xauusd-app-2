@@ -511,7 +511,7 @@ async function runAI(){
       for(const line of lines){
         if(!line.startsWith('data: '))continue;
         const raw=line.slice(6).trim();if(!raw||raw==='[DONE]')continue;
-        try{const j=JSON.parse(raw);const chunk=j?.candidates?.[0]?.content?.parts?.[0]?.text||'';if(chunk){fullText+=chunk;outEl.innerHTML=esc(fullText)+'<span class="ai-cursor"></span>'}}catch{}
+        try{const j=JSON.parse(raw);const chunk=j?.choices?.[0]?.delta?.content||'';if(chunk){fullText+=chunk;outEl.innerHTML=esc(fullText)+'<span class="ai-cursor"></span>'}}catch{}
       }
     }
     outEl.innerHTML=esc(fullText);
