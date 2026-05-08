@@ -424,25 +424,11 @@ function checkDataAge(updatedStr) {
   }
 }
 
-// Živá cena z Yahoo Finance přes CORS proxy
-async function fetchLivePrice() {
-  try {
-    const r = await fetch('https://query1.finance.yahoo.com/v8/finance/chart/GC%3DF?interval=1m&range=1d', {signal: AbortSignal.timeout(5000)});
-    if (!r.ok) return;
-    const j = await r.json();
-    const p = j?.chart?.result?.[0]?.meta?.regularMarketPrice;
-    if (p && p > 0) {
-      updatePrice(p, null);
-      document.getElementById('liveBadge').textContent = '● LIVE';
-    }
-  } catch(e) {}
-}
-
+// Živá cena každých 30 sekund - odstraněno (Yahoo Finance blokuje CORS)
 let countdown=180;
 setInterval(()=>{countdown--;if(countdown<=0){countdown=180;loadData();fetchLivePrice()}const m=Math.floor(countdown/60),s=countdown%60;document.getElementById('ctimer').textContent=`${m}:${s.toString().padStart(2,'0')}`;document.getElementById('cbar').style.width=(countdown/180*100)+'%'},1000);
 
-// Živá cena každých 30 sekund
-setInterval(fetchLivePrice, 30000);
+// Živá cena každých 30 sekund - odstraněno
 
 let cachedData=null,lastPrice=0;
 
@@ -730,7 +716,6 @@ async function runAI(){
 }
 
 loadData();
-fetchLivePrice();
 </script>
 </body>
 </html>
