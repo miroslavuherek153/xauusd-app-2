@@ -32,7 +32,40 @@ header{flex-shrink:0;background:rgba(5,8,16,0.98);border-bottom:1px solid var(--
 .nav{flex-shrink:0;display:flex;background:var(--bg2);border-bottom:1px solid var(--border)}
 .ntab{flex:1;padding:9px 2px;text-align:center;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--mono);transition:all .2s}
 .ntab.active{color:var(--gold);border-bottom-color:var(--gold);background:rgba(255,215,0,0.04)}
-.ntab.ai-tab.active{color:#4ade80;border-bottom-color:#4ade80;background:rgba(74,222,128,0.04)}
+.ntab.mtf-tab.active{color:#60a5fa;border-bottom-color:#60a5fa;background:rgba(96,165,250,0.04)}
+/* ══ MTF TAB ═════════════════════════════════════════════════════════ */
+.mtf-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.mtf-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;position:relative;overflow:hidden}
+.mtf-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;border-radius:4px 0 0 4px}
+.mtf-card.bull::before{background:var(--green)}
+.mtf-card.bear::before{background:var(--red)}
+.mtf-card.neut::before{background:var(--muted)}
+.mtf-tf{font-family:var(--display);font-size:11px;font-weight:700;color:var(--gold);letter-spacing:2px}
+.mtf-sig{font-family:var(--display);font-size:18px;font-weight:900;letter-spacing:3px;margin:6px 0 4px}
+.mtf-sig.buy{color:var(--green);text-shadow:0 0 12px rgba(0,255,136,0.3)}
+.mtf-sig.sell{color:var(--red);text-shadow:0 0 12px rgba(255,51,85,0.3)}
+.mtf-sig.wait{color:var(--gold)}
+.mtf-meta{font-size:9px;color:var(--muted);line-height:1.8}
+.mtf-bar-wrap{margin-top:8px}
+.mtf-bar-lbl{display:flex;justify-content:space-between;font-size:8px;color:var(--muted);margin-bottom:3px}
+.mtf-bar-bg{height:4px;background:rgba(255,255,255,0.06);border-radius:2px}
+.mtf-bar-fill{height:4px;border-radius:2px;transition:width .5s}
+.conf-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px}
+.conf-title{font-size:8px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:12px;padding-bottom:7px;border-bottom:1px solid rgba(255,215,0,0.08)}
+.conf-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
+.conf-row:last-child{border-bottom:none}
+.conf-name{font-size:10px;color:var(--muted)}
+.conf-val{font-size:11px;font-weight:bold}
+.conf-bar{flex:1;height:3px;background:rgba(255,255,255,0.06);border-radius:2px;margin:0 10px}
+.conf-fill{height:3px;border-radius:2px}
+.mtf-summary{background:linear-gradient(145deg,rgba(255,215,0,0.08),rgba(255,215,0,0.02));border:1px solid rgba(255,215,0,0.25);border-radius:12px;padding:14px;margin-bottom:12px;text-align:center}
+.mtf-sum-lbl{font-size:8px;letter-spacing:4px;color:var(--muted);margin-bottom:4px}
+.mtf-sum-val{font-family:var(--display);font-size:22px;font-weight:900;letter-spacing:5px}
+.mtf-score{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
+.mtf-sc-item{background:rgba(0,0,0,0.3);border-radius:6px;padding:6px;text-align:center}
+.mtf-sc-lbl{font-size:7px;letter-spacing:1px;color:var(--muted)}
+.mtf-sc-dot{width:8px;height:8px;border-radius:50%;margin:4px auto 2px}
+.mtf-sc-sig{font-size:9px;font-weight:bold}
 .main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:20px}
 .screen{display:none;padding:12px}
 .screen.active{display:block}
@@ -186,6 +219,7 @@ header{flex-shrink:0;background:rgba(5,8,16,0.98);border-bottom:1px solid var(--
   <button class="ntab" onclick="showTab('levels')">◈ Úrovně</button>
   <button class="ntab" onclick="showTab('setup')">◈ Setup</button>
   <button class="ntab" onclick="showTab('manual')">◈ Manuál</button>
+  <button class="ntab mtf-tab" onclick="showTab('mtf')">◈ MTF</button>
   <button class="ntab ai-tab" onclick="showTab('ai')">◈ AI</button>
   <button class="ntab" onclick="showTab('info')">◈ Info</button>
 </nav>
@@ -245,6 +279,11 @@ header{flex-shrink:0;background:rgba(5,8,16,0.98);border-bottom:1px solid var(--
       <button class="analyze-btn" onclick="manualAnalyze()">⚡ ANALYZOVAT</button>
     </div>
     <div id="manualResult"></div>
+  </div>
+
+  <!-- MTF DASHBOARD -->
+  <div class="screen" id="tab-mtf">
+    <div id="mtfContent"><div class="lwrap"><div class="spinner"></div></div></div>
   </div>
 
   <!-- AI TAB -->
@@ -340,7 +379,7 @@ function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
 function ut(){document.getElementById('ht').textContent=new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}
 ut();setInterval(ut,1000);
 
-const TABS=['analysis','levels','setup','manual','ai','info'];
+const TABS=['analysis','levels','setup','manual','mtf','ai','info'];
 function showTab(n){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
@@ -447,11 +486,108 @@ function renderAll(d){
   document.getElementById('tfBox').innerHTML=`<div class="card a3"><div class="ctitle">◈ Multi-Timeframe <span class="cbadge">AUTO</span></div>${Object.entries(d.tf||{}).map(([tf,t])=>`<div class="tfrow"><span class="tfname">${esc(tf)}</span><div class="tfbar"><div class="tffill" style="width:${t==='bullish'?70:t==='bearish'?30:50}%;background:${tbc(t)}"></div></div><span class="tfsig">${ta(t)}</span></div>`).join('')}</div>`;
   document.getElementById('indBox').innerHTML=`<div class="card a4"><div class="ctitle">◈ Indikátory</div><div class="indrow"><span class="indname">RSI 14</span><div class="indbar"><div class="indfill" style="width:${d.rsi}%;background:${rc(d.rsi)}"></div></div><span class="indval" style="color:${rc(d.rsi)}">${f(d.rsi,1)}</span></div><div class="indrow"><span class="indname">EMA 20</span><div class="indbar"><div class="indfill" style="width:60%;background:${price>d.ema20?'var(--green)':'var(--red)'}"></div></div><span class="indval" style="color:${price>d.ema20?'var(--green)':'var(--red)'}">${price>d.ema20?'↑':'↓'} $${f(d.ema20,0)}</span></div><div class="indrow"><span class="indname">EMA 50</span><div class="indbar"><div class="indfill" style="width:55%;background:${price>d.ema50?'var(--green)':'var(--red)'}"></div></div><span class="indval" style="color:${price>d.ema50?'var(--green)':'var(--red)'}">${price>d.ema50?'↑':'↓'} $${f(d.ema50,0)}</span></div><div class="indrow"><span class="indname">EMA 200</span><div class="indbar"><div class="indfill" style="width:50%;background:${price>d.ema200?'var(--green)':'var(--red)'}"></div></div><span class="indval" style="color:${price>d.ema200?'var(--green)':'var(--red)'}">${price>d.ema200?'↑':'↓'} $${f(d.ema200,0)}</span></div><div class="indrow"><span class="indname">MACD</span><div class="indbar"><div class="indfill" style="width:50%;background:${d.macd>0?'var(--green)':'var(--red)'}"></div></div><span class="indval" style="color:${d.macd>0?'var(--green)':'var(--red)'}">${f(d.macd,1)}</span></div></div>`;
   document.getElementById('analysisBox').innerHTML=`<div class="acard a5"><div class="ahead"><div style="font-size:16px">📊</div><div><div class="atitle">AUTOMATICKÁ ANALÝZA</div><div class="asub">GitHub Actions · ${esc(d.updated||'')}</div></div></div><div class="atext">${esc(d.analysis||'–')}</div></div>`;
+  renderMTF(d);
   document.getElementById('levelsContent').innerHTML=`<div class="card a1"><div class="ctitle">◈ Resistance zóny</div>${(d.resistance||[]).map((r,i)=>`<div class="lvrow"><span class="lbadge res">R${i+1}</span><span class="lprice" style="color:var(--red)">$${f(r,2)}</span><span class="ldist">+$${f(r-price,1)}</span></div>`).join('')}</div><div class="card a2"><div class="ctitle">◈ Aktuální cena</div><div class="lvrow"><span class="lbadge cur">LIVE</span><span class="lprice" style="color:var(--gold)">$${f(price,2)}</span><span class="ldist" style="color:${(d.change||0)>=0?'var(--green)':'var(--red)'}">${(d.changePct||0)>=0?'+':''}${f(d.changePct||0,2)}%</span></div></div><div class="card a3"><div class="ctitle">◈ Support zóny</div>${(d.support||[]).map((s,i)=>`<div class="lvrow"><span class="lbadge sup">S${i+1}</span><span class="lprice" style="color:var(--green)">$${f(s,2)}</span><span class="ldist">-$${f(price-s,1)}</span></div>`).join('')}</div><div class="card a4"><div class="ctitle">◈ Klouzavé průměry</div>${[[d.ema20,'EMA 20'],[d.ema50,'EMA 50'],[d.ema200,'EMA 200']].map(([v,n])=>`<div class="lvrow"><span style="font-size:10px;color:var(--muted)">${n}</span><span class="lprice" style="color:${price>v?'var(--green)':'var(--red)'}">$${f(v,1)}</span><span class="ldist" style="color:${price>v?'var(--green)':'var(--red)'}">${price>v?'▲ nad':'▼ pod'}</span></div>`).join('')}</div><button class="rbtn" onclick="loadData()">↻ AKTUALIZOVAT</button>`;
   document.getElementById('setupContent').innerHTML=`<div class="sigcard ${sc} a1"><div class="siglbl">◈ DOPORUČENÝ SETUP</div><div class="sigval">${esc(d.signal)}</div><div class="sigmeta">Shoda: ${d.confidence}% · ${esc((d.trend||'').toUpperCase())}</div></div><div class="setup-broker a2"><div class="ctitle" style="border:none;margin-bottom:8px">◈ R StocksTrader příkaz</div><div class="setup-row"><span class="setup-key">Instrument</span><span class="setup-val" style="color:var(--gold)">XAUUSD</span></div><div class="setup-row"><span class="setup-key">Typ</span><span class="setup-val" style="color:${sc==='bearish'?'var(--red)':'var(--green)'}">${d.signal==='BUY'?'MARKET BUY':'MARKET SELL'}</span></div><div class="setup-row"><span class="setup-key">Vstup</span><span class="setup-val ce">$${f(d.entry,2)}</span></div><div class="setup-row"><span class="setup-key">Stop Loss</span><span class="setup-val csl">$${f(d.sl,2)}</span></div><div class="setup-row"><span class="setup-key">Take Profit 1</span><span class="setup-val ctp">$${f(d.tp1,2)}</span></div><div class="setup-row"><span class="setup-key">Take Profit 2</span><span class="setup-val ctp">$${f(d.tp2,2)}</span></div></div><div class="rrbadge a3">R/R = 1 : ${rr} · ATR: $${f(d.atr||0,1)}</div><div class="card a3"><div class="ctitle">◈ Risk kalkulace</div>${[['0.01',1],['0.05',5],['0.10',10]].map(([lot,m])=>`<div class="lvrow"><span style="font-size:10px;color:var(--muted)">Lot ${lot}</span><span style="font-size:11px;color:var(--red)">Risk ~$${f(Math.abs((d.sl-d.entry)||15)*m,1)}</span></div>`).join('')}</div><div class="acard a4"><div class="ahead"><div style="font-size:16px">🎯</div><div><div class="atitle">ZDŮVODNĚNÍ</div><div class="asub">${esc(d.updated||'')}</div></div></div><div class="atext">${esc(d.analysis||'–')}</div></div><button class="rbtn" onclick="loadData()">↻ NOVÝ SETUP</button><div class="disc">⚠ Není finanční poradenství</div>`;
 }
 
-function manualAnalyze(){
+function renderMTF(d) {
+  const price = d.price || 0;
+  const tf = d.tf || {};
+  const tfs = [
+    {key:'1D', label:'Daily 1D'},
+    {key:'4H', label:'4 hodiny'},
+    {key:'1H', label:'1 hodina'},
+    {key:'15M',label:'15 minut'},
+  ];
+
+  const bull = Object.values(tf).filter(x=>x==='bullish').length;
+  const bear = Object.values(tf).filter(x=>x==='bearish').length;
+  const total = bull + bear + Object.values(tf).filter(x=>x==='neutral').length || 1;
+  const overallSig = bull > bear ? 'BUY' : bear > bull ? 'SELL' : 'WAIT';
+  const overallSc  = overallSig==='BUY' ? 'buy' : overallSig==='SELL' ? 'sell' : 'wait';
+  const overallCol = overallSig==='BUY' ? 'var(--green)' : overallSig==='SELL' ? 'var(--red)' : 'var(--gold)';
+  const confPct = Math.round(Math.max(bull,bear)/total*100);
+
+  // TF cards
+  const tfCards = tfs.map(({key,label}) => {
+    const t = tf[key] || 'neutral';
+    const isBull = t==='bullish', isBear = t==='bearish';
+    const sig = isBull?'BUY':isBear?'SELL':'WAIT';
+    const sc  = isBull?'buy':isBear?'sell':'wait';
+    const cls = isBull?'bull':isBear?'bear':'neut';
+    const col = isBull?'var(--green)':isBear?'var(--red)':'var(--gold)';
+    const barW = isBull?75:isBear?25:50;
+    // Indicator hints per TF
+    const hints = {
+      '1D': `EMA200: $${f(d.ema200,0)} · ${price>d.ema200?'▲ nad':'▼ pod'}`,
+      '4H': `EMA50: $${f(d.ema50,0)} · ${price>d.ema50?'▲ nad':'▼ pod'}`,
+      '1H': `EMA20: $${f(d.ema20,0)} · ${price>d.ema20?'▲ nad':'▼ pod'}`,
+      '15M':`MACD: ${f(d.macd,1)} · ${d.macd>0?'▲ pozitivní':'▼ negativní'}`,
+    };
+    return `
+      <div class="mtf-card ${cls}">
+        <div class="mtf-tf">${key}</div>
+        <div style="font-size:9px;color:var(--muted)">${label}</div>
+        <div class="mtf-sig ${sc}">${sig}</div>
+        <div class="mtf-meta">${hints[key]||''}</div>
+        <div class="mtf-bar-wrap">
+          <div class="mtf-bar-lbl"><span>BEAR</span><span>BULL</span></div>
+          <div class="mtf-bar-bg"><div class="mtf-bar-fill" style="width:${barW}%;background:${col}"></div></div>
+        </div>
+      </div>`;
+  }).join('');
+
+  // Score dots
+  const dots = tfs.map(({key}) => {
+    const t = tf[key]||'neutral';
+    const col = t==='bullish'?'var(--green)':t==='bearish'?'var(--red)':'var(--muted)';
+    const sig = t==='bullish'?'BUY':t==='bearish'?'SELL':'WAIT';
+    return `<div class="mtf-sc-item">
+      <div class="mtf-sc-lbl">${key}</div>
+      <div class="mtf-sc-dot" style="background:${col};box-shadow:0 0 6px ${col}"></div>
+      <div class="mtf-sc-sig" style="color:${col}">${sig}</div>
+    </div>`;
+  }).join('');
+
+  // Confluence indicators
+  const indics = [
+    {name:'RSI 14', val:f(d.rsi,1), w:d.rsi, col:`${d.rsi>70?'var(--red)':d.rsi<30?'var(--green)':'var(--gold)'}`},
+    {name:'EMA trend', val:price>d.ema200?'▲ Bullish':'▼ Bearish', w:price>d.ema200?75:25, col:price>d.ema200?'var(--green)':'var(--red)'},
+    {name:'MACD', val:f(d.macd,1), w:d.macd>0?65:35, col:d.macd>0?'var(--green)':'var(--red)'},
+    {name:'ATR volatilita', val:`$${f(d.atr,1)}`, w:Math.min((d.atr/50)*100,100), col:'var(--gold)'},
+    {name:'TF shoda', val:`${confPct}%`, w:confPct, col:overallCol},
+  ];
+
+  document.getElementById('mtfContent').innerHTML = `
+    <div class="mtf-summary a1">
+      <div class="mtf-sum-lbl">◈ CELKOVÝ MTF SIGNÁL</div>
+      <div class="mtf-sum-val" style="color:${overallCol}">${overallSig}</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:4px">${bull}× BUY · ${bear}× SELL · Shoda ${confPct}%</div>
+      <div class="mtf-score">${dots}</div>
+    </div>
+    <div class="mtf-grid a2">${tfCards}</div>
+    <div class="conf-card a3">
+      <div class="conf-title">◈ Confluence indikátory</div>
+      ${indics.map(i=>`
+        <div class="conf-row">
+          <span class="conf-name">${i.name}</span>
+          <div class="conf-bar"><div class="conf-fill" style="width:${i.w}%;background:${i.col}"></div></div>
+          <span class="conf-val" style="color:${i.col}">${i.val}</span>
+        </div>`).join('')}
+    </div>
+    <div class="card a4">
+      <div class="ctitle">◈ Cena vs klouzavé průměry</div>
+      ${[[d.ema20,'EMA 20','Krátkodobý trend'],[d.ema50,'EMA 50','Střednědobý trend'],[d.ema200,'EMA 200','Dlouhodobý trend']].map(([v,n,desc])=>`
+        <div class="lvrow">
+          <div><span style="font-size:10px;color:var(--muted)">${n}</span><br><span style="font-size:8px;color:var(--muted)">${desc}</span></div>
+          <span class="lprice" style="color:${price>v?'var(--green)':'var(--red)'}">$${f(v,1)}</span>
+          <span style="font-size:10px;color:${price>v?'var(--green)':'var(--red)'}">${price>v?'▲ nad':'▼ pod'}</span>
+        </div>`).join('')}
+    </div>
+    <div class="disc">⚠ Pouze informativní · Není finanční poradenství</div>
+  `;
+}
   const price=parseFloat(document.getElementById('m_price').value)||0;
   if(!price){alert('Zadejte cenu!');return}
   const prev=parseFloat(document.getElementById('m_prev').value)||price;
