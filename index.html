@@ -588,6 +588,7 @@ function renderMTF(d) {
     <div class="disc">⚠ Pouze informativní · Není finanční poradenství</div>
   `;
 }
+function manualAnalyze(){
   const price=parseFloat(document.getElementById('m_price').value)||0;
   if(!price){alert('Zadejte cenu!');return}
   const prev=parseFloat(document.getElementById('m_prev').value)||price;
