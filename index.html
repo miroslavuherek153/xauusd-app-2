@@ -1,721 +1,78 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Gold AI">
-<meta name="theme-color" content="#FFD700">
-<title>XAUUSD AI Terminal</title>
-<link rel="manifest" href="manifest.json">
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
-<style>
-:root{--gold:#FFD700;--green:#00FF88;--red:#FF3355;--bg:#050810;--bg2:#0a0f1e;--bg3:#0f1628;--border:rgba(255,215,0,0.15);--text:#c8d8f0;--muted:#556677;--mono:'Share Tech Mono',monospace;--display:'Orbitron',sans-serif}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden}
-body{background:var(--bg);color:var(--text);font-family:var(--mono);display:flex;flex-direction:column;background-image:radial-gradient(ellipse at 20% 0%,rgba(255,215,0,0.06) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(0,80,255,0.04) 0%,transparent 50%)}
-header{flex-shrink:0;background:rgba(5,8,16,0.98);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
-.logo{font-family:var(--display);font-size:14px;font-weight:900;color:var(--gold);letter-spacing:2px;text-shadow:0 0 15px rgba(255,215,0,0.3)}
-.logo span{color:var(--text);font-weight:400;font-size:12px}
-.hright{display:flex;align-items:center;gap:10px}
-.dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
-.dot.red{background:var(--red);box-shadow:0 0 8px var(--red)}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.2}}
-.htime{font-size:9px;color:var(--muted)}
-.cbar-wrap{flex-shrink:0;background:var(--bg2);border-bottom:1px solid var(--border);padding:5px 16px;display:flex;align-items:center;gap:10px}
-.cbar-label{font-size:8px;letter-spacing:2px;color:var(--muted)}
-.cbar-bg{flex:1;height:3px;background:rgba(255,255,255,0.06);border-radius:2px}
-.cbar-fill{height:3px;border-radius:2px;background:var(--gold);transition:width 1s linear}
-.cbar-time{font-size:9px;color:var(--gold);width:40px;text-align:right}
-.nav{flex-shrink:0;display:flex;background:var(--bg2);border-bottom:1px solid var(--border)}
-.ntab{flex:1;padding:9px 2px;text-align:center;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--mono);transition:all .2s}
-.ntab.active{color:var(--gold);border-bottom-color:var(--gold);background:rgba(255,215,0,0.04)}
-.ntab.mtf-tab.active{color:#60a5fa;border-bottom-color:#60a5fa;background:rgba(96,165,250,0.04)}
-/* ══ MTF TAB ═════════════════════════════════════════════════════════ */
-.mtf-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.mtf-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;position:relative;overflow:hidden}
-.mtf-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;border-radius:4px 0 0 4px}
-.mtf-card.bull::before{background:var(--green)}
-.mtf-card.bear::before{background:var(--red)}
-.mtf-card.neut::before{background:var(--muted)}
-.mtf-tf{font-family:var(--display);font-size:11px;font-weight:700;color:var(--gold);letter-spacing:2px}
-.mtf-sig{font-family:var(--display);font-size:18px;font-weight:900;letter-spacing:3px;margin:6px 0 4px}
-.mtf-sig.buy{color:var(--green);text-shadow:0 0 12px rgba(0,255,136,0.3)}
-.mtf-sig.sell{color:var(--red);text-shadow:0 0 12px rgba(255,51,85,0.3)}
-.mtf-sig.wait{color:var(--gold)}
-.mtf-meta{font-size:9px;color:var(--muted);line-height:1.8}
-.mtf-bar-wrap{margin-top:8px}
-.mtf-bar-lbl{display:flex;justify-content:space-between;font-size:8px;color:var(--muted);margin-bottom:3px}
-.mtf-bar-bg{height:4px;background:rgba(255,255,255,0.06);border-radius:2px}
-.mtf-bar-fill{height:4px;border-radius:2px;transition:width .5s}
-.conf-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px}
-.conf-title{font-size:8px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:12px;padding-bottom:7px;border-bottom:1px solid rgba(255,215,0,0.08)}
-.conf-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
-.conf-row:last-child{border-bottom:none}
-.conf-name{font-size:10px;color:var(--muted)}
-.conf-val{font-size:11px;font-weight:bold}
-.conf-bar{flex:1;height:3px;background:rgba(255,255,255,0.06);border-radius:2px;margin:0 10px}
-.conf-fill{height:3px;border-radius:2px}
-.mtf-summary{background:linear-gradient(145deg,rgba(255,215,0,0.08),rgba(255,215,0,0.02));border:1px solid rgba(255,215,0,0.25);border-radius:12px;padding:14px;margin-bottom:12px;text-align:center}
-.mtf-sum-lbl{font-size:8px;letter-spacing:4px;color:var(--muted);margin-bottom:4px}
-.mtf-sum-val{font-family:var(--display);font-size:22px;font-weight:900;letter-spacing:5px}
-.mtf-score{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
-.mtf-sc-item{background:rgba(0,0,0,0.3);border-radius:6px;padding:6px;text-align:center}
-.mtf-sc-lbl{font-size:7px;letter-spacing:1px;color:var(--muted)}
-.mtf-sc-dot{width:8px;height:8px;border-radius:50%;margin:4px auto 2px}
-.mtf-sc-sig{font-size:9px;font-weight:bold}
-.main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:20px}
-.screen{display:none;padding:12px}
-.screen.active{display:block}
-@keyframes su{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.a1{animation:su .3s ease both}.a2{animation:su .3s ease .06s both}.a3{animation:su .3s ease .12s both}.a4{animation:su .3s ease .18s both}.a5{animation:su .3s ease .24s both}
-@keyframes flashGreen{from{color:var(--green);text-shadow:0 0 20px var(--green)}to{color:#fff}}
-@keyframes flashRed{from{color:var(--red);text-shadow:0 0 20px var(--red)}to{color:#fff}}
-.up-flash{animation:flashGreen 1.5s ease}.down-flash{animation:flashRed 1.5s ease}
-.pcard{background:linear-gradient(145deg,rgba(255,215,0,0.08),rgba(255,215,0,0.02));border:1px solid rgba(255,215,0,0.25);border-radius:12px;padding:16px;margin-bottom:12px;position:relative;overflow:hidden}
-.pcard::after{content:'AU';position:absolute;bottom:-8px;right:12px;font-family:var(--display);font-size:60px;font-weight:900;color:rgba(255,215,0,0.04);pointer-events:none}
-.plbl{font-size:8px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center}
-.live-badge{background:rgba(0,255,136,0.15);color:var(--green);font-size:7px;padding:2px 6px;border-radius:10px;letter-spacing:2px;border:1px solid rgba(0,255,136,0.3)}
-.pval{font-family:var(--display);font-size:32px;font-weight:900;color:#fff;transition:all .3s}
-.pchg{font-size:11px;margin-top:4px}
-.up{color:var(--green)}.down{color:var(--red)}.nc{color:var(--muted)}
-.pstats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px}
-.stat{background:rgba(0,0,0,0.3);border-radius:6px;padding:7px}
-.slbl{font-size:7px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
-.sval{font-size:11px;color:var(--text);margin-top:2px}
-.tv-wrap{border-radius:12px;overflow:hidden;margin-bottom:12px;height:140px;border:1px solid var(--border)}
-.sigcard{border-radius:12px;padding:14px;margin-bottom:12px;text-align:center;border:1px solid}
-.sigcard.bearish{background:rgba(255,51,85,0.08);border-color:rgba(255,51,85,0.4)}
-.sigcard.bullish{background:rgba(0,255,136,0.06);border-color:rgba(0,255,136,0.3)}
-.sigcard.neutral{background:rgba(255,215,0,0.05);border-color:rgba(255,215,0,0.3)}
-.siglbl{font-size:8px;letter-spacing:4px;color:var(--muted);margin-bottom:4px}
-.sigval{font-family:var(--display);font-size:26px;font-weight:900;letter-spacing:6px}
-.sigcard.bearish .sigval{color:var(--red);text-shadow:0 0 20px rgba(255,51,85,0.5)}
-.sigcard.bullish .sigval{color:var(--green);text-shadow:0 0 20px rgba(0,255,136,0.4)}
-.sigcard.neutral .sigval{color:var(--gold)}
-.sigmeta{font-size:10px;color:var(--muted);margin-top:5px;line-height:1.7}
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px}
-.ctitle{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid rgba(255,215,0,0.08);display:flex;justify-content:space-between;align-items:center}
-.cbadge{font-size:8px;background:rgba(255,215,0,0.1);color:var(--gold);padding:2px 6px;border-radius:10px}
-.tfrow{display:flex;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
-.tfrow:last-child{border-bottom:none}
-.tfname{font-size:10px;color:var(--gold);width:38px}
-.tfbar{flex:1;height:3px;background:rgba(255,255,255,0.06);border-radius:2px;margin:0 10px}
-.tffill{height:3px;border-radius:2px}
-.tfsig{font-size:10px;width:58px;text-align:right}
-.aup{color:var(--green)}.adn{color:var(--red)}.ant{color:var(--muted)}
-.indrow{display:flex;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03);gap:8px}
-.indrow:last-child{border-bottom:none}
-.indname{font-size:10px;color:var(--muted);width:60px}
-.indbar{flex:1;height:4px;background:rgba(255,255,255,0.06);border-radius:2px}
-.indfill{height:4px;border-radius:2px}
-.indval{font-size:11px;font-weight:bold;width:52px;text-align:right}
-.lvrow{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
-.lvrow:last-child{border-bottom:none}
-.lbadge{font-size:7px;letter-spacing:2px;padding:2px 6px;border-radius:4px}
-.lbadge.res{background:rgba(255,51,85,0.12);color:var(--red);border:1px solid rgba(255,51,85,0.2)}
-.lbadge.sup{background:rgba(0,255,136,0.08);color:var(--green);border:1px solid rgba(0,255,136,0.15)}
-.lbadge.cur{background:rgba(255,215,0,0.12);color:var(--gold);border:1px solid rgba(255,215,0,0.2)}
-.lprice{font-family:var(--display);font-size:13px}
-.ldist{font-size:9px;color:var(--muted)}
-.setup-broker{background:var(--bg3);border:1px solid rgba(255,215,0,0.2);border-left:4px solid var(--gold);border-radius:10px;padding:14px;margin-bottom:12px}
-.setup-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
-.setup-row:last-child{border-bottom:none}
-.setup-key{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
-.setup-val{font-family:var(--display);font-size:15px}
-.ce{color:var(--gold)}.csl{color:var(--red)}.ctp{color:var(--green)}
-.rrbadge{background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.2);border-radius:6px;padding:6px;text-align:center;font-size:11px;color:var(--green);margin-bottom:10px}
-.acard{background:var(--bg2);border:1px solid rgba(0,255,136,0.2);border-radius:12px;padding:14px;margin-bottom:12px}
-.ahead{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:7px;border-bottom:1px solid rgba(0,255,136,0.1)}
-.atitle{font-size:8px;letter-spacing:3px;color:var(--green)}
-.asub{font-size:8px;color:var(--muted);margin-top:1px}
-.atext{font-size:11px;line-height:2;color:#9aafc5}
-.finput{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px}
-.finput label{display:block;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
-.finput input,.finput select{width:100%;background:none;border:none;color:var(--text);font-family:var(--mono);font-size:14px;outline:none}
-.finput input:focus{color:var(--gold)}
-.analyze-btn{width:100%;background:linear-gradient(135deg,rgba(255,215,0,0.2),rgba(255,165,0,0.1));border:1px solid rgba(255,215,0,0.4);color:var(--gold);padding:14px;font-family:var(--display);font-size:11px;letter-spacing:3px;cursor:pointer;border-radius:10px;margin-top:4px;transition:all .2s}
-.analyze-btn:active{transform:scale(0.98)}
-.iitem{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:13px 15px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
-.iname{font-size:12px;color:var(--text)}
-.idesc{font-size:9px;color:var(--muted);margin-top:2px}
-.iright{font-size:10px;color:var(--gold)}
-.isect-title{font-size:8px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:8px;margin-top:4px}
-.rbtn{background:rgba(255,215,0,0.07);border:1px solid var(--border);color:var(--gold);padding:12px;font-family:var(--mono);font-size:9px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;border-radius:10px;width:100%;margin-bottom:8px;transition:background .2s}
-.rbtn:active{background:rgba(255,215,0,0.15)}
-.disc{font-size:9px;color:#2a3345;text-align:center;padding:6px;line-height:1.8}
-.lwrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:18px}
-.spinner{width:48px;height:48px;border:2px solid rgba(255,215,0,0.1);border-top-color:var(--gold);border-radius:50%;animation:spin .9s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* ══ AI TAB ══════════════════════════════════════════════════════════ */
-.ai-banner{border-radius:12px;padding:16px;margin-bottom:14px;text-align:center;border:1px solid rgba(74,222,128,0.3);background:linear-gradient(145deg,rgba(74,222,128,0.06),rgba(34,197,94,0.03));position:relative;overflow:hidden}
-.ai-banner::before{content:'◈';position:absolute;top:-4px;right:16px;font-size:52px;color:rgba(74,222,128,0.05);pointer-events:none}
-.ai-banner-lbl{font-size:8px;letter-spacing:4px;color:#4ade80;margin-bottom:6px}
-.ai-banner-sig{font-family:var(--display);font-size:28px;font-weight:900;letter-spacing:6px}
-.ai-banner-sig.buy{color:var(--green);text-shadow:0 0 18px rgba(0,255,136,0.4)}
-.ai-banner-sig.sell{color:var(--red);text-shadow:0 0 18px rgba(255,51,85,0.4)}
-.ai-banner-sig.wait{color:var(--gold)}
-.ai-banner-sig.idle{color:var(--muted);font-size:16px;letter-spacing:2px}
-.ai-banner-meta{font-size:10px;color:var(--muted);margin-top:5px;line-height:1.7}
-.ai-card{background:var(--bg2);border:1px solid rgba(74,222,128,0.2);border-radius:12px;padding:14px;margin-bottom:12px}
-.ai-title{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:#4ade80;margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid rgba(74,222,128,0.1)}
-.ai-grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
-.ai-grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:8px}
-.ai-inp{background:var(--bg3);border:1px solid rgba(74,222,128,0.15);border-radius:8px;padding:9px 10px}
-.ai-inp label{display:block;font-size:8px;letter-spacing:2px;color:#2d6a4f;text-transform:uppercase;margin-bottom:3px}
-.ai-inp input,.ai-inp select{width:100%;background:none;border:none;color:var(--text);font-family:var(--mono);font-size:13px;outline:none}
-.ai-inp input:focus{color:#4ade80}
-.ai-inp select option{background:var(--bg3)}
-.ai-run{width:100%;background:linear-gradient(135deg,rgba(74,222,128,0.15),rgba(34,197,94,0.07));border:1px solid rgba(74,222,128,0.4);color:#4ade80;padding:14px;font-family:var(--display);font-size:11px;letter-spacing:3px;cursor:pointer;border-radius:10px;margin-top:4px;transition:all .2s}
-.ai-run:hover{background:linear-gradient(135deg,rgba(74,222,128,0.22),rgba(34,197,94,0.1))}
-.ai-run:active{transform:scale(.99)}
-.ai-run:disabled{opacity:.5;cursor:not-allowed}
-.ai-out-card{background:var(--bg3);border:1px solid rgba(74,222,128,0.2);border-radius:12px;padding:14px;margin-bottom:12px;display:none}
-.ai-out-card.visible{display:block}
-.ai-out-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(74,222,128,0.1)}
-.ai-out-title{font-size:8px;letter-spacing:3px;color:#4ade80;text-transform:uppercase}
-.ai-out-ts{font-size:9px;color:var(--muted);margin-left:auto}
-.ai-out-text{font-size:11px;line-height:2;color:#9aafc5;white-space:pre-wrap}
-.ai-cursor{display:inline-block;width:7px;height:12px;background:#4ade80;margin-left:1px;vertical-align:middle;animation:blink .75s step-end infinite}
-@keyframes blink{50%{opacity:0}}
-.ai-trade-box{background:var(--bg2);border:1px solid rgba(74,222,128,0.15);border-left:3px solid #4ade80;border-radius:10px;padding:12px 14px;margin-bottom:12px}
-.ai-trade-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
-.ai-trade-row:last-child{border-bottom:none}
-.ai-trade-key{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
-.ai-trade-val{font-family:var(--display);font-size:14px}
-.ai-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
-.ai-metric{background:var(--bg2);border:1px solid rgba(74,222,128,0.12);border-radius:8px;padding:8px;text-align:center}
-.ai-metric-lbl{font-size:7px;letter-spacing:2px;color:#2d6a4f;text-transform:uppercase}
-.ai-metric-val{font-family:var(--display);font-size:14px;color:#4ade80;margin-top:3px}
-.ai-presets{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
-.ai-preset{font-family:var(--mono);font-size:8px;letter-spacing:1px;padding:5px 10px;border:1px solid rgba(74,222,128,0.3);border-radius:20px;background:rgba(74,222,128,0.07);color:#4ade80;cursor:pointer;transition:all .15s}
-.ai-preset:hover{background:rgba(74,222,128,0.15)}
-.ai-autofill{font-size:8px;letter-spacing:1px;color:var(--green);background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.2);border-radius:6px;padding:6px 10px;margin-bottom:8px;text-align:center;display:none}
-.ai-error{color:var(--red);font-size:11px;text-align:center;padding:12px;border:1px solid rgba(255,51,85,0.2);border-radius:10px;margin-top:8px;background:rgba(255,51,85,0.04)}
-.free-badge{display:inline-flex;align-items:center;gap:4px;font-size:8px;background:rgba(74,222,128,0.1);color:#4ade80;border:1px solid rgba(74,222,128,0.25);border-radius:12px;padding:2px 8px;letter-spacing:1px}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XAUUSD Live Terminal</title>
+    <style>
+        body {
+            background-color: #0d1117;
+            color: #c9d1d9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: #161b22;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #30363d;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        h1 { font-size: 1.5rem; text-align: center; color: #58a6ff; }
+        .widget-wrapper { margin-top: 20px; border-radius: 8px; overflow: hidden; }
+    </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">XAU<span>/USD</span> LIVE</div>
-  <div class="hright">
-    <div class="htime" id="ht"></div>
-    <div class="dot" id="statusDot"></div>
-  </div>
-</header>
-
-<div class="cbar-wrap">
-  <span class="cbar-label">REFRESH</span>
-  <div class="cbar-bg"><div class="cbar-fill" id="cbar" style="width:100%"></div></div>
-  <span class="cbar-time" id="ctimer">15:00</span>
-</div>
-
-<nav class="nav">
-  <button class="ntab active" onclick="showTab('analysis')">◈ Auto</button>
-  <button class="ntab" onclick="showTab('levels')">◈ Úrovně</button>
-  <button class="ntab" onclick="showTab('setup')">◈ Setup</button>
-  <button class="ntab" onclick="showTab('manual')">◈ Manuál</button>
-  <button class="ntab mtf-tab" onclick="showTab('mtf')">◈ MTF</button>
-  <button class="ntab ai-tab" onclick="showTab('ai')">◈ AI</button>
-  <button class="ntab" onclick="showTab('info')">◈ Info</button>
-</nav>
-
-<div class="main">
-
-  <!-- AUTO -->
-  <div class="screen active" id="tab-analysis">
-    <div id="ageBadge" style="display:none"></div>
-    <div class="pcard a1">
-      <div class="plbl">◈ GOLD SPOT <span class="live-badge" id="liveBadge">● LIVE</span></div>
-      <div class="pval" id="livePrice">načítám...</div>
-      <div class="pchg" id="priceChange">–</div>
-      <div class="pstats">
-        <div class="stat"><div class="slbl">RSI 14</div><div class="sval" id="d_rsi">–</div></div>
-        <div class="stat"><div class="slbl">24h High</div><div class="sval up" id="d_high">–</div></div>
-        <div class="stat"><div class="slbl">24h Low</div><div class="sval down" id="d_low">–</div></div>
-      </div>
-    </div>
-    <div class="tv-wrap a2" id="tvWidget"></div>
-    <div id="signalBox"></div>
-    <div id="tfBox"></div>
-    <div id="indBox"></div>
-    <div id="analysisBox"></div>
-    <button class="rbtn a5" style="border-color:rgba(74,222,128,0.3);color:#4ade80;background:rgba(74,222,128,0.06)" onclick="openAiWithData()">◈ OTEVŘÍT AI ANALÝZU</button>
-    <button class="rbtn" onclick="loadData()">↻ AKTUALIZOVAT DATA</button>
-    <div class="disc">⚠ Pouze informativní · Není finanční poradenství</div>
-  </div>
-
-  <!-- LEVELS -->
-  <div class="screen" id="tab-levels"><div id="levelsContent"><div class="lwrap"><div class="spinner"></div></div></div></div>
-
-  <!-- SETUP -->
-  <div class="screen" id="tab-setup"><div id="setupContent"><div class="lwrap"><div class="spinner"></div></div></div></div>
-
-  <!-- MANUAL -->
-  <div class="screen" id="tab-manual">
-    <div class="card a1" style="background:linear-gradient(145deg,rgba(255,215,0,0.07),rgba(255,215,0,0.02));border-color:rgba(255,215,0,0.25)">
-      <div class="ctitle">◈ Data z TradingView</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-        <div class="finput"><label>Cena</label><input type="number" id="m_price" placeholder="3320.00" step="0.01"></div>
-        <div class="finput"><label>Předchozí close</label><input type="number" id="m_prev" placeholder="3300.00" step="0.01"></div>
-        <div class="finput"><label>RSI (14)</label><input type="number" id="m_rsi" placeholder="45" step="0.1"></div>
-        <div class="finput"><label>EMA 20</label><input type="number" id="m_ema20" placeholder="3300.00" step="0.01"></div>
-        <div class="finput"><label>EMA 50</label><input type="number" id="m_ema50" placeholder="3280.00" step="0.01"></div>
-        <div class="finput"><label>EMA 200</label><input type="number" id="m_ema200" placeholder="3180.00" step="0.01"></div>
-        <div class="finput"><label>High 24h</label><input type="number" id="m_high" placeholder="3350.00" step="0.01"></div>
-        <div class="finput"><label>Low 24h</label><input type="number" id="m_low" placeholder="3290.00" step="0.01"></div>
-      </div>
-      <div class="ctitle">◈ Timeframe signály</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-        <div class="finput"><label>1D</label><select id="t_1d"><option value="bearish">▼ Bearish</option><option value="neutral">— Neutral</option><option value="bullish">▲ Bullish</option></select></div>
-        <div class="finput"><label>4H</label><select id="t_4h"><option value="bearish">▼ Bearish</option><option value="neutral">— Neutral</option><option value="bullish">▲ Bullish</option></select></div>
-        <div class="finput"><label>1H</label><select id="t_1h"><option value="bearish">▼ Bearish</option><option value="neutral">— Neutral</option><option value="bullish">▲ Bullish</option></select></div>
-        <div class="finput"><label>15M</label><select id="t_15m"><option value="neutral">— Neutral</option><option value="bearish">▼ Bearish</option><option value="bullish">▲ Bullish</option></select></div>
-      </div>
-      <button class="analyze-btn" onclick="manualAnalyze()">⚡ ANALYZOVAT</button>
-    </div>
-    <div id="manualResult"></div>
-  </div>
-
-  <!-- MTF DASHBOARD -->
-  <div class="screen" id="tab-mtf">
-    <div id="mtfContent"><div class="lwrap"><div class="spinner"></div></div></div>
-  </div>
-
-  <!-- AI TAB -->
-  <div class="screen" id="tab-ai">
-    <div class="ai-banner a1">
-      <div class="ai-banner-lbl">◈ GEMINI AI SIGNÁL <span class="free-badge">● ZDARMA</span></div>
-      <div class="ai-banner-sig idle" id="aiBannerSig">ČEKÁ NA DATA</div>
-      <div class="ai-banner-meta" id="aiBannerMeta">Vyplňte tržní data a spusťte analýzu</div>
-    </div>
-    <div class="ai-card a2">
-      <div class="ai-title">◈ Tržní data</div>
-      <div class="ai-autofill" id="aiAutofill">✓ Data načtena automaticky z Auto záložky</div>
-      <div class="ai-presets">
-        <button class="ai-preset" onclick="aiPreset('bull')">▲ Bullish demo</button>
-        <button class="ai-preset" onclick="aiPreset('bear')">▼ Bearish demo</button>
-        <button class="ai-preset" onclick="aiPreset('neutral')">— Neutral demo</button>
-      </div>
-      <div class="ai-grid2">
-        <div class="ai-inp"><label>Cena (USD)</label><input id="ai_price" type="number" placeholder="3320.00" step="0.01"></div>
-        <div class="ai-inp"><label>Změna 24h (%)</label><input id="ai_chg" type="number" placeholder="+0.42" step="0.01"></div>
-        <div class="ai-inp"><label>RSI (14)</label><input id="ai_rsi" type="number" placeholder="52.5" step="0.1"></div>
-        <div class="ai-inp"><label>ATR (14)</label><input id="ai_atr" type="number" placeholder="28.0" step="0.1"></div>
-        <div class="ai-inp"><label>EMA 20</label><input id="ai_ema20" type="number" placeholder="3295.0" step="0.1"></div>
-        <div class="ai-inp"><label>EMA 50</label><input id="ai_ema50" type="number" placeholder="3280.0" step="0.1"></div>
-        <div class="ai-inp"><label>EMA 200</label><input id="ai_ema200" type="number" placeholder="3180.0" step="0.1"></div>
-        <div class="ai-inp"><label>MACD</label><input id="ai_macd" type="number" placeholder="4.2" step="0.1"></div>
-      </div>
-      <div class="ai-title" style="margin-top:4px">◈ Timeframe signály</div>
-      <div class="ai-grid4">
-        <div class="ai-inp"><label>1D</label><select id="ai_t1d"><option value="bullish">▲ BUY</option><option value="neutral">— WAIT</option><option value="bearish">▼ SELL</option></select></div>
-        <div class="ai-inp"><label>4H</label><select id="ai_t4h"><option value="bullish">▲ BUY</option><option value="neutral">— WAIT</option><option value="bearish">▼ SELL</option></select></div>
-        <div class="ai-inp"><label>1H</label><select id="ai_t1h"><option value="neutral">— WAIT</option><option value="bullish">▲ BUY</option><option value="bearish">▼ SELL</option></select></div>
-        <div class="ai-inp"><label>15M</label><select id="ai_t15m"><option value="neutral">— WAIT</option><option value="bullish">▲ BUY</option><option value="bearish">▼ SELL</option></select></div>
-      </div>
-      <button class="ai-run" id="aiRunBtn" onclick="runAI()">◈ SPUSTIT GEMINI AI ANALÝZU</button>
-      <div id="aiError"></div>
-    </div>
-    <div class="ai-out-card" id="aiOutCard">
-      <div class="ai-out-head">
-        <span class="ai-out-title">◈ Gemini AI výstup</span>
-        <span id="aiSigPill" style="margin-left:6px"></span>
-        <span class="ai-out-ts" id="aiOutTs"></span>
-      </div>
-      <div class="ai-trade-box" id="aiTradeBox" style="display:none">
-        <div class="ai-trade-row"><span class="ai-trade-key">Instrument</span><span class="ai-trade-val" style="color:var(--gold)">XAUUSD</span></div>
-        <div class="ai-trade-row"><span class="ai-trade-key">Signál</span><span class="ai-trade-val" id="aiTradeType">–</span></div>
-        <div class="ai-trade-row"><span class="ai-trade-key">Entry</span><span class="ai-trade-val ce" id="aiTradeEntry">–</span></div>
-        <div class="ai-trade-row"><span class="ai-trade-key">Stop Loss</span><span class="ai-trade-val csl" id="aiTradeSL">–</span></div>
-        <div class="ai-trade-row"><span class="ai-trade-key">Take Profit 1</span><span class="ai-trade-val ctp" id="aiTradeTP1">–</span></div>
-        <div class="ai-trade-row"><span class="ai-trade-key">Take Profit 2</span><span class="ai-trade-val ctp" id="aiTradeTP2">–</span></div>
-        <div class="ai-trade-row"><span class="ai-trade-key">R/R Ratio</span><span class="ai-trade-val" style="color:#4ade80" id="aiTradeRR">–</span></div>
-      </div>
-      <div class="ai-metrics" id="aiMetrics" style="display:none">
-        <div class="ai-metric"><div class="ai-metric-lbl">RSI 14</div><div class="ai-metric-val" id="aiMRsi">–</div></div>
-        <div class="ai-metric"><div class="ai-metric-lbl">TF shoda</div><div class="ai-metric-val" id="aiMTf">–</div></div>
-        <div class="ai-metric"><div class="ai-metric-lbl">ATR risk</div><div class="ai-metric-val" id="aiMAtr">–</div></div>
-      </div>
-      <div class="ai-out-text" id="aiOutText"></div>
-    </div>
-    <div class="disc">⚠ AI analýza je pouze informativní · Není finanční poradenství</div>
-  </div>
-
-  <!-- INFO -->
-  <div class="screen" id="tab-info">
-    <div style="padding:4px">
-      <div class="isect-title">◈ Status systému</div>
-      <div class="iitem"><div><div class="iname">Data robot</div><div class="idesc">GitHub Actions · každých 15 min</div></div><div class="iright" id="robotStatus">⏳</div></div>
-      <div class="iitem"><div><div class="iname">Poslední update</div><div class="idesc">Automatická aktualizace</div></div><div class="iright" id="lastUpdate">–</div></div>
-      <div class="iitem"><div><div class="iname">Živá cena</div><div class="idesc">GoldAPI.io · XAUUSD spot</div></div><div class="iright" style="color:var(--green)">● LIVE</div></div>
-      <div class="iitem"><div><div class="iname">Gemini AI</div><div class="idesc">Google Gemini 2.0 Flash · zdarma</div></div><div class="iright" style="color:#4ade80">◈ FREE</div></div>
-      <div class="iitem"><div><div class="iname">CF Worker proxy</div><div class="idesc">solitary-feather-c3d9.miroslavuherek-cz</div></div><div class="iright" style="color:#4ade80">◈ LIVE</div></div>
-      <div class="isect-title" style="margin-top:12px">◈ Jak nainstalovat jako apku</div>
-      <div class="card"><div style="font-size:11px;line-height:2.2;color:var(--text)">1. Otevřete v <b style="color:var(--gold)">Chrome</b><br>2. Klepněte <b style="color:var(--gold)">⋮</b> vpravo nahoře<br>3. <b style="color:var(--gold)">"Přidat na plochu"</b><br>4. Potvrďte → ikona na ploše ✓</div></div>
-      <div class="isect-title">◈ Push notifikace</div>
-      <div class="iitem" style="cursor:pointer" onclick="requestNotif()"><div><div class="iname">🔔 Notifikace BUY/SELL</div><div class="idesc">Klepněte pro povolení</div></div><div class="iright" id="notifBtn">Aktivovat</div></div>
-    </div>
-  </div>
-
-</div>
-
-<script>
-// ─────────────────────────────────────────────────────────────────────
-// KONFIGURACE — po nasazení workeru sem vlož tvou URL:
-const WORKER_URL = "https://solitary-feather-c3d9.miroslavuherek-cz.workers.dev";
-// ─────────────────────────────────────────────────────────────────────
-
-function f(n,d=2){return isNaN(n)?'–':Number(n).toFixed(d)}
-function rc(v){return v>70?'var(--red)':v<30?'var(--green)':'var(--text)'}
-function ta(t){return t==='bullish'?'<span class="aup">▲ BUY</span>':t==='bearish'?'<span class="adn">▼ SELL</span>':'<span class="ant">— WAIT</span>'}
-function tbc(t){return t==='bullish'?'var(--green)':t==='bearish'?'var(--red)':'var(--muted)'}
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-
-function ut(){document.getElementById('ht').textContent=new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}
-ut();setInterval(ut,1000);
-
-const TABS=['analysis','levels','setup','manual','mtf','ai','info'];
-function showTab(n){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('tab-'+n).classList.add('active');
-  TABS.forEach((x,i)=>{if(x===n)document.querySelectorAll('.ntab')[i].classList.add('active')});
-}
-
-if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
-
-const OS_ID="99a23e7d-32e9-475b-96ce-48615b4bc128";
-function initOS(){const s=document.createElement('script');s.src='https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js';s.defer=true;s.onload=()=>{window.OneSignalDeferred=window.OneSignalDeferred||[];OneSignalDeferred.push(async function(OS){await OS.init({appId:OS_ID,notifyButton:{enable:false},allowLocalhostAsSecureOrigin:true})})};document.head.appendChild(s)}
-initOS();
-async function requestNotif(){try{OneSignalDeferred.push(async function(OS){const ok=await OS.Notifications.requestPermission();document.getElementById('notifBtn').textContent=ok?'🔔 Aktivní':'❌ Zamítnuto';document.getElementById('notifBtn').style.color=ok?'var(--green)':'var(--red)'})}catch(e){alert('Chyba: '+e.message)}}
-
-let tvLoaded=false;
-function loadTV(){if(tvLoaded)return;tvLoaded=true;const c=document.getElementById('tvWidget');const s=document.createElement('script');s.src='https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js';s.async=true;s.innerHTML=JSON.stringify({symbol:'OANDA:XAUUSD',width:'100%',height:'140',locale:'cs',dateRange:'1M',colorTheme:'dark',isTransparent:true,autosize:true});c.appendChild(s)}
-
-// Kontrola stáří dat
-function checkDataAge(updatedStr) {
-  const badge = document.getElementById('ageBadge');
-  if (!badge || !updatedStr) return;
-  let updated;
-  try {
-    updated = new Date(updatedStr);
-    if (isNaN(updated)) {
-      const m = updatedStr.match(/(\d+)\.(\d+)\.(\d+)\s+(\d+):(\d+)/);
-      if (m) updated = new Date(Date.UTC(+m[3], +m[2]-1, +m[1], +m[4], +m[5]));
-    }
-  } catch(e) { return; }
-  if (!updated || isNaN(updated)) return;
-  const ageMin = Math.floor((Date.now() - updated.getTime()) / 60000);
-  if (ageMin < 20) {
-    badge.textContent = `✓ DATA ČERSTVÁ · aktualizováno před ${ageMin} min`;
-    badge.style.cssText = 'display:block;background:rgba(0,255,136,0.08);color:var(--green);border:1px solid rgba(0,255,136,0.25);border-radius:8px;padding:6px 12px;font-size:9px;letter-spacing:2px;text-align:center;margin-bottom:10px';
-  } else if (ageMin < 60) {
-    badge.textContent = `⚠ DATA STARÁ ${ageMin} MIN · robot mohl selhat`;
-    badge.style.cssText = 'display:block;background:rgba(255,165,0,0.08);color:orange;border:1px solid rgba(255,165,0,0.3);border-radius:8px;padding:7px 12px;font-size:9px;letter-spacing:2px;text-align:center;margin-bottom:10px';
-  } else {
-    const ageH = Math.floor(ageMin/60), ageM = ageMin%60;
-    badge.textContent = `🔴 DATA STARÁ ${ageH}h ${ageM}min · SIGNÁL NESPOLEHLIVÝ · oprav robota!`;
-    badge.style.cssText = 'display:block;background:rgba(255,51,85,0.1);color:var(--red);border:1px solid rgba(255,51,85,0.4);border-radius:8px;padding:8px 12px;font-size:9px;letter-spacing:2px;text-align:center;margin-bottom:10px;font-weight:bold';
-  }
-}
-
-// Živá cena každých 30 sekund - odstraněno (Yahoo Finance blokuje CORS)
-let countdown=180;
-setInterval(()=>{countdown--;if(countdown<=0){countdown=180;loadData();fetchLivePrice()}const m=Math.floor(countdown/60),s=countdown%60;document.getElementById('ctimer').textContent=`${m}:${s.toString().padStart(2,'0')}`;document.getElementById('cbar').style.width=(countdown/180*100)+'%'},1000);
-
-// Živá cena každých 30 sekund - odstraněno
-
-let cachedData=null,lastPrice=0;
-
-function updatePrice(price,d){
-  const el=document.getElementById('livePrice');
-  if(el&&lastPrice>0){el.classList.remove('up-flash','down-flash');void el.offsetWidth;el.classList.add(price>lastPrice?'up-flash':'down-flash')}
-  if(el)el.textContent='$'+f(price,2);
-  if(d){const ch=document.getElementById('priceChange');if(ch){const chg=d.change||0,pct=d.changePct||0;ch.className='pchg '+(chg>=0?'up':'down');ch.textContent=`${chg>=0?'▲':'▼'} $${f(Math.abs(chg),2)} · ${pct>=0?'+':''}${f(pct,2)}%`}
-  const dr=document.getElementById('d_rsi'),dh=document.getElementById('d_high'),dl=document.getElementById('d_low');
-  if(dr){dr.textContent=f(d.rsi,1);dr.style.color=rc(d.rsi)}if(dh)dh.textContent='$'+f(d.high24h,0);if(dl)dl.textContent='$'+f(d.low24h,0)}
-  lastPrice=price;
-}
-
-async function loadData(){
-  try{
-    const r=await fetch('./data.json?t='+Date.now());
-    if(!r.ok)throw new Error('HTTP '+r.status);
-    const d=await r.json();
-    if(d.status==='error')throw new Error(d.error||'Chyba dat');
-    cachedData=d;renderAll(d);checkDataAge(d.updated);
-    document.getElementById('statusDot').className='dot';
-    document.getElementById('robotStatus').textContent='✅ Online';
-    document.getElementById('lastUpdate').textContent=d.updated||'–';
-    loadTV();
-  }catch(e){
-    document.getElementById('statusDot').className='dot red';
-    document.getElementById('robotStatus').textContent='❌ Offline';
-    const err=`<div class="lwrap"><div style="font-size:28px">⚠</div><div style="color:var(--red);font-size:11px;letter-spacing:3px">CHYBA NAČÍTÁNÍ</div><div style="color:var(--muted);font-size:10px;text-align:center;line-height:1.8;max-width:280px">${esc(e.message)}</div><button class="rbtn" style="max-width:240px;margin-top:8px" onclick="loadData()">↻ ZKUSIT ZNOVU</button></div>`;
-    ['signalBox','tfBox','indBox','analysisBox'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=''});
-    document.getElementById('levelsContent').innerHTML=err;
-    document.getElementById('setupContent').innerHTML=err;
-  }
-}
-
-function renderAll(d){
-  const price=d.price||0;
-  updatePrice(price,d);
-  const sc=d.signal==='SELL'?'bearish':d.signal==='BUY'?'bullish':'neutral';
-  const rr=d.tp1&&d.sl&&d.entry?f(Math.abs(d.tp1-d.entry)/Math.abs(d.sl-d.entry||1),1):'2.0';
-  document.getElementById('signalBox').innerHTML=`<div class="sigcard ${sc} a2"><div class="siglbl">◈ AI ROBOT SIGNÁL</div><div class="sigval">${esc(d.signal)}</div><div class="sigmeta">Shoda: ${d.confidence}% · Trend: ${esc((d.trend||'').toUpperCase())}<br>EMA200: $${f(d.ema200,0)} · MACD: ${f(d.macd,1)} · ATR: $${f(d.atr||0,1)}</div></div>`;
-  document.getElementById('tfBox').innerHTML=`<div class="card a3"><div class="ctitle">◈ Multi-Timeframe <span class="cbadge">AUTO</span></div>${Object.entries(d.tf||{}).map(([tf,t])=>`<div class="tfrow"><span class="tfname">${esc(tf)}</span><div class="tfbar"><div class="tffill" style="width:${t==='bullish'?70:t==='bearish'?30:50}%;background:${tbc(t)}"></div></div><span class="tfsig">${ta(t)}</span></div>`).join('')}</div>`;
-  document.getElementById('indBox').innerHTML=`<div class="card a4"><div class="ctitle">◈ Indikátory</div><div class="indrow"><span class="indname">RSI 14</span><div class="indbar"><div class="indfill" style="width:${d.rsi}%;background:${rc(d.rsi)}"></div></div><span class="indval" style="color:${rc(d.rsi)}">${f(d.rsi,1)}</span></div><div class="indrow"><span class="indname">EMA 20</span><div class="indbar"><div class="indfill" style="width:60%;background:${price>d.ema20?'var(--green)':'var(--red)'}"></div></div><span class="indval" style="color:${price>d.ema20?'var(--green)':'var(--red)'}">${price>d.ema20?'↑':'↓'} $${f(d.ema20,0)}</span></div><div class="indrow"><span class="indname">EMA 50</span><div class="indbar"><div class="indfill" style="width:55%;background:${price>d.ema50?'var(--green)':'var(--red)'}"></div></div><span class="indval" style="color:${price>d.ema50?'var(--green)':'var(--red)'}">${price>d.ema50?'↑':'↓'} $${f(d.ema50,0)}</span></div><div class="indrow"><span class="indname">EMA 200</span><div class="indbar"><div class="indfill" style="width:50%;background:${price>d.ema200?'var(--green)':'var(--red)'}"></div></div><span class="indval" style="color:${price>d.ema200?'var(--green)':'var(--red)'}">${price>d.ema200?'↑':'↓'} $${f(d.ema200,0)}</span></div><div class="indrow"><span class="indname">MACD</span><div class="indbar"><div class="indfill" style="width:50%;background:${d.macd>0?'var(--green)':'var(--red)'}"></div></div><span class="indval" style="color:${d.macd>0?'var(--green)':'var(--red)'}">${f(d.macd,1)}</span></div></div>`;
-  document.getElementById('analysisBox').innerHTML=`<div class="acard a5"><div class="ahead"><div style="font-size:16px">📊</div><div><div class="atitle">AUTOMATICKÁ ANALÝZA</div><div class="asub">GitHub Actions · ${esc(d.updated||'')}</div></div></div><div class="atext">${esc(d.analysis||'–')}</div></div>`;
-  renderMTF(d);
-  document.getElementById('levelsContent').innerHTML=`<div class="card a1"><div class="ctitle">◈ Resistance zóny</div>${(d.resistance||[]).map((r,i)=>`<div class="lvrow"><span class="lbadge res">R${i+1}</span><span class="lprice" style="color:var(--red)">$${f(r,2)}</span><span class="ldist">+$${f(r-price,1)}</span></div>`).join('')}</div><div class="card a2"><div class="ctitle">◈ Aktuální cena</div><div class="lvrow"><span class="lbadge cur">LIVE</span><span class="lprice" style="color:var(--gold)">$${f(price,2)}</span><span class="ldist" style="color:${(d.change||0)>=0?'var(--green)':'var(--red)'}">${(d.changePct||0)>=0?'+':''}${f(d.changePct||0,2)}%</span></div></div><div class="card a3"><div class="ctitle">◈ Support zóny</div>${(d.support||[]).map((s,i)=>`<div class="lvrow"><span class="lbadge sup">S${i+1}</span><span class="lprice" style="color:var(--green)">$${f(s,2)}</span><span class="ldist">-$${f(price-s,1)}</span></div>`).join('')}</div><div class="card a4"><div class="ctitle">◈ Klouzavé průměry</div>${[[d.ema20,'EMA 20'],[d.ema50,'EMA 50'],[d.ema200,'EMA 200']].map(([v,n])=>`<div class="lvrow"><span style="font-size:10px;color:var(--muted)">${n}</span><span class="lprice" style="color:${price>v?'var(--green)':'var(--red)'}">$${f(v,1)}</span><span class="ldist" style="color:${price>v?'var(--green)':'var(--red)'}">${price>v?'▲ nad':'▼ pod'}</span></div>`).join('')}</div><button class="rbtn" onclick="loadData()">↻ AKTUALIZOVAT</button>`;
-  document.getElementById('setupContent').innerHTML=`<div class="sigcard ${sc} a1"><div class="siglbl">◈ DOPORUČENÝ SETUP</div><div class="sigval">${esc(d.signal)}</div><div class="sigmeta">Shoda: ${d.confidence}% · ${esc((d.trend||'').toUpperCase())}</div></div><div class="setup-broker a2"><div class="ctitle" style="border:none;margin-bottom:8px">◈ R StocksTrader příkaz</div><div class="setup-row"><span class="setup-key">Instrument</span><span class="setup-val" style="color:var(--gold)">XAUUSD</span></div><div class="setup-row"><span class="setup-key">Typ</span><span class="setup-val" style="color:${sc==='bearish'?'var(--red)':'var(--green)'}">${d.signal==='BUY'?'MARKET BUY':'MARKET SELL'}</span></div><div class="setup-row"><span class="setup-key">Vstup</span><span class="setup-val ce">$${f(d.entry,2)}</span></div><div class="setup-row"><span class="setup-key">Stop Loss</span><span class="setup-val csl">$${f(d.sl,2)}</span></div><div class="setup-row"><span class="setup-key">Take Profit 1</span><span class="setup-val ctp">$${f(d.tp1,2)}</span></div><div class="setup-row"><span class="setup-key">Take Profit 2</span><span class="setup-val ctp">$${f(d.tp2,2)}</span></div></div><div class="rrbadge a3">R/R = 1 : ${rr} · ATR: $${f(d.atr||0,1)}</div><div class="card a3"><div class="ctitle">◈ Risk kalkulace</div>${[['0.01',1],['0.05',5],['0.10',10]].map(([lot,m])=>`<div class="lvrow"><span style="font-size:10px;color:var(--muted)">Lot ${lot}</span><span style="font-size:11px;color:var(--red)">Risk ~$${f(Math.abs((d.sl-d.entry)||15)*m,1)}</span></div>`).join('')}</div><div class="acard a4"><div class="ahead"><div style="font-size:16px">🎯</div><div><div class="atitle">ZDŮVODNĚNÍ</div><div class="asub">${esc(d.updated||'')}</div></div></div><div class="atext">${esc(d.analysis||'–')}</div></div><button class="rbtn" onclick="loadData()">↻ NOVÝ SETUP</button><div class="disc">⚠ Není finanční poradenství</div>`;
-}
-
-function renderMTF(d) {
-  const price = d.price || 0;
-  const tf = d.tf || {};
-  const tfs = [
-    {key:'1D', label:'Daily 1D'},
-    {key:'4H', label:'4 hodiny'},
-    {key:'1H', label:'1 hodina'},
-    {key:'15M',label:'15 minut'},
-  ];
-
-  const bull = Object.values(tf).filter(x=>x==='bullish').length;
-  const bear = Object.values(tf).filter(x=>x==='bearish').length;
-  const total = bull + bear + Object.values(tf).filter(x=>x==='neutral').length || 1;
-  const overallSig = bull > bear ? 'BUY' : bear > bull ? 'SELL' : 'WAIT';
-  const overallSc  = overallSig==='BUY' ? 'buy' : overallSig==='SELL' ? 'sell' : 'wait';
-  const overallCol = overallSig==='BUY' ? 'var(--green)' : overallSig==='SELL' ? 'var(--red)' : 'var(--gold)';
-  const confPct = Math.round(Math.max(bull,bear)/total*100);
-
-  // TF cards
-  const tfCards = tfs.map(({key,label}) => {
-    const t = tf[key] || 'neutral';
-    const isBull = t==='bullish', isBear = t==='bearish';
-    const sig = isBull?'BUY':isBear?'SELL':'WAIT';
-    const sc  = isBull?'buy':isBear?'sell':'wait';
-    const cls = isBull?'bull':isBear?'bear':'neut';
-    const col = isBull?'var(--green)':isBear?'var(--red)':'var(--gold)';
-    const barW = isBull?75:isBear?25:50;
-    // Indicator hints per TF
-    const hints = {
-      '1D': `EMA200: $${f(d.ema200,0)} · ${price>d.ema200?'▲ nad':'▼ pod'}`,
-      '4H': `EMA50: $${f(d.ema50,0)} · ${price>d.ema50?'▲ nad':'▼ pod'}`,
-      '1H': `EMA20: $${f(d.ema20,0)} · ${price>d.ema20?'▲ nad':'▼ pod'}`,
-      '15M':`MACD: ${f(d.macd,1)} · ${d.macd>0?'▲ pozitivní':'▼ negativní'}`,
-    };
-    return `
-      <div class="mtf-card ${cls}">
-        <div class="mtf-tf">${key}</div>
-        <div style="font-size:9px;color:var(--muted)">${label}</div>
-        <div class="mtf-sig ${sc}">${sig}</div>
-        <div class="mtf-meta">${hints[key]||''}</div>
-        <div class="mtf-bar-wrap">
-          <div class="mtf-bar-lbl"><span>BEAR</span><span>BULL</span></div>
-          <div class="mtf-bar-bg"><div class="mtf-bar-fill" style="width:${barW}%;background:${col}"></div></div>
+<div class="container">
+    <h1>XAUUSD Real-Time Terminal</h1>
+    
+    <!-- LIVE CENA (JEDNODUCHÝ WIDGET) -->
+    <div class="widget-wrapper" style="height: 100px;">
+        <div class="tradingview-widget-container">
+            <div class="tradingview-widget-container__widget"></div>
+            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+            {
+                "symbol": "OANDA:XAUUSD",
+                "width": "100%",
+                "colorTheme": "dark",
+                "isTransparent": true,
+                "locale": "cs"
+            }
+            </script>
         </div>
-      </div>`;
-  }).join('');
-
-  // Score dots
-  const dots = tfs.map(({key}) => {
-    const t = tf[key]||'neutral';
-    const col = t==='bullish'?'var(--green)':t==='bearish'?'var(--red)':'var(--muted)';
-    const sig = t==='bullish'?'BUY':t==='bearish'?'SELL':'WAIT';
-    return `<div class="mtf-sc-item">
-      <div class="mtf-sc-lbl">${key}</div>
-      <div class="mtf-sc-dot" style="background:${col};box-shadow:0 0 6px ${col}"></div>
-      <div class="mtf-sc-sig" style="color:${col}">${sig}</div>
-    </div>`;
-  }).join('');
-
-  // Confluence indicators
-  const indics = [
-    {name:'RSI 14', val:f(d.rsi,1), w:d.rsi, col:`${d.rsi>70?'var(--red)':d.rsi<30?'var(--green)':'var(--gold)'}`},
-    {name:'EMA trend', val:price>d.ema200?'▲ Bullish':'▼ Bearish', w:price>d.ema200?75:25, col:price>d.ema200?'var(--green)':'var(--red)'},
-    {name:'MACD', val:f(d.macd,1), w:d.macd>0?65:35, col:d.macd>0?'var(--green)':'var(--red)'},
-    {name:'ATR volatilita', val:`$${f(d.atr,1)}`, w:Math.min((d.atr/50)*100,100), col:'var(--gold)'},
-    {name:'TF shoda', val:`${confPct}%`, w:confPct, col:overallCol},
-  ];
-
-  document.getElementById('mtfContent').innerHTML = `
-    <div class="mtf-summary a1">
-      <div class="mtf-sum-lbl">◈ CELKOVÝ MTF SIGNÁL</div>
-      <div class="mtf-sum-val" style="color:${overallCol}">${overallSig}</div>
-      <div style="font-size:10px;color:var(--muted);margin-top:4px">${bull}× BUY · ${bear}× SELL · Shoda ${confPct}%</div>
-      <div class="mtf-score">${dots}</div>
     </div>
-    <div class="mtf-grid a2">${tfCards}</div>
-    <div class="conf-card a3">
-      <div class="conf-title">◈ Confluence indikátory</div>
-      ${indics.map(i=>`
-        <div class="conf-row">
-          <span class="conf-name">${i.name}</span>
-          <div class="conf-bar"><div class="conf-fill" style="width:${i.w}%;background:${i.col}"></div></div>
-          <span class="conf-val" style="color:${i.col}">${i.val}</span>
-        </div>`).join('')}
+
+    <!-- LIVE GRAF (S MOŽNOSTÍ TRADINGU) -->
+    <div class="widget-wrapper" style="height: 500px;">
+        <div class="tradingview-widget-container" style="height:100%;width:100%">
+            <div id="tradingview_chart" style="height:calc(100% - 32px);width:100%"></div>
+            <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+            <script type="text/javascript">
+            new TradingView.widget({
+                "autosize": true,
+                "symbol": "OANDA:XAUUSD",
+                "interval": "1",
+                "timezone": "Europe/Prague",
+                "theme": "dark",
+                "style": "1",
+                "locale": "cs",
+                "toolbar_bg": "#f1f3f6",
+                "enable_publishing": false,
+                "hide_side_toolbar": false,
+                "allow_symbol_change": true,
+                "container_id": "tradingview_chart"
+            });
+            </script>
+        </div>
     </div>
-    <div class="card a4">
-      <div class="ctitle">◈ Cena vs klouzavé průměry</div>
-      ${[[d.ema20,'EMA 20','Krátkodobý trend'],[d.ema50,'EMA 50','Střednědobý trend'],[d.ema200,'EMA 200','Dlouhodobý trend']].map(([v,n,desc])=>`
-        <div class="lvrow">
-          <div><span style="font-size:10px;color:var(--muted)">${n}</span><br><span style="font-size:8px;color:var(--muted)">${desc}</span></div>
-          <span class="lprice" style="color:${price>v?'var(--green)':'var(--red)'}">$${f(v,1)}</span>
-          <span style="font-size:10px;color:${price>v?'var(--green)':'var(--red)'}">${price>v?'▲ nad':'▼ pod'}</span>
-        </div>`).join('')}
-    </div>
-    <div class="disc">⚠ Pouze informativní · Není finanční poradenství</div>
-  `;
-}
-function manualAnalyze(){
-  const price=parseFloat(document.getElementById('m_price').value)||0;
-  if(!price){alert('Zadejte cenu!');return}
-  const prev=parseFloat(document.getElementById('m_prev').value)||price;
-  const rsi=parseFloat(document.getElementById('m_rsi').value)||50;
-  const ema20=parseFloat(document.getElementById('m_ema20').value)||0;
-  const ema50=parseFloat(document.getElementById('m_ema50').value)||0;
-  const t1d=document.getElementById('t_1d').value,t4h=document.getElementById('t_4h').value,t1h=document.getElementById('t_1h').value,t15m=document.getElementById('t_15m').value;
-  const change=price-prev,changePct=prev?(change/prev*100):0;
-  let bull=0,bear=0;
-  [t1d,t4h,t1h,t15m].forEach(t=>{if(t==='bullish')bull++;else if(t==='bearish')bear++});
-  if(rsi<35)bull++;else if(rsi>65)bear++;
-  if(ema20&&price>ema20)bull++;else if(ema20)bear++;
-  if(ema50&&price>ema50)bull++;else if(ema50)bear++;
-  if(changePct>0)bull++;else bear++;
-  const sig=bear>bull?'SELL':bull>bear?'BUY':'WAIT';
-  const sc=sig==='SELL'?'bearish':sig==='BUY'?'bullish':'neutral';
-  const conf=Math.round(Math.max(bull,bear)/(bull+bear||1)*100);
-  const now=new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'});
-  const entry=sig==='SELL'?price+15:sig==='BUY'?price-15:price;
-  const sl=sig==='SELL'?entry+18:entry-18;
-  const tp1=sig==='SELL'?price-30:price+30;
-  const tp2=sig==='SELL'?price-60:price+60;
-  const rr=f(Math.abs(tp1-entry)/Math.abs(sl-entry||1),1);
-  document.getElementById('manualResult').innerHTML=`<div class="sigcard ${sc} a1" style="margin-top:12px"><div class="siglbl">◈ MANUÁLNÍ SIGNÁL</div><div class="sigval">${sig}</div><div class="sigmeta">Shoda: ${conf}% · ${bull}× BUY · ${bear}× SELL</div></div><div class="setup-broker a2"><div class="ctitle" style="border:none;margin-bottom:8px">◈ Příkaz</div><div class="setup-row"><span class="setup-key">Typ</span><span class="setup-val" style="color:${sc==='bearish'?'var(--red)':'var(--green)'}">${sig==='BUY'?'MARKET BUY':'MARKET SELL'}</span></div><div class="setup-row"><span class="setup-key">Vstup</span><span class="setup-val ce">$${f(entry,2)}</span></div><div class="setup-row"><span class="setup-key">Stop Loss</span><span class="setup-val csl">$${f(sl,2)}</span></div><div class="setup-row"><span class="setup-key">Take Profit 1</span><span class="setup-val ctp">$${f(tp1,2)}</span></div><div class="setup-row"><span class="setup-key">Take Profit 2</span><span class="setup-val ctp">$${f(tp2,2)}</span></div></div><div class="rrbadge">R/R = 1 : ${rr}</div><div class="disc">⚠ Není finanční poradenství</div>`;
-  document.getElementById('manualResult').scrollIntoView({behavior:'smooth'});
-}
+</div>
 
-/* ══ AI — Gemini via Cloudflare Worker ══════════════════════════════ */
-const AI_PRESETS={bull:{price:3340.5,chg:0.85,rsi:62,atr:31.2,ema20:3315,ema50:3288,ema200:3175,macd:8.4,t1d:'bullish',t4h:'bullish',t1h:'bullish',t15m:'neutral'},bear:{price:3285.2,chg:-1.24,rsi:34,atr:35.8,ema20:3310,ema50:3330,ema200:3190,macd:-6.2,t1d:'bearish',t4h:'bearish',t1h:'bearish',t15m:'neutral'},neutral:{price:3308.0,chg:0.05,rsi:52,atr:22.5,ema20:3305,ema50:3302,ema200:3185,macd:1.1,t1d:'neutral',t4h:'bullish',t1h:'bearish',t15m:'neutral'}};
-
-function aiPreset(k){const p=AI_PRESETS[k];['price','chg','rsi','atr','ema20','ema50','ema200','macd'].forEach(id=>document.getElementById('ai_'+id).value=p[id]);['t1d','t4h','t1h','t15m'].forEach(id=>document.getElementById('ai_'+id).value=p[id]);document.getElementById('aiError').innerHTML='';document.getElementById('aiAutofill').style.display='none'}
-
-function openAiWithData(){
-  if(cachedData){const d=cachedData;document.getElementById('ai_price').value=d.price||'';document.getElementById('ai_chg').value=d.changePct||'';document.getElementById('ai_rsi').value=d.rsi||'';document.getElementById('ai_atr').value=d.atr||'';document.getElementById('ai_ema20').value=d.ema20||'';document.getElementById('ai_ema50').value=d.ema50||'';document.getElementById('ai_ema200').value=d.ema200||'';document.getElementById('ai_macd').value=d.macd||'';if(d.tf){const m={'1D':'ai_t1d','4H':'ai_t4h','1H':'ai_t1h','15M':'ai_t15m'};Object.entries(m).forEach(([k,id])=>{const el=document.getElementById(id);if(el&&d.tf[k])el.value=d.tf[k]})}document.getElementById('aiAutofill').style.display='block'}
-  showTab('ai');
-}
-
-function buildPrompt(d){
-  const ab=(p,e)=>p>e?'nad':'pod';
-  const rZ=d.rsi>70?'překoupena':d.rsi<30?'přeprodána':'neutrální';
-  const tfs=[d.t1d,d.t4h,d.t1h,d.t15m];
-  const bull=tfs.filter(x=>x==='bullish').length,bear=tfs.filter(x=>x==='bearish').length;
-  const trend=bull>bear?'bullish':bear>bull?'bearish':'smíšený';
-  return `Jsi profesionální trader specializovaný na XAUUSD. Poskytni obchodní analýzu v češtině.
-
-TRŽNÍ DATA:
-Cena: $${d.price.toFixed(2)} | Změna 24h: ${d.chg>=0?'+':''}${d.chg.toFixed(2)}%
-RSI(14): ${d.rsi.toFixed(1)} [${rZ}] | ATR(14): $${d.atr.toFixed(1)}
-EMA20: $${d.ema20.toFixed(1)} (cena ${ab(d.price,d.ema20)}) | EMA50: $${d.ema50.toFixed(1)} (${ab(d.price,d.ema50)}) | EMA200: $${d.ema200.toFixed(1)} (${ab(d.price,d.ema200)})
-MACD: ${d.macd.toFixed(1)} [${d.macd>0?'pozitivní':'negativní'}]
-TF: 1D=${d.t1d} 4H=${d.t4h} 1H=${d.t1h} 15M=${d.t15m} → ${trend} (${bull}× bull/${bear}× bear)
-
-VÝSTUP (přesně takto, bez markdown):
-SIGNÁL: [BUY/SELL/WAIT]
-VSTUP: $[číslo]
-STOP LOSS: $[ATR×1.0 od vstupu]
-TAKE PROFIT 1: $[ATR×1.5]
-TAKE PROFIT 2: $[ATR×2.5]
-
-ZDŮVODNĚNÍ:
-[3-4 věty]
-
-KLÍČOVÁ RIZIKA:
-[2 rizika]
-
-CONFLUENCE:
-[Co potvrzuje vs co oslabuje]
-
-Max 200 slov. Konkrétní čísla.`;
-}
-
-function parseLvl(text){
-  const n=rx=>{const m=text.match(rx);return m?parseFloat(m[1].replace(',','.')):null};
-  return{entry:n(/VSTUP:\s*\$?([\d.,]+)/i),sl:n(/STOP\s*LOSS:\s*\$?([\d.,]+)/i),tp1:n(/TAKE\s*PROFIT\s*1:\s*\$?([\d.,]+)/i),tp2:n(/TAKE\s*PROFIT\s*2:\s*\$?([\d.,]+)/i),sig:(text.match(/SIGNÁL:\s*(BUY|SELL|WAIT)/i)||[])[1]?.toUpperCase()||'WAIT'};
-}
-
-async function runAI(){
-  const price=parseFloat(document.getElementById('ai_price').value)||0;
-  if(!price){document.getElementById('aiError').innerHTML='<div class="ai-error">⚠ Zadejte nejprve aktuální cenu zlata</div>';return}
-  document.getElementById('aiError').innerHTML='';
-  const d={price,chg:parseFloat(document.getElementById('ai_chg').value)||0,rsi:parseFloat(document.getElementById('ai_rsi').value)||50,atr:parseFloat(document.getElementById('ai_atr').value)||25,ema20:parseFloat(document.getElementById('ai_ema20').value)||0,ema50:parseFloat(document.getElementById('ai_ema50').value)||0,ema200:parseFloat(document.getElementById('ai_ema200').value)||0,macd:parseFloat(document.getElementById('ai_macd').value)||0,t1d:document.getElementById('ai_t1d').value,t4h:document.getElementById('ai_t4h').value,t1h:document.getElementById('ai_t1h').value,t15m:document.getElementById('ai_t15m').value};
-
-  const btn=document.getElementById('aiRunBtn');btn.disabled=true;btn.textContent='⏳ ANALYZUJI...';
-  const card=document.getElementById('aiOutCard');card.classList.add('visible');
-  document.getElementById('aiOutText').innerHTML='<span class="ai-cursor"></span>';
-  document.getElementById('aiOutTs').textContent=new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  document.getElementById('aiMetrics').style.display='none';document.getElementById('aiTradeBox').style.display='none';document.getElementById('aiSigPill').innerHTML='';
-  const banner=document.getElementById('aiBannerSig');banner.className='ai-banner-sig idle';banner.textContent='ANALYZUJI...';
-  document.getElementById('aiBannerMeta').textContent='Gemini AI zpracovává data...';
-
-  try{
-    const resp=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:buildPrompt(d)})});
-    if(!resp.ok){const err=await resp.text();throw new Error(`Worker ${resp.status}: ${err.slice(0,100)}`)}
-
-    const reader=resp.body.getReader(),decoder=new TextDecoder();
-    let fullText='';
-    const outEl=document.getElementById('aiOutText');
-
-    while(true){
-      const{done,value}=await reader.read();if(done)break;
-      const lines=decoder.decode(value).split('\n');
-      for(const line of lines){
-        if(!line.startsWith('data: '))continue;
-        const raw=line.slice(6).trim();if(!raw||raw==='[DONE]')continue;
-        try{const j=JSON.parse(raw);const chunk=j?.choices?.[0]?.delta?.content||'';if(chunk){fullText+=chunk;outEl.innerHTML=esc(fullText)+'<span class="ai-cursor"></span>'}}catch{}
-      }
-    }
-    outEl.innerHTML=esc(fullText);
-
-    const lvl=parseLvl(fullText);
-    const sc=lvl.sig==='BUY'?'buy':lvl.sig==='SELL'?'sell':'wait';
-    banner.className='ai-banner-sig '+sc;banner.textContent=lvl.sig||'WAIT';
-    document.getElementById('aiBannerMeta').textContent=`RSI: ${f(d.rsi,1)} · ATR: $${f(d.atr,1)} · ${new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'})}`;
-
-    const pc={BUY:'rgba(0,255,136,0.15)',SELL:'rgba(255,51,85,0.12)',WAIT:'rgba(255,215,0,0.1)'};
-    const pt={BUY:'var(--green)',SELL:'var(--red)',WAIT:'var(--gold)'};const s=lvl.sig||'WAIT';
-    document.getElementById('aiSigPill').innerHTML=`<span style="display:inline-flex;align-items:center;font-family:var(--display);font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;letter-spacing:2px;background:${pc[s]||pc.WAIT};color:${pt[s]||pt.WAIT}">${s==='BUY'?'▲':s==='SELL'?'▼':'—'} ${s}</span>`;
-
-    if(lvl.entry){
-      const rr=lvl.tp1&&lvl.sl?f(Math.abs(lvl.tp1-lvl.entry)/Math.abs(lvl.sl-lvl.entry||1),2):'–';
-      document.getElementById('aiTradeType').textContent=lvl.sig==='BUY'?'MARKET BUY':'MARKET SELL';document.getElementById('aiTradeType').style.color=lvl.sig==='BUY'?'var(--green)':'var(--red)';
-      document.getElementById('aiTradeEntry').textContent='$'+f(lvl.entry,2);document.getElementById('aiTradeSL').textContent='$'+f(lvl.sl,2);document.getElementById('aiTradeTP1').textContent='$'+f(lvl.tp1,2);document.getElementById('aiTradeTP2').textContent='$'+f(lvl.tp2,2);document.getElementById('aiTradeRR').textContent='1 : '+rr;
-      document.getElementById('aiTradeBox').style.display='block';
-    }
-
-    const bull=[d.t1d,d.t4h,d.t1h,d.t15m].filter(x=>x==='bullish').length,bear=[d.t1d,d.t4h,d.t1h,d.t15m].filter(x=>x==='bearish').length;
-    document.getElementById('aiMRsi').textContent=f(d.rsi,1);document.getElementById('aiMRsi').style.color=rc(d.rsi);
-    document.getElementById('aiMTf').textContent=Math.max(bull,bear)+'/4';document.getElementById('aiMTf').style.color=bull>bear?'var(--green)':'var(--red)';
-    document.getElementById('aiMAtr').textContent='$'+f(d.atr,0);document.getElementById('aiMetrics').style.display='grid';
-    card.scrollIntoView({behavior:'smooth'});
-
-  }catch(e){
-    document.getElementById('aiOutText').innerHTML='';
-    document.getElementById('aiError').innerHTML=`<div class="ai-error">⚠ ${esc(e.message)}</div>`;
-    banner.className='ai-banner-sig idle';banner.textContent='CHYBA';document.getElementById('aiBannerMeta').textContent=e.message.slice(0,60);
-    card.classList.remove('visible');
-  }
-  btn.disabled=false;btn.textContent='◈ SPUSTIT GEMINI AI ANALÝZU';
-}
-
-loadData();
-</script>
 </body>
 </html>
