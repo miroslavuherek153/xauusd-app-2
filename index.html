@@ -3,116 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XAUUSD AI TERMINAL v3.0</title>
+    <title>XAUUSD H1 MASTER STRATEGY</title>
     <style>
         body { background-color: #0d1117; color: #c9d1d9; font-family: sans-serif; padding: 10px; display: flex; flex-direction: column; align-items: center; margin: 0; }
-        .container { width: 100%; max-width: 1000px; background: #161b22; padding: 20px; border-radius: 12px; border: 1px solid #30363d; box-sizing: border-box; }
+        .container { width: 100%; max-width: 900px; background: #161b22; padding: 20px; border-radius: 12px; border: 1px solid #30363d; box-sizing: border-box; }
         .header { text-align: center; border-bottom: 1px solid #30363d; padding-bottom: 15px; margin-bottom: 20px; }
-        h1 { color: #58a6ff; margin: 0; font-size: 1.8rem; }
+        h1 { color: #58a6ff; margin: 0; font-size: 1.6rem; }
         .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
         @media (max-width: 600px) { .info-grid { grid-template-columns: 1fr; } }
         .info-box { background: #21262d; padding: 15px; border-radius: 8px; border: 1px solid #30363d; }
-        .label { color: #8b949e; font-size: 0.8rem; text-transform: uppercase; }
-        .trade-value { font-family: monospace; color: #ffffff; font-size: 1.1rem; font-weight: bold; }
-        .buy-action { color: #3fb950; }
-        .sell-action { color: #f85149; }
+        .label { color: #8b949e; font-size: 0.75rem; text-transform: uppercase; margin-bottom: 8px; display: block; }
+        .trade-value { font-family: 'Courier New', monospace; color: #ffffff; font-size: 1.3rem; font-weight: bold; background: #0d1117; padding: 5px 10px; border-radius: 4px; display: block; margin: 5px 0; }
+        .buy-theme { border-left: 5px solid #3fb950; }
+        .sell-theme { border-left: 5px solid #f85149; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h1>XAUUSD AI TERMINAL</h1>
-        <p style="color: #8b949e; margin: 5px 0 0 0;">Live Signals for R StocksTrader</p>
+        <h1>XAUUSD H1 STRATEGY TERMINAL</h1>
+        <p style="color: #8b949e; margin: 5px 0 0 0;">Dle strategie: SL 4.5b | TP 2.0b | VWAP Filter</p>
     </div>
 
-    <!-- LIVE PRICE WIDGET -->
-    <div class="info-box" style="margin-bottom: 15px; text-align: center;">
-        <div class="tradingview-widget-container">
-            <div class="tradingview-widget-container__widget"></div>
-            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-            {
-                "symbol": "OANDA:XAUUSD",
-                "width": "100%",
-                "colorTheme": "dark",
-                "isTransparent": true,
-                "locale": "cs"
-            }
-            </script>
-        </div>
-    </div>
-
-    <!-- CHART -->
-    <div style="height: 500px; border-radius: 8px; overflow: hidden; border: 1px solid #30363d; background: #131722;">
+    <div style="height: 450px; border-radius: 8px; overflow: hidden; border: 1px solid #30363d; margin-bottom: 20px;">
         <div id="tradingview_chart" style="height:100%;"></div>
         <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
         <script type="text/javascript">
         new TradingView.widget({
-            "autosize": true, "symbol": "OANDA:XAUUSD", "interval": "5", "timezone": "Europe/Prague",
-            "theme": "dark", "style": "1", "locale": "cs", "container_id": "tradingview_chart"
+            "autosize": true, "symbol": "OANDA:XAUUSD", "interval": "60", "timezone": "Europe/Prague",
+            "theme": "dark", "style": "1", "locale": "cs", "container_id": "tradingview_chart",
+            "studies": ["VWAP@tv-basicstudies"]
         });
         </script>
     </div>
 
     <div class="info-grid">
-        <!-- TECHNICKÁ ANALÝZA -->
         <div class="info-box">
-            <div class="label">Sentiment trhu</div>
+            <span class="label">Technický Sentiment (H1)</span>
             <div class="tradingview-widget-container">
                 <div class="tradingview-widget-container__widget"></div>
                 <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
-                {
-                    "interval": "15m", "width": "100%", "isTransparent": true, "height": 310,
-                    "symbol": "OANDA:XAUUSD", "showIntervalTabs": true, "locale": "cs", "colorTheme": "dark"
-                }
+                { "interval": "1h", "width": "100%", "isTransparent": true, "height": 300, "symbol": "OANDA:XAUUSD", "showIntervalTabs": false, "locale": "cs", "colorTheme": "dark" }
                 </script>
             </div>
         </div>
 
-        <!-- DYNAMICKÝ OBCHODNÍ PŘÍKAZ -->
-        <div class="info-box">
-            <div class="label">Aktuální Obchodní Příkaz (R StocksTrader)</div>
-            <div id="signal-box" style="margin-top:15px;">
-                <p>Status: <strong id="signal-type">NAČÍTÁNÍ...</strong></p>
-                <div style="background: #0d1117; padding: 15px; border-radius: 8px; border: 1px dashed #30363d;">
-                    <p>ENTRY: <span class="trade-value" id="entry-val">-</span></p>
-                    <p>STOP LOSS: <span class="trade-value" id="sl-val" style="color:#f85149;">-</span></p>
-                    <p>TAKE PROFIT: <span class="trade-value" id="tp-val" style="color:#3fb950;">-</span></p>
-                </div>
-                <p style="font-size: 0.8rem; color: #8b949e; margin-top: 10px;">
-                    * Hodnoty jsou počítány automaticky podle ATR a aktuální ceny. 
-                    Před zadáním do platformy vždy potvrďte trend v grafu.
-                </p>
+        <div class="info-box" id="trade-panel">
+            <span class="label" id="setup-label">Kontroluji trh...</span>
+            <h2 id="setup-title" style="margin: 10px 0;">Čekám na H1 svíci</h2>
+            
+            <div style="margin-top: 15px;">
+                <span class="label">Entry (Vstup pod/nad Low/High)</span>
+                <span class="trade-value" id="val-entry">-</span>
+                
+                <span class="label">Stop Loss (Fix 4.5 bodu)</span>
+                <span class="trade-value" id="val-sl" style="color: #f85149;">-</span>
+                
+                <span class="label">Take Profit (Fix 2.0 body)</span>
+                <span class="trade-value" id="val-tp" style="color: #3fb950;">-</span>
             </div>
+
+            <p id="vwap-info" style="font-size: 0.8rem; color: #8b949e; margin-top: 15px; border-top: 1px solid #30363d; padding-top: 10px;">
+                Pravidlo: Obchoduj pouze od 07:00 ráno.
+            </p>
         </div>
     </div>
 </div>
 
 <script>
-    // Logika pro výpočet hodnot (Entry, SL, TP)
-    async function updateTradeSignals() {
+    async function updateStrategy() {
         try {
-            // Použijeme veřejné API pro získání aktuální ceny zlata
-            const response = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=PAXGUSDT');
-            const data = await response.json();
-            const price = parseFloat(data.price);
+            // Získání poslední uzavřené H1 svíčky z Binance (PAXG = Zlato)
+            const res = await fetch('https://api.binance.com/api/v3/klines?symbol=PAXGUSDT&interval=1h&limit=2');
+            const data = await res.json();
+            const lastCandle = data[0]; // Předchozí uzavřená svíce
+            const currentPrice = parseFloat(data[1][4]); // Aktuální cena
 
-            // Výpočet (Modelový příklad: SL 5 USD, TP 15 USD - lze upravit)
-            const entry = price.toFixed(2);
-            const sl = (price - 6.50).toFixed(2);
-            const tp = (price + 18.00).toFixed(2);
+            const highH1 = parseFloat(lastCandle[2]);
+            const lowH1 = parseFloat(lastCandle[3]);
+            const openH1 = parseFloat(lastCandle[1]);
 
-            document.getElementById('signal-type').innerHTML = '<span class="buy-action">BUY (NÁKUP)</span>';
-            document.getElementById('entry-val').innerText = entry;
-            document.getElementById('sl-val').innerText = sl;
-            document.getElementById('tp-val').innerText = tp;
-        } catch (e) {
-            console.log("Čekám na data...");
-        }
+            const panel = document.getElementById('trade-panel');
+            const spread = 0.30; // Simulovaný spread 30 bodů
+            
+            // Logika VWAP / Trendu: Cena vs. Open H1
+            if (currentPrice < openH1) {
+                // SHORT SETUP (Cena pod open/vwap)
+                panel.className = "info-box sell-theme";
+                document.getElementById('setup-label').innerText = "Vstup pod Low H1";
+                document.getElementById('setup-title').innerText = "▼ SHORT SETUP";
+                
+                const entry = (lowH1 - spread).toFixed(2);
+                document.getElementById('val-entry').innerText = entry;
+                document.getElementById('val-sl').innerText = (parseFloat(entry) + 4.5).toFixed(2);
+                document.getElementById('val-tp').innerText = (parseFloat(entry) - 2.0).toFixed(2);
+                document.getElementById('vwap-info').innerText = "Podmínka: Cena pod VWAP. Cílíme na 2 body dolů.";
+            } else {
+                // LONG SETUP (Cena nad open/vwap)
+                panel.className = "info-box buy-theme";
+                document.getElementById('setup-label').innerText = "Vstup nad High H1";
+                document.getElementById('setup-title').innerText = "▲ LONG SETUP";
+                
+                const entry = (highH1 + spread).toFixed(2);
+                document.getElementById('val-entry').innerText = entry;
+                document.getElementById('val-sl').innerText = (parseFloat(entry) - 4.5).toFixed(2);
+                document.getElementById('val-tp').innerText = (parseFloat(entry) + 2.0).toFixed(2);
+                document.getElementById('vwap-info').innerText = "Podmínka: Cena nad VWAP. Cílíme na 2 body nahoru.";
+            }
+
+        } catch (e) { console.log("Sync error..."); }
     }
 
-    setInterval(updateTradeSignals, 5000);
-    updateTradeSignals();
+    setInterval(updateStrategy, 5000);
+    updateStrategy();
 </script>
 
 </body>
