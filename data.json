@@ -1,28 +1,28 @@
 {
-  "price": 4472.96,
-  "change": 84.65,
-  "changePct": 1.93,
-  "high24h": 4510.9,
-  "low24h": 4381.23,
-  "ask": 4474.23,
-  "bid": 4471.69,
+  "price": 4472.89,
+  "change": -0.07,
+  "changePct": 0,
+  "high24h": 4478.79,
+  "low24h": 4471.41,
+  "ask": 4473.26,
+  "bid": 4472.54,
   "rsi": 69.2,
-  "ema20": 4440.4,
+  "ema20": 4440.3,
   "ema50": 4442.9,
-  "ema200": 4447.6,
+  "ema200": 4447.5,
   "macd": -4.62,
   "atr": 18.3,
   "signal": "BUY",
   "trend": "bullish",
-  "confidence": 86,
+  "confidence": 71,
   "resistance": [
     4482.8,
-    4476.9,
+    4476.8,
     4476.6
   ],
   "support": [
-    4413.0,
-    4415.7,
+    4412.9,
+    4415.6,
     4419.5
   ],
   "tf": {
@@ -32,15 +32,15 @@
     "30M": "bullish",
     "15M": "neutral"
   },
-  "entry": 4472.96,
-  "sl": 4445.51,
-  "tp1": 4509.55,
-  "tp2": 4537.0,
+  "entry": 4472.89,
+  "sl": 4445.44,
+  "tp1": 4509.48,
+  "tp2": 4536.93,
   "rr": 1.3,
   "sl_dist": 27.45,
   "tp1_dist": 36.59,
-  "updated": "03.09.2026 21:24 UTC",
+  "updated": "03.09.2026 23:27 UTC",
   "status": "ok",
   "source": "GoldAPI.io + Yahoo Finance",
-  "analysis": "XAUUSD ke 03.09.2026 21:24 UTC: Živá spotová cena $4472.96 (GoldAPI.io). Cena je nad EMA50 ($4443) – trend bullish. RSI 69 – neutrální. MACD ↓ negativní. ATR: $18.3 – SL $27 · TP1 $37 · R:R 1:1.3. Doporučení: BUY (86% shoda)."
+  "analysis": "XAUUSD ke 03.09.2026 23:27 UTC: Živá spotová cena $4472.89 (GoldAPI.io). Cena je nad EMA50 ($4443) – trend bullish. RSI 69 – neutrální. MACD ↓ negativní. ATR: $18.3 – SL $27 · TP1 $37 · R:R 1:1.3. Doporučení: BUY (71% shoda)."
 }
