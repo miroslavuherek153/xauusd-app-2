@@ -78,6 +78,8 @@ def twelvedata(interval, size=300):
     if d.get("status") == "error":
         raise RuntimeError(d.get("message"))
     v = list(reversed(d["values"]))
+    # svíčky se zavřeným trhem (víkend, svátky) jsou ploché (high == low) - zkreslily by ATR i S/R
+    v = [x for x in v if float(x["high"]) > float(x["low"])]
     return [float(x["high"]) for x in v], [float(x["low"]) for x in v], [float(x["close"]) for x in v]
 
 
