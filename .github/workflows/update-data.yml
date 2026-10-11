@@ -22,7 +22,7 @@ jobs:
       - name: Update data.json (+ notifikace při změně signálu)
         env:
           # Klíče jsou v Settings -> Secrets and variables -> Actions, NE v kódu.
-          GOLDAPI_KEY: ${{ secrets.GOLDAPI_KEY }}
+          TWELVEDATA_KEY: ${{ secrets.TWELVEDATA_KEY }}
           ONESIGNAL_APP_ID: ${{ secrets.ONESIGNAL_APP_ID }}
           ONESIGNAL_API_KEY: ${{ secrets.ONESIGNAL_API_KEY }}
         run: python3 scripts/update_data.py

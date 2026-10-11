@@ -2,9 +2,9 @@
 update_data.py - aktualizace data.json pro xauusd-app-2 (spouští GitHub Actions, workflow update-data.yml).
 
 Klíče se berou z GitHub Secrets (proměnné prostředí), NIKDY ne z kódu:
-  GOLDAPI_KEY        - goldapi.io (živá spotová cena)
-  ONESIGNAL_APP_ID   - OneSignal aplikace (push notifikace)
-  ONESIGNAL_API_KEY  - OneSignal REST API klíč
+  TWELVEDATA_KEY     - twelvedata.com (spot XAU/USD: svíčky H1 a D1; free 800 požadavků/den, běh = 2)
+  ONESIGNAL_APP_ID / ONESIGNAL_API_KEY - volitelné push notifikace (bez nich se přeskočí)
+GoldAPI se už nepoužívá: free tarif má 100 požadavků za MĚSÍC, workflow jich potřeboval ~2 900.
 
 Oproti původní verzi ve workflow:
   - klíče nejsou v kódu (byly veřejně vidět v repozitáři),
@@ -70,15 +70,32 @@ def yahoo(symbol, interval, rng):
     return [r[0] for r in rows], [r[1] for r in rows], [r[2] for r in rows]
 
 
+def twelvedata(interval, size=300):
+    key = os.environ.get("TWELVEDATA_KEY", "")
+    if not key:
+        raise RuntimeError("TWELVEDATA_KEY chybí")
+    d = get_json(f"https://api.twelvedata.com/time_series?symbol=XAU/USD&interval={interval}&outputsize={size}&apikey={key}")
+    if d.get("status") == "error":
+        raise RuntimeError(d.get("message"))
+    v = list(reversed(d["values"]))
+    return [float(x["high"]) for x in v], [float(x["low"]) for x in v], [float(x["close"]) for x in v]
+
+
 def history(interval, rng):
-    """Zlaté futures GC=F (Yahoo symbol XAUUSD=X vrací 404); pro trend a ATR stačí."""
-    for sym in ("GC=F", "XAUUSD=X"):
-        try:
-            h, l, c = yahoo(sym, interval, rng)
-            if len(c) >= 30:
-                return h, l, c, sym
-        except Exception as e:  # noqa: BLE001
-            print(f"Yahoo {sym} {interval}: {e}")
+    """Spot XAU/USD z Twelve Data; záloha zlaté futures GC=F z Yahoo (jiná cena než spot - jen celá řada
+    z jednoho zdroje, nikdy se nemíchá spot s futures). Yahoo symbol XAUUSD=X vrací 404."""
+    try:
+        h, l, c = twelvedata({"1h": "1h", "1d": "1day"}[interval])
+        if len(c) >= 30:
+            return h, l, c, "Twelve Data XAU/USD (spot)"
+    except Exception as e:  # noqa: BLE001
+        print(f"Twelve Data {interval}: {e}")
+    try:
+        h, l, c = yahoo("GC=F", interval, rng)
+        if len(c) >= 30:
+            return h, l, c, "Yahoo GC=F (futures, ne spot)"
+    except Exception as e:  # noqa: BLE001
+        print(f"Yahoo GC=F {interval}: {e}")
     return [], [], [], None
 
 
@@ -90,22 +107,12 @@ def trend_of(closes):
 
 def main():
     now = datetime.now(timezone.utc).strftime("%d.%m.%Y %H:%M UTC")
-    key = os.environ.get("GOLDAPI_KEY", "")
     spot = {}
-    if key:
-        try:
-            spot = get_json("https://www.goldapi.io/api/XAU/USD", {"x-access-token": key, "Content-Type": "application/json"}, 10)
-        except Exception as e:  # noqa: BLE001
-            print(f"GoldAPI: {e}")
-    else:
-        print("GOLDAPI_KEY chybí (GitHub Secrets) - jen cena z Yahoo")
-
     h1, l1, c1, src = history("1h", "60d")
     if not c1:
-        write({"status": "error", "error": "Nepodařilo se načíst historická data (Yahoo).", "updated": now, "price": 0})
+        write({"status": "error", "error": "Nepodařilo se načíst data (Twelve Data ani Yahoo).", "updated": now, "price": 0})
         return
-    price = spot.get("price") or c1[-1]
-    c1[-1] = price
+    price = c1[-1]                                  # poslední cena ze STEJNÉHO zdroje jako historie
 
     e20, e50, e200 = ema(c1, 20), ema(c1, 50), ema(c1, 200)
     macd = ema(c1, 12) - ema(c1, 26)
@@ -142,7 +149,7 @@ def main():
         "entry": round(price, 2), "sl": round(price - side * sl_d, 2), "tp1": round(price + side * tp1_d, 2),
         "tp2": round(price + side * tp2_d, 2), "rr": round(tp1_d / sl_d, 1) if sl_d else 0,
         "sl_dist": round(sl_d, 2), "tp1_dist": round(tp1_d, 2),
-        "updated": now, "status": "ok", "source": ("GoldAPI.io + " if spot.get("price") else "") + f"Yahoo {src}",
+        "updated": now, "status": "ok", "source": src,
         "analysis": (f"XAUUSD {now}: cena ${price:.2f}, {'nad' if price > e50 else 'pod'} EMA50 (${e50:.0f}), RSI {rsi_v:.0f}, "
                      f"MACD {'kladný' if macd > 0 else 'záporný'}, ATR ${atr:.1f}. Indikátory převážně "
                      f"{'býčí' if signal == 'BUY' else 'medvědí' if signal == 'SELL' else 'smíšené'} ({max(bull, bear)}/{bull + bear} bodů). "
