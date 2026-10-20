@@ -1,123 +1,338 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XAUUSD H1 MASTER STRATEGY</title>
-    <style>
-        body { background-color: #0d1117; color: #c9d1d9; font-family: sans-serif; padding: 10px; display: flex; flex-direction: column; align-items: center; margin: 0; }
-        .container { width: 100%; max-width: 900px; background: #161b22; padding: 20px; border-radius: 12px; border: 1px solid #30363d; box-sizing: border-box; }
-        .header { text-align: center; border-bottom: 1px solid #30363d; padding-bottom: 15px; margin-bottom: 20px; }
-        h1 { color: #58a6ff; margin: 0; font-size: 1.6rem; }
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-        @media (max-width: 600px) { .info-grid { grid-template-columns: 1fr; } }
-        .info-box { background: #21262d; padding: 15px; border-radius: 8px; border: 1px solid #30363d; }
-        .label { color: #8b949e; font-size: 0.75rem; text-transform: uppercase; margin-bottom: 8px; display: block; }
-        .trade-value { font-family: 'Courier New', monospace; color: #ffffff; font-size: 1.3rem; font-weight: bold; background: #0d1117; padding: 5px 10px; border-radius: 4px; display: block; margin: 5px 0; }
-        .buy-theme { border-left: 5px solid #3fb950; }
-        .sell-theme { border-left: 5px solid #f85149; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zlato asistent</title>
+<meta name="theme-color" content="#0d1117">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<style>
+:root {
+  --bg: #0d1117; --card: #161b22; --card2: #21262d; --line: #30363d; --text: #e6edf3; --muted: #8b949e;
+  --blue: #58a6ff; --green: #3fb950; --red: #f85149; --amber: #d29922;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+.wrap { max-width: 960px; margin: 0 auto; padding: 12px 16px 40px; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; padding: 6px 0 12px; border-bottom: 1px solid var(--line); }
+h1 { font-size: 1.15rem; margin: 0; color: var(--blue); }
+.price { font: 700 1.9rem/1 ui-monospace, "Cascadia Mono", Consolas, monospace; }
+.sub { color: var(--muted); font-size: .8rem; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 12px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.card h2 { font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; font-weight: 600; }
+.row { display: flex; justify-content: space-between; gap: 8px; padding: 3px 0; }
+.row > span:first-child { color: var(--muted); }
+.mono { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
+.b { font-weight: 700; }
+.up { color: var(--green); } .down { color: var(--red); } .warn { color: var(--amber); } .muted { color: var(--muted); }
+.badge { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: .8rem; font-weight: 600; background: var(--card2); }
+.badge.up { background: rgba(63,185,80,.15); } .badge.down { background: rgba(248,81,73,.15); } .badge.warn { background: rgba(210,153,34,.15); }
+.verdict { margin-top: 12px; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); }
+.verdict .t { font-size: 1.1rem; font-weight: 700; }
+.verdict.ok { border-left: 5px solid var(--green); } .verdict.no { border-left: 5px solid var(--red); } .verdict.mid { border-left: 5px solid var(--amber); }
+ul.check { list-style: none; padding: 0; margin: 6px 0 0; }
+ul.check li { padding: 3px 0; }
+.chart { height: 420px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; margin-top: 12px; }
+.tabs { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+.tabs button { background: var(--card2); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; font: inherit; cursor: pointer; }
+.tabs button.on { border-color: var(--blue); color: var(--blue); }
+.calc label { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 3px 0; color: var(--muted); }
+.calc input { width: 110px; background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; font: inherit; text-align: right; }
+details { margin-top: 12px; }
+summary { cursor: pointer; color: var(--muted); }
+.note { color: var(--muted); font-size: .8rem; margin-top: 8px; }
+</style>
 </head>
 <body>
+<div class="wrap">
+  <header>
+    <h1>Zlato – asistent vstupu</h1>
+    <span class="price" id="price">–</span>
+    <span id="chg" class="mono"></span>
+    <span class="sub" id="upd">načítám…</span>
+  </header>
 
-<div class="container">
-    <div class="header">
-        <h1>XAUUSD H1 STRATEGY TERMINAL</h1>
-        <p style="color: #8b949e; margin: 5px 0 0 0;">Dle strategie: SL 4.5b | TP 2.0b | VWAP Filter</p>
+  <div class="verdict mid" id="verdict">
+    <div class="t" id="v-title">Počítám…</div>
+    <div class="sub">Pomůcka podle postupu puntíků (D1 → H4 → H1, VWAP, reliéf, makro). Není to ověřená strategie – rozhoduješ ty.</div>
+    <ul class="check" id="v-list"></ul>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Směr</h2>
+      <div class="row"><span>D1</span><span id="d1"></span></div>
+      <div class="row"><span>H4</span><span id="h4"></span></div>
+      <div class="row"><span>H1</span><span id="h1"></span></div>
+      <div class="row"><span>Cena vs. VWAP dne</span><span id="vw-side"></span></div>
+      <div class="row"><span>Dnešní den</span><span id="dayType"></span></div>
     </div>
 
-    <div style="height: 450px; border-radius: 8px; overflow: hidden; border: 1px solid #30363d; margin-bottom: 20px;">
-        <div id="tradingview_chart" style="height:100%;"></div>
-        <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-        <script type="text/javascript">
-        new TradingView.widget({
-            "autosize": true, "symbol": "OANDA:XAUUSD", "interval": "60", "timezone": "Europe/Prague",
-            "theme": "dark", "style": "1", "locale": "cs", "container_id": "tradingview_chart",
-            "studies": ["VWAP@tv-basicstudies"]
-        });
-        </script>
+    <div class="card">
+      <h2>VWAP dne</h2>
+      <div class="row"><span>VWAP</span><span class="mono b" id="vwap">–</span></div>
+      <div class="row"><span>Vzdálenost</span><span class="mono" id="vw-dist">–</span></div>
+      <div class="row"><span>ATR H1</span><span class="mono" id="atr">–</span></div>
+      <div class="note">„Daleko od VWAP bych měl strach, trh se k VWAP vrací.“ Varování nad 1,5 × ATR H1.</div>
     </div>
 
-    <div class="info-grid">
-        <div class="info-box">
-            <span class="label">Technický Sentiment (H1)</span>
-            <div class="tradingview-widget-container">
-                <div class="tradingview-widget-container__widget"></div>
-                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
-                { "interval": "1h", "width": "100%", "isTransparent": true, "height": 300, "symbol": "OANDA:XAUUSD", "showIntervalTabs": false, "locale": "cs", "colorTheme": "dark" }
-                </script>
-            </div>
-        </div>
-
-        <div class="info-box" id="trade-panel">
-            <span class="label" id="setup-label">Kontroluji trh...</span>
-            <h2 id="setup-title" style="margin: 10px 0;">Čekám na H1 svíci</h2>
-            
-            <div style="margin-top: 15px;">
-                <span class="label">Entry (Vstup pod/nad Low/High)</span>
-                <span class="trade-value" id="val-entry">-</span>
-                
-                <span class="label">Stop Loss (Fix 4.5 bodu)</span>
-                <span class="trade-value" id="val-sl" style="color: #f85149;">-</span>
-                
-                <span class="label">Take Profit (Fix 2.0 body)</span>
-                <span class="trade-value" id="val-tp" style="color: #3fb950;">-</span>
-            </div>
-
-            <p id="vwap-info" style="font-size: 0.8rem; color: #8b949e; margin-top: 15px; border-top: 1px solid #30363d; padding-top: 10px;">
-                Pravidlo: Obchoduj pouze od 07:00 ráno.
-            </p>
-        </div>
+    <div class="card">
+      <h2>Prostor do překážky (reliéf)</h2>
+      <div class="row"><span>LONG – překážka</span><span class="mono" id="obs-l">–</span></div>
+      <div class="row"><span>LONG – volno</span><span class="mono b" id="room-l">–</span></div>
+      <div class="row"><span>SHORT – překážka</span><span class="mono" id="obs-s">–</span></div>
+      <div class="row"><span>SHORT – volno</span><span class="mono b" id="room-s">–</span></div>
+      <div class="note">Překážka = nejbližší H1 vrchol/dno (fraktál ±3, posledních 120 h) nebo šikmá linie přes dva poslední nižší vrcholy / vyšší dna. Pod 4 body = malý prostor.</div>
     </div>
+
+    <div class="card">
+      <h2>Úrovně H1 a cíl swingu</h2>
+      <div class="row"><span>Buy stop (high poslední H1)</span><span class="mono" id="lv-buy">–</span></div>
+      <div class="row"><span>Sell stop (low poslední H1)</span><span class="mono" id="lv-sell">–</span></div>
+      <div class="row"><span>Poslední swing (M5)</span><span class="mono" id="swing">–</span></div>
+      <div class="row"><span>Cíl 80 % swingu – long</span><span class="mono" id="tg-l">–</span></div>
+      <div class="row"><span>Cíl 80 % swingu – short</span><span class="mono" id="tg-s">–</span></div>
+    </div>
+
+    <div class="card">
+      <h2>Makro USA</h2>
+      <div id="macro" class="muted">načítám…</div>
+      <div class="note">Vysoký (●) a střední dopad (ForexFactory). 30 min kolem silné zprávy vstup nedoporučen.</div>
+    </div>
+
+    <div class="card">
+      <h2>Tok a páka (Binance, jen informace)</h2>
+      <div class="row"><span>Agresivní nákupy 15 min</span><span class="mono" id="tk15">–</span></div>
+      <div class="row"><span>Agresivní nákupy 1 h</span><span class="mono" id="tk60">–</span></div>
+      <div class="row"><span>Účty v long</span><span class="mono" id="lsr">–</span></div>
+      <div class="row"><span>Funding p.a.</span><span class="mono" id="fund">–</span></div>
+      <div class="note">Testy na historii neukázaly, že by tok sám předpovídal směr – berte jako kontext.</div>
+    </div>
+
+    <div class="card calc">
+      <h2>Kalkulačka rizika</h2>
+      <label>Účet ($) <input id="c-acc" type="number" inputmode="decimal" value="10000"></label>
+      <label>Riziko na obchod (%) <input id="c-risk" type="number" inputmode="decimal" step="0.1" value="1"></label>
+      <label>Stop (body) <input id="c-sl" type="number" inputmode="decimal" step="0.1" value="4.5"></label>
+      <div class="row"><span>Riziko v $</span><span class="mono b" id="c-usd">–</span></div>
+      <div class="row"><span>Objem (loty, 1 lot = 100 oz)</span><span class="mono b" id="c-lot">–</span></div>
+      <div class="row"><span>Denní limit ztráty (−2 %)</span><span class="mono" id="c-day">–</span></div>
+    </div>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <button data-i="5">M5</button><button data-i="15">M15</button><button data-i="60" class="on">H1</button><button data-i="240">H4</button><button data-i="D">D1</button>
+  </div>
+  <div class="chart"><div id="tv" style="height:100%"></div></div>
+
+  <details>
+    <summary>Co víme z testů (zlato 2015–2021, náklady jako na ostrém účtu)</summary>
+    <ul class="note">
+      <li>Průraz každé H1 svíčky, cíl 2 / stop 4,5 (předchozí verze této stránky): −0,19 R na obchod, úspěšnost 56 % proti potřebným 77 %.</li>
+      <li>Puntíky mechanicky (8 variant): žádná kladná. Jediné, co neslo informaci, byl filtr reliéfu.</li>
+      <li>Kanál ABCD mechanicky: −0,42 R, stejně jako náhodný vstup. Stop těsně za linií je v šumu.</li>
+      <li>Davidovy živé alerty se vyhodnocují každou noc (první dotek ± bodů proti náhodnému vstupu ve stejný čas).</li>
+    </ul>
+  </details>
+  <p class="note">Ceny: Binance XAUUSDT (obchoduje se 24/7, bývá o ~5–8 b. výš než spot u brokera – úrovně ber relativně). Den a VWAP od půlnoci serveru MT5 (Athény). Není to investiční doporučení.</p>
 </div>
 
+<script src="https://s3.tradingview.com/tv.js"></script>
 <script>
-    async function updateStrategy() {
-        try {
-            // Získání poslední uzavřené H1 svíčky z Binance (PAXG = Zlato)
-            const res = await fetch('https://api.binance.com/api/v3/klines?symbol=PAXGUSDT&interval=1h&limit=2');
-            const data = await res.json();
-            const lastCandle = data[0]; // Předchozí uzavřená svíce
-            const currentPrice = parseFloat(data[1][4]); // Aktuální cena
+const F = "https://fapi.binance.com";
+const $ = (id) => document.getElementById(id);
+const fmt = (x, d = 2) => (x == null || !isFinite(x)) ? "–" : Number(x).toFixed(d);
 
-            const highH1 = parseFloat(lastCandle[2]);
-            const lowH1 = parseFloat(lastCandle[3]);
-            const openH1 = parseFloat(lastCandle[1]);
+// ---------- graf ----------
+let tvInterval = "60";
+function drawChart() {
+  if (!window.TradingView) return;
+  $("tv").innerHTML = "";
+  new TradingView.widget({ autosize: true, symbol: "OANDA:XAUUSD", interval: tvInterval, timezone: "Europe/Prague",
+    theme: "dark", style: "1", locale: "cs", container_id: "tv", studies: ["VWAP@tv-basicstudies"], hide_side_toolbar: true });
+}
+$("tabs").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  document.querySelectorAll("#tabs button").forEach((x) => x.classList.toggle("on", x === b));
+  tvInterval = b.dataset.i; drawChart();
+});
 
-            const panel = document.getElementById('trade-panel');
-            const spread = 0.30; // Simulovaný spread 30 bodů
-            
-            // Logika VWAP / Trendu: Cena vs. Open H1
-            if (currentPrice < openH1) {
-                // SHORT SETUP (Cena pod open/vwap)
-                panel.className = "info-box sell-theme";
-                document.getElementById('setup-label').innerText = "Vstup pod Low H1";
-                document.getElementById('setup-title').innerText = "▼ SHORT SETUP";
-                
-                const entry = (lowH1 - spread).toFixed(2);
-                document.getElementById('val-entry').innerText = entry;
-                document.getElementById('val-sl').innerText = (parseFloat(entry) + 4.5).toFixed(2);
-                document.getElementById('val-tp').innerText = (parseFloat(entry) - 2.0).toFixed(2);
-                document.getElementById('vwap-info').innerText = "Podmínka: Cena pod VWAP. Cílíme na 2 body dolů.";
-            } else {
-                // LONG SETUP (Cena nad open/vwap)
-                panel.className = "info-box buy-theme";
-                document.getElementById('setup-label').innerText = "Vstup nad High H1";
-                document.getElementById('setup-title').innerText = "▲ LONG SETUP";
-                
-                const entry = (highH1 + spread).toFixed(2);
-                document.getElementById('val-entry').innerText = entry;
-                document.getElementById('val-sl').innerText = (parseFloat(entry) - 4.5).toFixed(2);
-                document.getElementById('val-tp').innerText = (parseFloat(entry) + 2.0).toFixed(2);
-                document.getElementById('vwap-info').innerText = "Podmínka: Cena nad VWAP. Cílíme na 2 body nahoru.";
-            }
+// ---------- pomocné výpočty ----------
+async function j(url) { const r = await fetch(url); if (!r.ok) throw new Error(url.split("?")[0].split("/").pop() + " " + r.status); return r.json(); }
+const kl = (raw) => raw.map((k) => ({ t: k[0], o: +k[1], h: +k[2], l: +k[3], c: +k[4], v: +k[5], tb: +k[9] }));
+function ema(a, n) { const k = 2 / (n + 1); let e = a[0]; const out = [e]; for (let i = 1; i < a.length; i++) { e = a[i] * k + e * (1 - k); out.push(e); } return out; }
+function atr(b, n = 14) { let a = null; for (let i = 1; i < b.length; i++) { const tr = Math.max(b[i].h - b[i].l, Math.abs(b[i].h - b[i - 1].c), Math.abs(b[i].l - b[i - 1].c)); a = a == null ? tr : (a * (n - 1) + tr) / n; } return a; }
+function trend(b) {                                    // close vs EMA20 a sklon EMA20 za 5 svíček
+  const c = b.map((x) => x.c), e = ema(c, 20), n = e.length - 1;
+  const slope = e[n] - e[n - 5], last = c[n];
+  if (last > e[n] && slope > 0) return 1;
+  if (last < e[n] && slope < 0) return -1;
+  return 0;
+}
+function tzOffsetMin(date, tz) {                       // posun časové zóny v minutách (Athény = server MT5)
+  const p = Object.fromEntries(new Intl.DateTimeFormat("en-US", { timeZone: tz, hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }).formatToParts(date).map((x) => [x.type, x.value]));
+  return (Date.UTC(+p.year, p.month - 1, +p.day, +p.hour, +p.minute) - Math.floor(date.getTime() / 60000) * 60000) / 60000;
+}
+function serverDayStart(ms) { const off = tzOffsetMin(new Date(ms), "Europe/Athens") * 60000; const loc = ms + off; return loc - (loc % 86400000) - off; }
+function fractals(b, k = 3) {                          // jen uzavřené svíčky, potvrzené k svíčkami
+  const hi = [], lo = [];
+  for (let i = k; i < b.length - k; i++) {
+    const win = b.slice(i - k, i + k + 1);
+    if (b[i].h === Math.max(...win.map((x) => x.h))) hi.push(i);
+    if (b[i].l === Math.min(...win.map((x) => x.l))) lo.push(i);
+  }
+  return { hi, lo };
+}
+function reliefLine(b, idx, side) {                    // šikmá linie přes 2 poslední nižší vrcholy (long) / vyšší dna (short)
+  const pts = idx.map((i) => [i, side === 1 ? b[i].h : b[i].l]);
+  if (pts.length < 2) return null;
+  const [j2, p2] = pts[pts.length - 1];
+  for (let q = pts.length - 2; q >= 0; q--) {
+    const [j1, p1] = pts[q];
+    if ((p1 - p2) * side <= 0) continue;
+    const s = (p2 - p1) / (j2 - j1);
+    for (let i = j1; i <= j2; i++) { if ((b[i].c - (p1 + s * (i - j1))) * side > 0) return null; }
+    return p1 + s * (b.length - j1);                   // hodnota linie na právě tvořené svíčce
+  }
+  return null;
+}
+const dirTxt = (d) => d > 0 ? '<span class="badge up">nahoru</span>' : d < 0 ? '<span class="badge down">dolů</span>' : '<span class="badge warn">do strany</span>';
 
-        } catch (e) { console.log("Sync error..."); }
-    }
+// ---------- hlavní výpočet ----------
+async function update() {
+  try {
+    const [m1r, h1r, h4r, d1r, prem, ls, data] = await Promise.all([
+      j(`${F}/fapi/v1/klines?symbol=XAUUSDT&interval=1m&limit=1500`), j(`${F}/fapi/v1/klines?symbol=XAUUSDT&interval=1h&limit=300`),
+      j(`${F}/fapi/v1/klines?symbol=XAUUSDT&interval=4h&limit=200`), j(`${F}/fapi/v1/klines?symbol=XAUUSDT&interval=1d&limit=120`),
+      j(`${F}/fapi/v1/premiumIndex?symbol=XAUUSDT`), j(`${F}/futures/data/globalLongShortAccountRatio?symbol=XAUUSDT&period=1h&limit=1`).catch(() => []),
+      fetch("data.json", { cache: "no-store" }).then((r) => r.json()).catch(() => ({})),
+    ]);
+    const m1 = kl(m1r), h1 = kl(h1r), h4 = kl(h4r), d1 = kl(d1r);
+    const price = m1[m1.length - 1].c, now = Date.now();
+    const h1c = h1.slice(0, -1);                        // jen uzavřené H1
+    const A = atr(h1c);
 
-    setInterval(updateStrategy, 5000);
-    updateStrategy();
+    // VWAP od půlnoci serveru (tickový objem Binance)
+    const ds = serverDayStart(now);
+    const today = m1.filter((x) => x.t >= ds);
+    let pv = 0, vv = 0; today.forEach((x) => { pv += (x.h + x.l + x.c) / 3 * x.v; vv += x.v; });
+    const vwap = vv ? pv / vv : null, vwDist = vwap ? price - vwap : null;
+    const open = today.length ? today[0].o : price;
+    $("price").textContent = fmt(price);
+    $("chg").innerHTML = `<span class="${price >= open ? "up" : "down"}">${price >= open ? "+" : ""}${fmt(price - open)} dnes</span>`;
+    $("upd").textContent = "Binance XAUUSDT · " + new Date().toLocaleTimeString("cs-CZ");
+
+    // směr
+    const dD = trend(d1.slice(0, -1)), dH4 = trend(h4.slice(0, -1)), dH1 = trend(h1c);
+    $("d1").innerHTML = dirTxt(dD); $("h4").innerHTML = dirTxt(dH4); $("h1").innerHTML = dirTxt(dH1);
+    const vSide = vwap ? Math.sign(vwDist) : 0;
+    $("vw-side").innerHTML = vSide > 0 ? '<span class="badge up">nad VWAP</span>' : vSide < 0 ? '<span class="badge down">pod VWAP</span>' : "–";
+    const y = d1[d1.length - 2];
+    const tdH = today.length ? Math.max(...today.map((x) => x.h)) : price, tdL = today.length ? Math.min(...today.map((x) => x.l)) : price;
+    const inside = tdH <= y.h && tdL >= y.l, chop = inside && dD === 0;
+    $("dayType").innerHTML = chop ? '<span class="badge warn">chop (uvnitř včerejška)</span>'
+      : inside ? '<span class="badge">uvnitř včerejšího rozpětí</span>' : '<span class="badge">mimo včerejší rozpětí</span>';
+
+    $("vwap").textContent = fmt(vwap);
+    const far = vwap && A && Math.abs(vwDist) > 1.5 * A;
+    $("vw-dist").innerHTML = `<span class="${far ? "warn" : ""}">${vwDist >= 0 ? "+" : ""}${fmt(vwDist)} b. (${fmt(Math.abs(vwDist) / A, 1)} × ATR)${far ? " – daleko" : ""}</span>`;
+    $("atr").textContent = fmt(A);
+
+    // překážky a reliéf
+    const fr = fractals(h1c), from = h1c.length - 120;
+    const hiIdx = fr.hi.filter((i) => i >= from), loIdx = fr.lo.filter((i) => i >= from);
+    const hiAbove = hiIdx.filter((i) => h1c[i].h > price).map((i) => h1c[i].h);
+    const loBelow = loIdx.filter((i) => h1c[i].l < price).map((i) => h1c[i].l);
+    const rl = reliefLine(h1c, hiIdx, 1), rs = reliefLine(h1c, loIdx, -1);
+    const candL = [...hiAbove, ...(rl && rl > price ? [rl] : [])], candS = [...loBelow, ...(rs && rs < price ? [rs] : [])];
+    const obsL = candL.length ? Math.min(...candL) : null, obsS = candS.length ? Math.max(...candS) : null;
+    const roomL = obsL ? obsL - price : null, roomS = obsS ? price - obsS : null;
+    const roomCls = (r) => r == null ? "up" : r < 4 ? "down" : r < 8 ? "warn" : "up";
+    $("obs-l").textContent = obsL ? fmt(obsL) + (obsL === rl ? " (reliéf)" : "") : "žádná ve 120 h";
+    $("obs-s").textContent = obsS ? fmt(obsS) + (obsS === rs ? " (reliéf)" : "") : "žádná ve 120 h";
+    $("room-l").innerHTML = `<span class="${roomCls(roomL)}">${roomL == null ? "volno" : fmt(roomL) + " b."}</span>`;
+    $("room-s").innerHTML = `<span class="${roomCls(roomS)}">${roomS == null ? "volno" : fmt(roomS) + " b."}</span>`;
+
+    // úrovně a swing
+    const last = h1c[h1c.length - 1], spr = 0.3;
+    // poslední swing = poslední vlna na M5 ("swing na intradenním grafu"), fraktál ±3 na uzavřených M5
+    const m5 = []; m1.forEach((x) => { const t = x.t - (x.t % 300000), z = m5[m5.length - 1];
+      if (z && z.t === t) { z.h = Math.max(z.h, x.h); z.l = Math.min(z.l, x.l); z.c = x.c; } else m5.push({ t, o: x.o, h: x.h, l: x.l, c: x.c }); });
+    const f5 = fractals(m5.slice(0, -1)), m5c = m5.slice(0, -1);
+    const lastHi = f5.hi.length ? m5c[f5.hi[f5.hi.length - 1]].h : null, lastLo = f5.lo.length ? m5c[f5.lo[f5.lo.length - 1]].l : null;
+    const sw = lastHi && lastLo ? Math.abs(lastHi - lastLo) : null;
+    const buy = last.h + spr, sell = last.l;
+    $("lv-buy").textContent = fmt(buy); $("lv-sell").textContent = fmt(sell);
+    $("swing").textContent = sw ? `${fmt(sw)} b. (${fmt(lastLo)} – ${fmt(lastHi)})` : "–";
+    const tgL = sw ? buy + 0.8 * sw : null, tgS = sw ? sell - 0.8 * sw : null;
+    $("tg-l").innerHTML = tgL ? fmt(tgL) + (obsL && tgL > obsL ? ' <span class="warn">za překážkou</span>' : "") : "–";
+    $("tg-s").innerHTML = tgS ? fmt(tgS) + (obsS && tgS < obsS ? ' <span class="warn">za překážkou</span>' : "") : "–";
+
+    // tok a páka
+    const share = (bars) => { const v = bars.reduce((s, x) => s + x.v, 0), b = bars.reduce((s, x) => s + x.tb, 0); return v ? b / v * 100 : null; };
+    const t15 = share(m1.slice(-15)), t60 = share(m1.slice(-60));
+    const tkCls = (x) => x == null ? "" : x >= 55 ? "up" : x <= 45 ? "down" : "";
+    $("tk15").innerHTML = `<span class="${tkCls(t15)}">${fmt(t15, 0)} %</span>`;
+    $("tk60").innerHTML = `<span class="${tkCls(t60)}">${fmt(t60, 0)} %</span>`;
+    $("lsr").textContent = ls.length ? fmt(ls[ls.length - 1].longAccount * 100, 0) + " %" : "–";
+    $("fund").textContent = fmt(+prem.lastFundingRate * 6 * 365 * 100, 1) + " %";
+
+    // makro
+    const ev = (data.macro || []).map((e) => ({ ...e, ms: Date.parse(e.t) })).filter((e) => e.ms > now - 3600e3 && e.ms < now + 2 * 86400e3);
+    const near = ev.find((e) => Math.abs(e.ms - now) <= 30 * 60e3 && e.impact === "High");
+    $("macro").innerHTML = !data.macro ? "Kalendář se načte s další aktualizací dat (do 15 min)."
+      : ev.length ? ev.map((e) => {
+        const mins = Math.round((e.ms - now) / 60e3);
+        const when = new Date(e.ms).toLocaleString("cs-CZ", { weekday: "short", hour: "2-digit", minute: "2-digit" });
+        return `<div class="row"><span><span class="${e.impact === "High" ? "down" : "warn"}">●</span> ${e.title}</span>`
+          + `<span class="mono">${when}${mins > 0 && mins < 600 ? ` (za ${mins} min)` : ""}</span></div>`;
+      }).join("") : "Dnes a zítra nic důležitého.";
+
+    // verdikt (checklist)
+    const hourPr = +new Intl.DateTimeFormat("cs-CZ", { timeZone: "Europe/Prague", hour: "numeric", hourCycle: "h23" }).format(new Date());
+    const side = dH1 !== 0 && dH1 === vSide ? dH1 : 0;
+    const room = side > 0 ? roomL : side < 0 ? roomS : null;
+    const inWin = hourPr >= 7 && hourPr < 21;
+    const checks = [
+      [side !== 0, side > 0 ? "H1 nahoru a cena nad VWAP" : side < 0 ? "H1 dolů a cena pod VWAP" : "H1 směr a strana VWAP se neshodují"],
+      [side === 0 || dD === side || dD === 0, dD === 0 ? "D1 do strany" : dD === side ? "D1 ve stejném směru" : "D1 proti směru obchodu"],
+      [!chop, chop ? "chop den – „nic mě nenutí obchodovat“" : "není chop den"],
+      [room == null || room >= 4, room == null ? "do překážky volno" : `do překážky ${fmt(room)} b.` + (room < 4 ? " – malý prostor (reliéf)" : "")],
+      [!far, far ? "daleko od VWAP – trh se vrací" : "vzdálenost od VWAP v normě"],
+      [!near, near ? `silné makro do 30 min: ${near.title}` : "žádné silné makro do 30 min"],
+      [inWin, inWin ? "obchodní okno 7–21 h" : "mimo obchodní okno 7–21 h"],
+    ];
+    const bad = checks.filter((c) => !c[0]).length;
+    $("v-list").innerHTML = checks.map(([ok, t]) => `<li>${ok ? "✅" : "⛔"} ${t}</li>`).join("");
+    const vEl = $("verdict"), dir = side > 0 ? "▲ LONG" : "▼ SHORT";
+    if (side !== 0 && bad === 0) { vEl.className = "verdict ok"; $("v-title").textContent = dir + " – podmínky splněny"; }
+    else if (side !== 0 && bad === 1) { vEl.className = "verdict mid"; $("v-title").textContent = dir + " – pozor, 1 podmínka chybí"; }
+    else { vEl.className = "verdict no"; $("v-title").textContent = "Nevstupovat – čekat"; }
+  } catch (e) {
+    $("upd").textContent = "Chyba načítání dat (" + e.message.slice(0, 60) + ") – zkusím znovu";
+  }
+}
+
+// ---------- kalkulačka ----------
+const CALC = ["c-acc", "c-risk", "c-sl"];
+try { const s = JSON.parse(localStorage.getItem("calc") || "{}"); CALC.forEach((k) => { if (s[k] != null) $(k).value = s[k]; }); } catch (e) {}
+function calc() {
+  const acc = +$("c-acc").value, risk = +$("c-risk").value, sl = +$("c-sl").value;
+  const usd = acc * risk / 100;
+  $("c-usd").textContent = fmt(usd) + " $";
+  $("c-lot").textContent = sl > 0 ? fmt(usd / (sl * 100), 2) : "–";
+  $("c-day").textContent = fmt(-acc * 0.02) + " $";
+  try { localStorage.setItem("calc", JSON.stringify(Object.fromEntries(CALC.map((k) => [k, $(k).value])))); } catch (e) {}
+}
+CALC.forEach((k) => $(k).addEventListener("input", calc));
+calc();
+
+drawChart();
+update();
+setInterval(update, 20000);
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
-
 </body>
 </html>

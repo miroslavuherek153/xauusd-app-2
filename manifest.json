@@ -1,11 +1,11 @@
 {
-  "name": "XAUUSD AI Analyzer",
-  "short_name": "Gold AI",
-  "description": "Live XAUUSD technická analýza s Claude AI",
-  "start_url": "./index.html",
+  "name": "Zlato – asistent vstupu",
+  "short_name": "Zlato",
+  "description": "XAUUSD: směr, VWAP, reliéf, makro a riziko podle postupu puntíků",
+  "start_url": "./",
   "display": "standalone",
-  "background_color": "#050810",
-  "theme_color": "#FFD700",
+  "background_color": "#0d1117",
+  "theme_color": "#0d1117",
   "orientation": "portrait",
   "icons": [
     {
@@ -21,6 +21,10 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["finance"],
-  "lang": "cs"
+  "categories": [
+    "finance"
+  ],
+  "lang": "cs",
+  "scope": "./",
+  "id": "./"
 }

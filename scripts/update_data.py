@@ -107,6 +107,20 @@ def trend_of(closes):
     return "bullish" if closes[-1] > ema(closes, 50) else "bearish"
 
 
+def macro_usd():
+    """Události USD s vysokým/středním dopadem na tento týden (ForexFactory JSON; prohlížeč ho kvůli CORS číst nemůže)."""
+    try:
+        ev = get_json("https://nfs.faireconomy.media/ff_calendar_thisweek.json")
+    except Exception:  # noqa: BLE001
+        try:                                                       # limit požadavků -> poslední známý kalendář
+            return json.load(open("data.json", encoding="utf-8")).get("macro")
+        except Exception:  # noqa: BLE001
+            return None
+    return [{"t": e["date"], "title": e["title"], "impact": e["impact"], "forecast": e.get("forecast", ""),
+             "previous": e.get("previous", "")}
+            for e in ev if e.get("country") == "USD" and e.get("impact") in ("High", "Medium")]
+
+
 def main():
     now = datetime.now(timezone.utc).strftime("%d.%m.%Y %H:%M UTC")
     spot = {}
@@ -151,7 +165,7 @@ def main():
         "entry": round(price, 2), "sl": round(price - side * sl_d, 2), "tp1": round(price + side * tp1_d, 2),
         "tp2": round(price + side * tp2_d, 2), "rr": round(tp1_d / sl_d, 1) if sl_d else 0,
         "sl_dist": round(sl_d, 2), "tp1_dist": round(tp1_d, 2),
-        "updated": now, "status": "ok", "source": src,
+        "updated": now, "status": "ok", "source": src, "macro": macro_usd(),
         "analysis": (f"XAUUSD {now}: cena ${price:.2f}, {'nad' if price > e50 else 'pod'} EMA50 (${e50:.0f}), RSI {rsi_v:.0f}, "
                      f"MACD {'kladný' if macd > 0 else 'záporný'}, ATR ${atr:.1f}. Indikátory převážně "
                      f"{'býčí' if signal == 'BUY' else 'medvědí' if signal == 'SELL' else 'smíšené'} ({max(bull, bear)}/{bull + bear} bodů). "
