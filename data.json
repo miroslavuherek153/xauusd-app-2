@@ -1,44 +1,81 @@
 {
-  "price": 4142.96,
+  "price": 4123.19,
   "change": 0,
   "changePct": 0,
-  "high24h": 4190.13,
+  "high24h": 4176.41,
   "low24h": 4115.57,
-  "ask": 4142.96,
-  "bid": 4142.96,
-  "rsi": 42.7,
-  "ema20": 4146.2,
-  "ema50": 4155.8,
-  "ema200": 4163.1,
-  "macd": -8.26,
-  "atr": 9.05,
+  "ask": 4123.19,
+  "bid": 4123.19,
+  "rsi": 36.4,
+  "ema20": 4139.4,
+  "ema50": 4151.0,
+  "ema200": 4162.0,
+  "macd": -9.0,
+  "atr": 10.84,
   "signal": "SELL",
   "trend": "bearish",
   "confidence": 100,
   "resistance": [
-    4144.4,
-    4144.9,
-    4145.9
+    4127.5,
+    4131.7,
+    4136.2
   ],
   "support": [
-    4142.9,
-    4142.4,
-    4141.4
+    4121.2,
+    4119.5,
+    4118.6
   ],
   "tf": {
     "1D": "bearish",
     "4H": "bearish",
     "1H": "bearish"
   },
-  "entry": 4142.96,
-  "sl": 4156.53,
-  "tp1": 4124.86,
-  "tp2": 4111.29,
+  "entry": 4123.19,
+  "sl": 4139.44,
+  "tp1": 4101.51,
+  "tp2": 4085.26,
   "rr": 1.3,
-  "sl_dist": 13.57,
-  "tp1_dist": 18.1,
-  "updated": "20.10.2026 03:27 UTC",
+  "sl_dist": 16.25,
+  "tp1_dist": 21.67,
+  "updated": "20.10.2026 08:47 UTC",
   "status": "ok",
   "source": "Twelve Data XAU/USD (spot)",
-  "analysis": "XAUUSD 20.10.2026 03:27 UTC: cena $4142.96, pod EMA50 ($4156), RSI 43, MACD záporný, ATR $9.0. Indikátory převážně medvědí (7/7 bodů). Jde o souhrn indikátorů, ne o ověřený obchodní signál."
+  "macro": [
+    {
+      "t": "2026-10-22T08:30:00-04:00",
+      "title": "Unemployment Claims",
+      "impact": "Medium",
+      "forecast": "200K",
+      "previous": "199K"
+    },
+    {
+      "t": "2026-10-23T09:45:00-04:00",
+      "title": "Flash Manufacturing PMI",
+      "impact": "Medium",
+      "forecast": "55.4",
+      "previous": "57.0"
+    },
+    {
+      "t": "2026-10-23T09:45:00-04:00",
+      "title": "Flash Services PMI",
+      "impact": "Medium",
+      "forecast": "57.8",
+      "previous": "58.7"
+    },
+    {
+      "t": "2026-10-23T10:00:00-04:00",
+      "title": "Revised UoM Consumer Sentiment",
+      "impact": "Medium",
+      "forecast": "46.3",
+      "previous": "46.3"
+    },
+    {
+      "t": "2026-10-23T10:00:00-04:00",
+      "title": "Revised UoM Inflation Expectations",
+      "impact": "Medium",
+      "forecast": "",
+      "previous": "4.7%"
+    }
+  ],
+  "analysis": "XAUUSD 20.10.2026 08:47 UTC: cena $4123.19, pod EMA50 ($4151), RSI 36, MACD záporný, ATR $10.8. Indikátory převážně medvědí (7/7 bodů). Jde o souhrn indikátorů, ne o ověřený obchodní signál."
 }
