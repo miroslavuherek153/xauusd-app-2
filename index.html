@@ -41,6 +41,7 @@ ul.check li { padding: 3px 0; }
 .trade .seg { display: flex; gap: 6px; margin-bottom: 6px; }
 .trade .seg button { flex: 1; background: var(--card2); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 6px; font: inherit; font-weight: 600; cursor: pointer; }
 .trade .seg button.on.l { border-color: var(--green); color: var(--green); } .trade .seg button.on.s { border-color: var(--red); color: var(--red); }
+.trade .seg.mode button.on { border-color: var(--blue); color: var(--blue); }
 .trade .fill { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
 .trade .fill button { background: var(--card2); color: var(--muted); border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; font: inherit; font-size: .8rem; cursor: pointer; }
 .trade label, .calc label { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 3px 0; color: var(--muted); }
@@ -67,6 +68,8 @@ summary { cursor: pointer; color: var(--muted); }
 
   <div class="card trade" style="margin-top:12px">
     <h2>Můj obchod – vstup, TP, SL</h2>
+    <div class="seg mode"><button id="m-robot">🤖 Vyplňuje robot</button><button id="m-hand">✋ Ručně</button></div>
+    <div id="t-robot" class="sub" style="margin:2px 0 8px"></div>
     <div class="seg"><button id="t-long" class="l">▲ LONG</button><button id="t-short" class="s">▼ SHORT</button></div>
     <label>Vstup <input id="t-entry" type="number" inputmode="decimal" step="0.01"></label>
     <label>Take profit (TP) <input id="t-tp" type="number" inputmode="decimal" step="0.01"></label>
@@ -336,6 +339,8 @@ async function update() {
     if (side !== 0 && bad === 0) { vEl.className = "verdict ok"; $("v-title").textContent = dir + " – podmínky splněny"; }
     else if (side !== 0 && bad === 1) { vEl.className = "verdict mid"; $("v-title").textContent = dir + " – pozor, 1 podmínka chybí"; }
     else { vEl.className = "verdict no"; $("v-title").textContent = "Nevstupovat – čekat"; }
+    Object.assign(S, { vSideDir: side, bad, fails: checks.filter((c) => !c[0]).map((c) => c[1]), m5Hi: lastHi, m5Lo: lastLo });
+    robotFill();
   } catch (e) {
     $("upd").textContent = "Chyba načítání dat (" + e.message.slice(0, 60) + ") – zkusím znovu";
   }
@@ -347,9 +352,46 @@ const TR = ["t-entry", "t-tp", "t-sl", "t-basis"];
 let tSide = 1;
 try { const s = JSON.parse(localStorage.getItem("trade") || "{}"); TR.forEach((k) => { if (s[k] != null) $(k).value = s[k]; }); if (s.side) tSide = s.side; $("t-filled").checked = !!s.filled; } catch (e) {}
 function setSide(v) { tSide = v; $("t-long").classList.toggle("on", v === 1); $("t-short").classList.toggle("on", v === -1); trade(); }
-$("t-long").onclick = () => setSide(1); $("t-short").onclick = () => setSide(-1);
+$("t-long").onclick = () => { setMode("hand"); setSide(1); }; $("t-short").onclick = () => { setMode("hand"); setSide(-1); };
+// režim: robot vyplňuje podle verdiktu / ručně (ruční úprava přepne na ručně)
+let mode = "robot";
+try { mode = JSON.parse(localStorage.getItem("trade") || "{}").mode || "robot"; } catch (e) {}
+function setMode(m) {
+  mode = m; $("m-robot").classList.toggle("on", m === "robot"); $("m-hand").classList.toggle("on", m === "hand");
+  if (m === "hand") $("t-robot").textContent = "Ručně – hodnoty zadáváš ty.";
+  trade(); robotFill();
+}
+$("m-robot").onclick = () => setMode("robot"); $("m-hand").onclick = () => setMode("hand");
+function robotFill() {
+  if (mode !== "robot" || S.price == null || S.vSideDir === undefined) return;
+  if ($("t-filled").checked) { $("t-robot").textContent = "🤖 Obchod je otevřený – robot hodnoty nemění."; return; }
+  const basis = +$("t-basis").value || 0, side = S.vSideDir;
+  const clear = (why) => { ["t-entry", "t-tp", "t-sl"].forEach((k) => ($(k).value = "")); $("t-robot").innerHTML = "🤖 <b>Nevstupovat</b> – " + why; trade(); };
+  if (side === 0 || S.bad > 1) return clear(S.fails.slice(0, 2).join("; ") || "směr není jasný");
+  if (!S.sw) return clear("chybí poslední swing");
+  const e = side > 0 ? S.buy : S.sell;                 // ceny Binance; rozdíl brokera se přičte na konci
+  // SL za poslední vlnou M5 (+0,5), rozumně 2–6 bodů, jinak 4,5
+  const ext = side > 0 ? S.m5Lo : S.m5Hi;
+  let slD = ext != null && (e - ext) * side > 0 ? (e - ext) * side + 0.5 : 4.5;
+  slD = Math.min(Math.max(slD, 2), 6);
+  // TP 80 % swingu, ale nejdál 0,3 b. před překážkou (reliéf)
+  let tpD = 0.8 * S.sw;
+  const obs = side > 0 ? S.obsL : S.obsS;
+  if (obs != null) tpD = Math.min(tpD, (obs - e) * side - 0.3);
+  if (tpD <= 0) return clear("vstup by byl až za překážkou (reliéf)");
+  if (tpD / slD < 1) return clear(`cíl ${fmt(tpD)} b. je menší než stop ${fmt(slD)} b. – málo prostoru`);
+  setSide(side);
+  $("t-entry").value = (e + basis).toFixed(2);
+  $("t-tp").value = (e + basis + side * tpD).toFixed(2);
+  $("t-sl").value = (e + basis - side * slD).toFixed(2);
+  $("t-robot").innerHTML = `🤖 Návrh: <b>${side > 0 ? "LONG buy stop" : "SHORT sell stop"}</b> na ${side > 0 ? "high" : "low"} poslední H1, `
+    + `TP ${obs != null && tpD < 0.8 * S.sw - 1e-9 ? "před překážkou" : "80 % swingu M5"}, SL za poslední vlnou M5`
+    + (S.bad === 1 ? ` · <span class="warn">pozor: ${S.fails[0]}</span>` : "") + ". Neověřené pravidlo – rozhoduješ ty.";
+  trade();
+}
 $("t-fill").onclick = () => {
   if (S.buy == null) return;
+  setMode("hand");
   const basis = +$("t-basis").value || 0;
   const e = (tSide > 0 ? S.buy : S.sell) + basis, sw = S.sw || 0;
   $("t-entry").value = e.toFixed(2);
@@ -358,12 +400,12 @@ $("t-fill").onclick = () => {
   trade();
 };
 $("t-clear").onclick = () => { ["t-entry", "t-tp", "t-sl"].forEach((k) => ($(k).value = "")); $("t-filled").checked = false; trade(); };
-TR.forEach((k) => $(k).addEventListener("input", trade));
-$("t-filled").addEventListener("change", trade);
+TR.forEach((k) => $(k).addEventListener("input", () => { if (k !== "t-basis") setMode("hand"); trade(); if (k === "t-basis") robotFill(); }));
+$("t-filled").addEventListener("change", () => { trade(); robotFill(); });
 function trade() {
   const e = parseFloat($("t-entry").value), tp = parseFloat($("t-tp").value), sl = parseFloat($("t-sl").value);
   const basis = +$("t-basis").value || 0, side = tSide;
-  try { localStorage.setItem("trade", JSON.stringify({ ...Object.fromEntries(TR.map((k) => [k, $(k).value])), side, filled: $("t-filled").checked })); } catch (x) {}
+  try { localStorage.setItem("trade", JSON.stringify({ ...Object.fromEntries(TR.map((k) => [k, $(k).value])), side, filled: $("t-filled").checked, mode })); } catch (x) {}
   const warn = [];
   if (!isFinite(e)) { ["t-dist", "t-rr", "t-lot", "t-usd", "t-now"].forEach((k) => ($(k).textContent = "–")); $("t-warn").innerHTML = ""; return; }
   const dTp = isFinite(tp) ? (tp - e) * side : null, dSl = isFinite(sl) ? (e - sl) * side : null;
@@ -392,6 +434,7 @@ function trade() {
   $("t-warn").innerHTML = warn.length ? warn.map((w) => `<li>⚠️ ${w}</li>`).join("") : (dTp > 0 && dSl > 0 ? "<li>✅ bez varování</li>" : "");
 }
 setSide(tSide);
+setMode(mode);
 
 // ---------- kalkulačka ----------
 const CALC = ["c-acc", "c-risk", "c-sl"];
