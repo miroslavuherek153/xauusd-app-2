@@ -1,43 +1,43 @@
 {
-  "price": 4127.41,
+  "price": 4118.42,
   "change": 0,
   "changePct": 0,
   "high24h": 4142.03,
   "low24h": 4106.88,
-  "ask": 4127.41,
-  "bid": 4127.41,
-  "rsi": 50.8,
-  "ema20": 4125.6,
-  "ema50": 4131.6,
-  "ema200": 4153.5,
-  "macd": 0.32,
-  "atr": 11.5,
+  "ask": 4118.42,
+  "bid": 4118.42,
+  "rsi": 44.6,
+  "ema20": 4125.7,
+  "ema50": 4130.9,
+  "ema200": 4152.4,
+  "macd": -0.28,
+  "atr": 12.82,
   "signal": "SELL",
   "trend": "bearish",
-  "confidence": 67,
+  "confidence": 100,
   "resistance": [
-    4127.5,
-    4128.6,
-    4129.5
+    4119.5,
+    4120.5,
+    4120.8
   ],
   "support": [
-    4127.2,
-    4126.8,
-    4126.3
+    4117.6,
+    4117.5,
+    4117.1
   ],
   "tf": {
     "1D": "bearish",
     "4H": "bearish",
     "1H": "bearish"
   },
-  "entry": 4127.41,
-  "sl": 4144.65,
-  "tp1": 4104.41,
-  "tp2": 4087.17,
+  "entry": 4118.42,
+  "sl": 4137.65,
+  "tp1": 4092.79,
+  "tp2": 4073.56,
   "rr": 1.3,
-  "sl_dist": 17.25,
-  "tp1_dist": 22.99,
-  "updated": "21.10.2026 15:12 UTC",
+  "sl_dist": 19.23,
+  "tp1_dist": 25.64,
+  "updated": "21.10.2026 19:18 UTC",
   "status": "ok",
   "source": "Twelve Data XAU/USD (spot)",
   "macro": [
@@ -59,7 +59,7 @@
       "t": "2026-10-23T09:45:00-04:00",
       "title": "Flash Services PMI",
       "impact": "Medium",
-      "forecast": "57.8",
+      "forecast": "57.9",
       "previous": "58.7"
     },
     {
@@ -77,5 +77,5 @@
       "previous": "4.7%"
     }
   ],
-  "analysis": "XAUUSD 21.10.2026 15:12 UTC: cena $4127.41, pod EMA50 ($4132), RSI 51, MACD kladný, ATR $11.5. Indikátory převážně medvědí (4/6 bodů). Jde o souhrn indikátorů, ne o ověřený obchodní signál."
+  "analysis": "XAUUSD 21.10.2026 19:18 UTC: cena $4118.42, pod EMA50 ($4131), RSI 45, MACD záporný, ATR $12.8. Indikátory převážně medvědí (7/7 bodů). Jde o souhrn indikátorů, ne o ověřený obchodní signál."
 }
