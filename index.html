@@ -125,7 +125,7 @@ summary { cursor: pointer; color: var(--muted); }
     <div class="card">
       <h2>Klíčové úrovně (liquidity)</h2>
       <div id="levels" class="mono" style="font-size:.85rem">načítám…</div>
-      <div class="note">High/low předchozí seance (UTC: Asie 0–7, Londýn 7–13, NY 13–21), dne, týdne, měsíce, poslední 4H svíčky a swingu H1. Mapa, ne signál – jako vstup v testech výhodu nedaly. Ceny Binance (+ rozdíl brokera z karty Můj obchod).</div>
+      <div class="note">High/low předchozí seance (UTC: Asie 0–7, Londýn 7–13, NY 13–21), dne, týdne, měsíce, poslední 4H svíčky a swingu H1; „Opce:“ = strike GLD s nejvíc otevřenými opcemi přepočtený na zlato (call wall nad cenou, put wall pod cenou, max pain nejbližší expirace; 2× denně). Mapa, ne signál – jako vstup v testech výhodu nedaly. Ceny Binance (+ rozdíl brokera z karty Můj obchod).</div>
     </div>
 
     <div class="card">
@@ -233,6 +233,17 @@ function keyLevels(d1, h4, h1, now) {                  // svíčky kl(): {t,o,h,
   add("Swing H1", f.hi.length ? hc[f.hi[f.hi.length - 1]].h : NaN, f.lo.length ? hc[f.lo[f.lo.length - 1]].l : NaN);
   return out;
 }
+// opční mapa (GLD -> zlato, 2× denně z PC; stejná data jako MTF Scanner): kde je nejvíc otevřených opcí
+const OPCE_URL = "https://miroslavuherek153.github.io/mtf-trader/data/opce.json";
+function optLevels(o, now) {
+  const x = o && o.tickers && o.tickers.XAU;
+  if (!x || now - Date.parse(o.time) > 4 * 864e5) return [];        // starší než 4 dny = nepoužít
+  const out = [];
+  if (x.call_wall) out.push({ name: "Opce: call wall (odpor)", p: x.call_wall });
+  if (x.put_wall) out.push({ name: "Opce: put wall (podpora)", p: x.put_wall });
+  if (x.max_pain && x.near_exp >= new Date(now).toISOString().slice(0, 10)) out.push({ name: `Opce: max pain ${x.near_exp.slice(8)}.${x.near_exp.slice(5, 7)}.`, p: x.max_pain });
+  return out;
+}
 function fractals(b, k = 3) {                          // jen uzavřené svíčky, potvrzené k svíčkami
   const hi = [], lo = [];
   for (let i = k; i < b.length - k; i++) {
@@ -260,11 +271,12 @@ const dirTxt = (d) => d > 0 ? '<span class="badge up">nahoru</span>' : d < 0 ? '
 // ---------- hlavní výpočet ----------
 async function update() {
   try {
-    const [m1r, h1r, h4r, d1r, prem, ls, data] = await Promise.all([
+    const [m1r, h1r, h4r, d1r, prem, ls, data, opce] = await Promise.all([
       j(`${F}/fapi/v1/klines?symbol=XAUUSDT&interval=1m&limit=1500`), j(`${F}/fapi/v1/klines?symbol=XAUUSDT&interval=1h&limit=300`),
       j(`${F}/fapi/v1/klines?symbol=XAUUSDT&interval=4h&limit=200`), j(`${F}/fapi/v1/klines?symbol=XAUUSDT&interval=1d&limit=120`),
       j(`${F}/fapi/v1/premiumIndex?symbol=XAUUSDT`), j(`${F}/futures/data/globalLongShortAccountRatio?symbol=XAUUSDT&period=1h&limit=1`).catch(() => []),
       fetch("data.json", { cache: "no-store" }).then((r) => r.json()).catch(() => ({})),
+      fetch(OPCE_URL).then((r) => r.json()).catch(() => ({})),
     ]);
     const m1 = kl(m1r), h1 = kl(h1r), h4 = kl(h4r), d1 = kl(d1r);
     const price = m1[m1.length - 1].c, now = Date.now();
@@ -328,7 +340,7 @@ async function update() {
     $("tg-s").innerHTML = tgS ? fmt(tgS) + (obsS && tgS < obsS ? ' <span class="warn">za překážkou</span>' : "") : "–";
 
     // klíčové úrovně (liquidity): předchozí seance, den, týden, měsíc, poslední 4H, swing H1
-    const levels = keyLevels(d1, h4, h1, now);
+    const levels = keyLevels(d1, h4, h1, now).concat(optLevels(opce, now));
     const basisNow = +$("t-basis").value || 0;
     const above = levels.filter((l) => l.p > price).sort((a, b) => a.p - b.p), below = levels.filter((l) => l.p <= price).sort((a, b) => b.p - a.p);
     const lvRow = (l, near) => `<div class="row"${near ? ' style="font-weight:700"' : ""}><span>${l.name}</span><span>${fmt(l.p + basisNow)} <span class="muted">${l.p > price ? "+" : ""}${fmt(l.p - price)}</span></span></div>`;
