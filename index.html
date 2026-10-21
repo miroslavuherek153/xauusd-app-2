@@ -123,6 +123,12 @@ summary { cursor: pointer; color: var(--muted); }
     </div>
 
     <div class="card">
+      <h2>Klíčové úrovně (liquidity)</h2>
+      <div id="levels" class="mono" style="font-size:.85rem">načítám…</div>
+      <div class="note">High/low předchozí seance (UTC: Asie 0–7, Londýn 7–13, NY 13–21), dne, týdne, měsíce, poslední 4H svíčky a swingu H1. Mapa, ne signál – jako vstup v testech výhodu nedaly. Ceny Binance (+ rozdíl brokera z karty Můj obchod).</div>
+    </div>
+
+    <div class="card">
       <h2>Makro USA</h2>
       <div id="macro" class="muted">načítám…</div>
       <div class="note">Vysoký (●) a střední dopad (ForexFactory). 30 min kolem silné zprávy vstup nedoporučen.</div>
@@ -202,6 +208,31 @@ function tzOffsetMin(date, tz) {                       // posun časové zóny v
   return (Date.UTC(+p.year, p.month - 1, +p.day, +p.hour, +p.minute) - Math.floor(date.getTime() / 60000) * 60000) / 60000;
 }
 function serverDayStart(ms) { const off = tzOffsetMin(new Date(ms), "Europe/Athens") * 60000; const loc = ms + off; return loc - (loc % 86400000) - off; }
+function keyLevels(d1, h4, h1, now) {                  // svíčky kl(): {t,o,h,l,c}; seance v UTC
+  const out = [];
+  const add = (name, hi, lo) => { if (isFinite(hi)) out.push({ name: name + " high", p: hi }); if (isFinite(lo)) out.push({ name: name + " low", p: lo }); };
+  const hl = (arr) => [Math.max(...arr.map((x) => x.h)), Math.min(...arr.map((x) => x.l))];
+  const n = new Date(now), day0 = Date.UTC(n.getUTCFullYear(), n.getUTCMonth(), n.getUTCDate());
+  const pd = d1.filter((x) => x.t < day0).pop();
+  if (pd) add("Předch. den", pd.h, pd.l);
+  const wk0 = day0 - ((new Date(day0).getUTCDay() + 6) % 7) * 864e5;
+  const W = d1.filter((x) => x.t >= wk0 - 7 * 864e5 && x.t < wk0);
+  if (W.length) add("Předch. týden", ...hl(W));
+  const m0 = Date.UTC(n.getUTCFullYear(), n.getUTCMonth(), 1), pm0 = Date.UTC(n.getUTCFullYear(), n.getUTCMonth() - 1, 1);
+  const Mo = d1.filter((x) => x.t >= pm0 && x.t < m0);
+  if (Mo.length) add("Předch. měsíc", ...hl(Mo));
+  const c4 = h4.filter((x) => x.t + 4 * 36e5 <= now).pop();
+  if (c4) add("Posl. 4H svíčka", c4.h, c4.l);
+  let best = null;
+  for (const back of [0, 1]) for (const [nm, a, b] of [["Asie", 0, 7], ["Londýn", 7, 13], ["New York", 13, 21]]) {
+    const s = day0 - back * 864e5 + a * 36e5, e = day0 - back * 864e5 + b * 36e5;
+    if (e <= now && (!best || e > best.e)) best = { nm: nm + (back ? " (včera)" : ""), s, e };
+  }
+  if (best) { const X = h1.filter((x) => x.t >= best.s && x.t < best.e); if (X.length) add("Seance " + best.nm, ...hl(X)); }
+  const hc = h1.filter((x) => x.t + 36e5 <= now), f = fractals(hc);
+  add("Swing H1", f.hi.length ? hc[f.hi[f.hi.length - 1]].h : NaN, f.lo.length ? hc[f.lo[f.lo.length - 1]].l : NaN);
+  return out;
+}
 function fractals(b, k = 3) {                          // jen uzavřené svíčky, potvrzené k svíčkami
   const hi = [], lo = [];
   for (let i = k; i < b.length - k; i++) {
@@ -296,7 +327,15 @@ async function update() {
     $("tg-l").innerHTML = tgL ? fmt(tgL) + (obsL && tgL > obsL ? ' <span class="warn">za překážkou</span>' : "") : "–";
     $("tg-s").innerHTML = tgS ? fmt(tgS) + (obsS && tgS < obsS ? ' <span class="warn">za překážkou</span>' : "") : "–";
 
-    Object.assign(S, { price, buy, sell, sw, obsL, obsS, vwap, atr: A, vSide });
+    // klíčové úrovně (liquidity): předchozí seance, den, týden, měsíc, poslední 4H, swing H1
+    const levels = keyLevels(d1, h4, h1, now);
+    const basisNow = +$("t-basis").value || 0;
+    const above = levels.filter((l) => l.p > price).sort((a, b) => a.p - b.p), below = levels.filter((l) => l.p <= price).sort((a, b) => b.p - a.p);
+    const lvRow = (l, near) => `<div class="row"${near ? ' style="font-weight:700"' : ""}><span>${l.name}</span><span>${fmt(l.p + basisNow)} <span class="muted">${l.p > price ? "+" : ""}${fmt(l.p - price)}</span></span></div>`;
+    $("levels").innerHTML = above.slice().reverse().map((l, i, a) => lvRow(l, i === a.length - 1)).join("")
+      + `<div class="row" style="color:var(--amber);font-weight:700;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line)"><span>Cena</span><span>${fmt(price + basisNow)}</span></div>`
+      + below.map((l, i) => lvRow(l, i === 0)).join("");
+    Object.assign(S, { price, buy, sell, sw, obsL, obsS, vwap, atr: A, vSide, levels });
     trade();
 
     // tok a páka
@@ -409,6 +448,7 @@ function trade() {
   const warn = [];
   if (!isFinite(e)) { ["t-dist", "t-rr", "t-lot", "t-usd", "t-now"].forEach((k) => ($(k).textContent = "–")); $("t-warn").innerHTML = ""; return; }
   const dTp = isFinite(tp) ? (tp - e) * side : null, dSl = isFinite(sl) ? (e - sl) * side : null;
+  let be = "";
   if (dTp != null && dTp <= 0) warn.push("TP je na špatné straně vstupu");
   if (dSl != null && dSl <= 0) warn.push("SL je na špatné straně vstupu");
   $("t-dist").textContent = `${dTp != null ? fmt(dTp) : "–"} b. / ${dSl != null ? fmt(dSl) : "–"} b.`;
@@ -430,8 +470,17 @@ function trade() {
     if (S.vwap != null && dSl > 0 && (S.vwap + basis - sl) * side > 0 && (S.vwap + basis - e) * side < 0) warn.push("VWAP je mezi vstupem a SL – SL za VWAP bývá bezpečnější");
     if (S.atr && dSl > 0 && dSl < 0.3 * S.atr) warn.push(`SL ${fmt(dSl)} b. je v šumu (ATR H1 ${fmt(S.atr)})`);
     if (S.vSide && S.vSide !== side) warn.push(side > 0 ? "long pod VWAP – proti směru dne" : "short nad VWAP – proti směru dne");
+    // stop těsně za klíčovou úrovní (méně než 0,3× ATR) - tam se stopy rády vybírají
+    const lv = (S.levels || []).map((l) => ({ ...l, p: l.p + basis })).find((l) => S.atr && dSl > 0 &&
+      (side > 0 ? (l.p > sl && l.p < e && l.p - sl < 0.3 * S.atr) : (l.p < sl && l.p > e && sl - l.p < 0.3 * S.atr)));
+    if (lv) warn.push(`SL těsně za úrovní „${lv.name}“ ${fmt(lv.p)} – tam se stopy často vybírají`);
+    if (filled && dSl > 0) {                                  // break-even: ze zisku se nesmí stát ztráta
+      const r = pts / dSl;
+      if (r >= 1) be = `🛡️ Zisk +${fmt(r, 1)} R – posuň SL na vstup ${fmt(e)} (break-even), případně vyber část zisku.`;
+      else be = `🛡️ Break-even při ceně ${fmt(e + side * dSl)} (+1 R) – pak posuň SL na vstup.`;
+    }
   }
-  $("t-warn").innerHTML = warn.length ? warn.map((w) => `<li>⚠️ ${w}</li>`).join("") : (dTp > 0 && dSl > 0 ? "<li>✅ bez varování</li>" : "");
+  $("t-warn").innerHTML = (be ? `<li>${be}</li>` : "") + (warn.length ? warn.map((w) => `<li>⚠️ ${w}</li>`).join("") : (dTp > 0 && dSl > 0 ? "<li>✅ bez varování</li>" : ""));
 }
 setSide(tSide);
 setMode(mode);
