@@ -75,6 +75,7 @@ summary { cursor: pointer; color: var(--muted); }
     <label>Take profit (TP) <input id="t-tp" type="number" inputmode="decimal" step="0.01"></label>
     <label>Stop loss (SL) <input id="t-sl" type="number" inputmode="decimal" step="0.01"></label>
     <div class="fill"><button id="t-fill">Doplnit z úrovní H1 (cíl 80 % swingu, stop 4,5)</button><button id="t-clear">Vymazat</button></div>
+    <div class="fill"><button id="t-gex">Návrh TP/SL z opční mapy (gama)</button></div>
     <div class="row"><span>Do TP / do SL</span><span class="mono" id="t-dist">–</span></div>
     <div class="row"><span>Poměr zisk : riziko</span><span class="mono b" id="t-rr">–</span></div>
     <div class="row"><span>Objem podle kalkulačky rizika</span><span class="mono b" id="t-lot">–</span></div>
@@ -126,6 +127,13 @@ summary { cursor: pointer; color: var(--muted); }
       <h2>Klíčové úrovně (liquidity)</h2>
       <div id="levels" class="mono" style="font-size:.85rem">načítám…</div>
       <div class="note">High/low předchozí seance (UTC: Asie 0–7, Londýn 7–13, NY 13–21), dne, týdne, měsíce, poslední 4H svíčky a swingu H1; „Opce:“ = strike GLD s nejvíc otevřenými opcemi přepočtený na zlato (call wall nad cenou, put wall pod cenou, max pain nejbližší expirace; 2× denně). Mapa, ne signál – jako vstup v testech výhodu nedaly. Ceny Binance (+ rozdíl brokera z karty Můj obchod).</div>
+    </div>
+
+    <div class="card">
+      <h2>Gama mapa (GEX) – kde se trh zrychluje</h2>
+      <div id="gex-reg" class="sub">načítám…</div>
+      <div id="gex"></div>
+      <div class="note">Gama dealerů z opcí GLD přepočtená na zlato (expirace do 30 dní, 2× denně). Červeně strike, kde dealeři při pohybu ceny <b>zesilují</b> pohyb (záporná gama), zeleně kde ho <b>tlumí</b>. Pod úrovní „flip“ bývají pohyby prudší, nad ní klidnější. Zda to platí i pro zlato, měříme (gex_rezim) – zatím orientace, ne signál.</div>
     </div>
 
     <div class="card">
@@ -245,6 +253,57 @@ function optLevels(o, now) {
   if (x.gex_flip) out.push({ name: `Opce: gama flip (${x.gex_musd < 0 ? "pod ním zrychlené pohyby" : "nad ním klidnější trh"})`, p: x.gex_flip });
   return out;
 }
+// graf GEX po strikách (SVG): vodorovné sloupce od středu, čára ceny, flip a zdi
+function gexChart(x, price, basis) {
+  const box = $("gex"), reg = $("gex-reg");
+  if (!x || !(x.gex_profile || []).length) { box.innerHTML = ""; reg.textContent = "Opční data nejsou k dispozici."; return; }
+  const neg = x.gex_musd < 0;
+  reg.innerHTML = `Celkově <b class="${neg ? "down" : "up"}">${neg ? "záporná gama – pohyby se zrychlují" : "kladná gama – trh se drží v pásmu"}</b>`
+    + (x.gex_flip ? ` · flip ${fmt(x.gex_flip + basis)} (cena ${price + basis > x.gex_flip + basis ? "nad" : "pod"} ním)` : "");
+  const rows = x.gex_profile.slice().sort((a, b) => b[0] - a[0]), W = 360, rh = 13, top = 6, H = top * 2 + rows.length * rh;
+  const mx = Math.max(...rows.map((r) => Math.abs(r[1]))) || 1, cx = 200, half = 120;
+  const y = (p) => { // strike -> y (lineárně mezi řádky)
+    for (let i = 0; i < rows.length - 1; i++) if (p <= rows[i][0] && p >= rows[i + 1][0])
+      return top + (i + (rows[i][0] - p) / (rows[i][0] - rows[i + 1][0] || 1)) * rh + rh / 2;
+    return p > rows[0][0] ? top : H - top;
+  };
+  let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;margin-top:6px" role="img" aria-label="GEX po strikách">`;
+  rows.forEach((r, i) => {
+    const w = Math.abs(r[1]) / mx * half, yy = top + i * rh;
+    svg += `<text x="4" y="${yy + 10}" font-size="9" fill="#8b949e">${fmt(r[0] + basis, 0)}</text>`
+      + `<rect x="${r[1] < 0 ? cx - w : cx}" y="${yy + 2}" width="${Math.max(w, 1)}" height="${rh - 4}" rx="2" fill="${r[1] < 0 ? "#e5534b" : "#3fb950"}" opacity=".85"></rect>`;
+  });
+  svg += `<line x1="${cx}" x2="${cx}" y1="${top}" y2="${H - top}" stroke="#8b949e" stroke-width=".6"></line>`;
+  const mark = (p, color, label, dash) => p == null ? "" : `<line x1="40" x2="${W - 4}" y1="${y(p)}" y2="${y(p)}" stroke="${color}" stroke-width="1.2"${dash ? ' stroke-dasharray="4 3"' : ""}></line>`
+    + `<text x="${W - 4}" y="${Math.max(y(p) - 2, 9)}" font-size="9" text-anchor="end" fill="${color}">${label} ${fmt(p + basis, 0)}</text>`;
+  svg += mark(x.call_wall, "#58a6ff", "call wall", true) + mark(x.put_wall, "#f778ba", "put wall", true)
+    + mark(x.gex_flip, "#d29922", "flip", true) + mark(price, "#f0b429", "cena", false);
+  box.innerHTML = svg + "</svg>";
+}
+// návrh TP/SL z opční mapy: TP na další výraznou úroveň ve směru (v záporné gamě až na druhou), SL za nejbližší úroveň za vstupem
+function gexSuggest() {
+  const x = S.opce, A = S.atr, basis = +$("t-basis").value || 0, side = tSide;
+  if (!x || !(x.gex_profile || []).length || !A) { $("t-robot").textContent = "Opční mapa nebo ATR chybí – návrh nejde spočítat."; return; }
+  setMode("hand");
+  const eIn = parseFloat($("t-entry").value), e = (isFinite(eIn) ? eIn : (side > 0 ? S.buy : S.sell) + basis) - basis;
+  const neg = x.gex_musd < 0, mx = Math.max(...x.gex_profile.map((r) => Math.abs(r[1])));
+  const lv = [...x.gex_profile.filter((r) => Math.abs(r[1]) >= 0.4 * mx).map((r) => r[0]), x.call_wall, x.put_wall, x.gex_flip, x.max_pain]
+    .filter((v) => Number.isFinite(v));
+  const ahead = lv.filter((p) => (p - e) * side >= A).sort((a, b) => (a - b) * side);
+  const behind = lv.filter((p) => (e - p) * side > 0).sort((a, b) => (b - a) * side);
+  let slD = behind.length ? (e - behind[0]) * side + 0.3 * A : 1.5 * A;
+  slD = Math.min(Math.max(slD, (neg ? 1.0 : 0.7) * A), (neg ? 3 : 2) * A);
+  let tp = neg ? (ahead[1] ?? ahead[0]) : ahead[0];
+  if (tp == null) tp = e + side * 2 * slD;
+  $("t-entry").value = (e + basis).toFixed(2);
+  $("t-tp").value = (tp + basis).toFixed(2);
+  $("t-sl").value = (e + basis - side * slD).toFixed(2);
+  $("t-robot").innerHTML = `📊 Návrh z gamy (${neg ? "záporná – SL volnější, TP až na druhou úroveň" : "kladná – TP na nejbližší úroveň, SL těsnější"}): `
+    + `TP na opční úrovni ${fmt(tp + basis)}, SL ${fmt(slD)} b. za ${behind.length ? "nejbližší úrovní" : "1,5× ATR"}. <b>Neověřené pravidlo</b> (test gex_rezim běží) – rozhoduješ ty.`;
+  trade();
+}
+$("t-gex").onclick = gexSuggest;
+
 function fractals(b, k = 3) {                          // jen uzavřené svíčky, potvrzené k svíčkami
   const hi = [], lo = [];
   for (let i = k; i < b.length - k; i++) {
@@ -342,6 +401,8 @@ async function update() {
 
     // klíčové úrovně (liquidity): předchozí seance, den, týden, měsíc, poslední 4H, swing H1
     const levels = keyLevels(d1, h4, h1, now).concat(optLevels(opce, now));
+    S.opce = optLevels(opce, now).length ? opce.tickers.XAU : null;
+    gexChart(S.opce, price, +$("t-basis").value || 0);
     const basisNow = +$("t-basis").value || 0;
     const above = levels.filter((l) => l.p > price).sort((a, b) => a.p - b.p), below = levels.filter((l) => l.p <= price).sort((a, b) => b.p - a.p);
     const lvRow = (l, near) => `<div class="row"${near ? ' style="font-weight:700"' : ""}><span>${l.name}</span><span>${fmt(l.p + basisNow)} <span class="muted">${l.p > price ? "+" : ""}${fmt(l.p - price)}</span></span></div>`;
