@@ -242,6 +242,7 @@ function optLevels(o, now) {
   if (x.call_wall) out.push({ name: "Opce: call wall (odpor)", p: x.call_wall });
   if (x.put_wall) out.push({ name: "Opce: put wall (podpora)", p: x.put_wall });
   if (x.max_pain && x.near_exp >= new Date(now).toISOString().slice(0, 10)) out.push({ name: `Opce: max pain ${x.near_exp.slice(8)}.${x.near_exp.slice(5, 7)}.`, p: x.max_pain });
+  if (x.gex_flip) out.push({ name: `Opce: gama flip (${x.gex_musd < 0 ? "pod ním zrychlené pohyby" : "nad ním klidnější trh"})`, p: x.gex_flip });
   return out;
 }
 function fractals(b, k = 3) {                          // jen uzavřené svíčky, potvrzené k svíčkami
