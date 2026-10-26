@@ -1,81 +1,109 @@
 {
-  "price": 3993.59,
+  "price": 3991.54,
   "change": 0,
   "changePct": 0,
-  "high24h": 4034.68,
-  "low24h": 3975.83,
-  "ask": 3993.59,
-  "bid": 3993.59,
-  "rsi": 34.6,
-  "ema20": 4006.1,
-  "ema50": 4034.5,
-  "ema200": 4102.8,
-  "macd": -12.36,
-  "atr": 10.03,
+  "high24h": 4003.86,
+  "low24h": 3977.58,
+  "ask": 3991.54,
+  "bid": 3991.54,
+  "rsi": 44.8,
+  "ema20": 3993.3,
+  "ema50": 3999.3,
+  "ema200": 4060.6,
+  "macd": -0.92,
+  "atr": 5.7,
   "signal": "SELL",
   "trend": "bearish",
   "confidence": 100,
   "resistance": [
     3993.8,
-    3995.9,
-    4000.7
+    3993.9,
+    3994.9
   ],
   "support": [
-    3993.6,
-    3993.5,
-    3993.2
+    3990.5,
+    3988.8,
+    3984.9
   ],
   "tf": {
     "1D": "bearish",
     "4H": "bearish",
     "1H": "bearish"
   },
-  "entry": 3993.59,
-  "sl": 4008.63,
-  "tp1": 3973.54,
-  "tp2": 3958.5,
+  "entry": 3991.54,
+  "sl": 4000.09,
+  "tp1": 3980.13,
+  "tp2": 3971.58,
   "rr": 1.3,
-  "sl_dist": 15.04,
-  "tp1_dist": 20.05,
-  "updated": "24.10.2026 01:04 UTC",
+  "sl_dist": 8.56,
+  "tp1_dist": 11.41,
+  "updated": "26.10.2026 02:38 UTC",
   "status": "ok",
   "source": "Twelve Data XAU/USD (spot)",
   "macro": [
     {
-      "t": "2026-10-22T08:30:00-04:00",
+      "t": "2026-10-27T10:00:00-04:00",
+      "title": "CB Consumer Confidence",
+      "impact": "Medium",
+      "forecast": "80.5",
+      "previous": "81.9"
+    },
+    {
+      "t": "2026-10-28T14:00:00-04:00",
+      "title": "Federal Funds Rate",
+      "impact": "High",
+      "forecast": "4.00%",
+      "previous": "4.00%"
+    },
+    {
+      "t": "2026-10-28T14:00:00-04:00",
+      "title": "FOMC Statement",
+      "impact": "High",
+      "forecast": "",
+      "previous": ""
+    },
+    {
+      "t": "2026-10-28T14:30:00-04:00",
+      "title": "FOMC Press Conference",
+      "impact": "High",
+      "forecast": "",
+      "previous": ""
+    },
+    {
+      "t": "2026-10-29T08:30:00-04:00",
+      "title": "Advance GDP q/q",
+      "impact": "High",
+      "forecast": "3.2%",
+      "previous": "1.5%"
+    },
+    {
+      "t": "2026-10-29T08:30:00-04:00",
+      "title": "Core PCE Price Index m/m",
+      "impact": "High",
+      "forecast": "0.3%",
+      "previous": "0.2%"
+    },
+    {
+      "t": "2026-10-29T08:30:00-04:00",
+      "title": "Advance GDP Price Index q/q",
+      "impact": "Medium",
+      "forecast": "3.5%",
+      "previous": "6.2%"
+    },
+    {
+      "t": "2026-10-29T08:30:00-04:00",
       "title": "Unemployment Claims",
       "impact": "Medium",
-      "forecast": "200K",
-      "previous": "199K"
+      "forecast": "198K",
+      "previous": "194K"
     },
     {
-      "t": "2026-10-23T09:45:00-04:00",
-      "title": "Flash Manufacturing PMI",
+      "t": "2026-10-30T08:30:00-04:00",
+      "title": "Employment Cost Index q/q",
       "impact": "Medium",
-      "forecast": "55.4",
-      "previous": "57.0"
-    },
-    {
-      "t": "2026-10-23T09:45:00-04:00",
-      "title": "Flash Services PMI",
-      "impact": "Medium",
-      "forecast": "57.9",
-      "previous": "58.7"
-    },
-    {
-      "t": "2026-10-23T10:00:00-04:00",
-      "title": "Revised UoM Consumer Sentiment",
-      "impact": "Medium",
-      "forecast": "46.3",
-      "previous": "46.3"
-    },
-    {
-      "t": "2026-10-23T10:00:00-04:00",
-      "title": "Revised UoM Inflation Expectations",
-      "impact": "Medium",
-      "forecast": "",
-      "previous": "4.7%"
+      "forecast": "0.8%",
+      "previous": "0.9%"
     }
   ],
-  "analysis": "XAUUSD 24.10.2026 01:04 UTC: cena $3993.59, pod EMA50 ($4035), RSI 35, MACD záporný, ATR $10.0. Indikátory převážně medvědí (7/7 bodů). Jde o souhrn indikátorů, ne o ověřený obchodní signál."
+  "analysis": "XAUUSD 26.10.2026 02:38 UTC: cena $3991.54, pod EMA50 ($3999), RSI 45, MACD záporný, ATR $5.7. Indikátory převážně medvědí (7/7 bodů). Jde o souhrn indikátorů, ne o ověřený obchodní signál."
 }
