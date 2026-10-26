@@ -1,43 +1,43 @@
 {
-  "price": 4013.63,
+  "price": 4023.06,
   "change": 0,
   "changePct": 0,
-  "high24h": 4019.33,
+  "high24h": 4026.58,
   "low24h": 3977.58,
-  "ask": 4013.63,
-  "bid": 4013.63,
-  "rsi": 66.4,
-  "ema20": 4001.7,
-  "ema50": 4002.0,
-  "ema200": 4058.1,
-  "macd": 4.36,
-  "atr": 7.46,
+  "ask": 4023.06,
+  "bid": 4023.06,
+  "rsi": 59.6,
+  "ema20": 4008.7,
+  "ema50": 4005.3,
+  "ema200": 4055.9,
+  "macd": 5.57,
+  "atr": 11.32,
   "signal": "BUY",
   "trend": "bullish",
   "confidence": 71,
   "resistance": [
-    4013.8,
-    4014.8,
-    4016.1
+    4025.9,
+    4026.0,
+    4026.6
   ],
   "support": [
-    4009.4,
-    4008.3,
-    4007.5
+    4021.6,
+    4014.9,
+    4013.6
   ],
   "tf": {
     "1D": "bearish",
     "4H": "bearish",
     "1H": "bullish"
   },
-  "entry": 4013.63,
-  "sl": 4002.45,
-  "tp1": 4028.55,
-  "tp2": 4039.73,
+  "entry": 4023.06,
+  "sl": 4006.08,
+  "tp1": 4045.71,
+  "tp2": 4062.69,
   "rr": 1.3,
-  "sl_dist": 11.19,
-  "tp1_dist": 14.91,
-  "updated": "26.10.2026 08:07 UTC",
+  "sl_dist": 16.98,
+  "tp1_dist": 22.64,
+  "updated": "26.10.2026 15:09 UTC",
   "status": "ok",
   "source": "Twelve Data XAU/USD (spot)",
   "macro": [
@@ -45,7 +45,7 @@
       "t": "2026-10-27T10:00:00-04:00",
       "title": "CB Consumer Confidence",
       "impact": "Medium",
-      "forecast": "80.5",
+      "forecast": "80.7",
       "previous": "81.9"
     },
     {
@@ -105,5 +105,5 @@
       "previous": "0.9%"
     }
   ],
-  "analysis": "XAUUSD 26.10.2026 08:07 UTC: cena $4013.63, nad EMA50 ($4002), RSI 66, MACD kladný, ATR $7.5. Indikátory převážně býčí (5/7 bodů). Jde o souhrn indikátorů, ne o ověřený obchodní signál."
+  "analysis": "XAUUSD 26.10.2026 15:09 UTC: cena $4023.06, nad EMA50 ($4005), RSI 60, MACD kladný, ATR $11.3. Indikátory převážně býčí (5/7 bodů). Jde o souhrn indikátorů, ne o ověřený obchodní signál."
 }
