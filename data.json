@@ -1,42 +1,43 @@
 {
-  "price": 3873.09,
+  "price": 3875.39,
   "change": 0,
   "changePct": 0,
-  "high24h": 4026.26,
+  "high24h": 4013.0,
   "low24h": 3871.19,
-  "ask": 3873.09,
-  "bid": 3873.09,
-  "rsi": 17.1,
-  "ema20": 3937.3,
-  "ema50": 3979.8,
-  "ema200": 4031.4,
-  "macd": -36.17,
-  "atr": 17.06,
+  "ask": 3875.39,
+  "bid": 3875.39,
+  "rsi": 17.4,
+  "ema20": 3917.1,
+  "ema50": 3964.4,
+  "ema200": 4025.0,
+  "macd": -35.09,
+  "atr": 12.87,
   "signal": "SELL",
   "trend": "bearish",
   "confidence": 100,
   "resistance": [
-    3884.2,
-    3884.7,
-    3887.3
+    3875.5,
+    3875.8,
+    3884.2
   ],
   "support": [
-    3873.0,
-    3871.2
+    3875.3,
+    3875.1,
+    3874.5
   ],
   "tf": {
     "1D": "bearish",
     "4H": "bearish",
     "1H": "bearish"
   },
-  "entry": 3873.09,
-  "sl": 3898.68,
-  "tp1": 3838.98,
-  "tp2": 3813.4,
+  "entry": 3875.39,
+  "sl": 3894.69,
+  "tp1": 3849.65,
+  "tp2": 3830.35,
   "rr": 1.3,
-  "sl_dist": 25.58,
-  "tp1_dist": 34.11,
-  "updated": "30.10.2026 20:45 UTC",
+  "sl_dist": 19.3,
+  "tp1_dist": 25.73,
+  "updated": "31.10.2026 00:17 UTC",
   "status": "ok",
   "source": "Twelve Data XAU/USD (spot)",
   "macro": [
@@ -104,5 +105,5 @@
       "previous": "0.9%"
     }
   ],
-  "analysis": "XAUUSD 30.10.2026 20:45 UTC: cena $3873.09, pod EMA50 ($3980), RSI 17, MACD záporný, ATR $17.1. Indikátory převážně medvědí (7/7 bodů). Jde o souhrn indikátorů, ne o ověřený obchodní signál."
+  "analysis": "XAUUSD 31.10.2026 00:17 UTC: cena $3875.39, pod EMA50 ($3964), RSI 17, MACD záporný, ATR $12.9. Indikátory převážně medvědí (7/7 bodů). Jde o souhrn indikátorů, ne o ověřený obchodní signál."
 }
