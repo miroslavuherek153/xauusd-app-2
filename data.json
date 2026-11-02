@@ -1,109 +1,116 @@
 {
-  "price": 3875.39,
+  "price": 3905.65,
   "change": 0,
   "changePct": 0,
-  "high24h": 4013.0,
-  "low24h": 3871.19,
-  "ask": 3875.39,
-  "bid": 3875.39,
-  "rsi": 17.4,
-  "ema20": 3917.1,
-  "ema50": 3964.4,
-  "ema200": 4025.0,
-  "macd": -35.09,
-  "atr": 12.87,
-  "signal": "SELL",
-  "trend": "bearish",
-  "confidence": 100,
+  "high24h": 3915.02,
+  "low24h": 3866.02,
+  "ask": 3905.65,
+  "bid": 3905.65,
+  "rsi": 71.1,
+  "ema20": 3886.3,
+  "ema50": 3891.8,
+  "ema200": 3959.9,
+  "macd": 5.65,
+  "atr": 6.56,
+  "signal": "BUY",
+  "trend": "bullish",
+  "confidence": 71,
   "resistance": [
-    3875.5,
-    3875.8,
-    3884.2
+    3907.0,
+    3912.8,
+    3915.0
   ],
   "support": [
-    3875.3,
-    3875.1,
-    3874.5
+    3894.8,
+    3894.7,
+    3893.0
   ],
   "tf": {
     "1D": "bearish",
     "4H": "bearish",
-    "1H": "bearish"
+    "1H": "bullish"
   },
-  "entry": 3875.39,
-  "sl": 3894.69,
-  "tp1": 3849.65,
-  "tp2": 3830.35,
+  "entry": 3905.65,
+  "sl": 3895.81,
+  "tp1": 3918.77,
+  "tp2": 3928.61,
   "rr": 1.3,
-  "sl_dist": 19.3,
-  "tp1_dist": 25.73,
-  "updated": "31.10.2026 00:17 UTC",
+  "sl_dist": 9.84,
+  "tp1_dist": 13.12,
+  "updated": "02.11.2026 03:48 UTC",
   "status": "ok",
   "source": "Twelve Data XAU/USD (spot)",
   "macro": [
     {
-      "t": "2026-10-27T10:00:00-04:00",
-      "title": "CB Consumer Confidence",
+      "t": "2026-11-02T10:00:00-05:00",
+      "title": "ISM Manufacturing PMI",
       "impact": "Medium",
-      "forecast": "81.2",
-      "previous": "81.9"
+      "forecast": "54.5",
+      "previous": "54.5"
     },
     {
-      "t": "2026-10-28T14:00:00-04:00",
-      "title": "Federal Funds Rate",
-      "impact": "High",
-      "forecast": "4.00%",
-      "previous": "4.00%"
+      "t": "2026-11-03T10:00:00-05:00",
+      "title": "JOLTS Job Openings",
+      "impact": "Medium",
+      "forecast": "7.11M",
+      "previous": "7.08M"
     },
     {
-      "t": "2026-10-28T14:00:00-04:00",
-      "title": "FOMC Statement",
+      "t": "2026-11-03T10:16:00-05:00",
+      "title": "Congressional Elections",
       "impact": "High",
       "forecast": "",
       "previous": ""
     },
     {
-      "t": "2026-10-28T14:30:00-04:00",
-      "title": "FOMC Press Conference",
-      "impact": "High",
-      "forecast": "",
-      "previous": ""
-    },
-    {
-      "t": "2026-10-29T08:30:00-04:00",
-      "title": "Advance GDP q/q",
-      "impact": "High",
-      "forecast": "3.2%",
-      "previous": "1.5%"
-    },
-    {
-      "t": "2026-10-29T08:30:00-04:00",
-      "title": "Core PCE Price Index m/m",
-      "impact": "High",
-      "forecast": "0.3%",
-      "previous": "0.2%"
-    },
-    {
-      "t": "2026-10-29T08:30:00-04:00",
-      "title": "Advance GDP Price Index q/q",
+      "t": "2026-11-04T10:00:00-05:00",
+      "title": "ISM Services PMI",
       "impact": "Medium",
-      "forecast": "3.2%",
-      "previous": "6.2%"
+      "forecast": "54.9",
+      "previous": "54.9"
     },
     {
-      "t": "2026-10-29T08:30:00-04:00",
+      "t": "2026-11-05T08:30:00-05:00",
       "title": "Unemployment Claims",
       "impact": "Medium",
-      "forecast": "198K",
+      "forecast": "197K",
       "previous": "194K"
     },
     {
-      "t": "2026-10-30T08:30:00-04:00",
-      "title": "Employment Cost Index q/q",
+      "t": "2026-11-06T08:30:00-05:00",
+      "title": "Average Hourly Earnings m/m",
+      "impact": "High",
+      "forecast": "0.3%",
+      "previous": "0.1%"
+    },
+    {
+      "t": "2026-11-06T08:30:00-05:00",
+      "title": "Non-Farm Employment Change",
+      "impact": "High",
+      "forecast": "63K",
+      "previous": "29K"
+    },
+    {
+      "t": "2026-11-06T08:30:00-05:00",
+      "title": "Unemployment Rate",
+      "impact": "High",
+      "forecast": "4.2%",
+      "previous": "4.2%"
+    },
+    {
+      "t": "2026-11-06T10:00:00-05:00",
+      "title": "Prelim UoM Consumer Sentiment",
       "impact": "Medium",
-      "forecast": "0.8%",
-      "previous": "0.9%"
+      "forecast": "47.8",
+      "previous": "46.3"
+    },
+    {
+      "t": "2026-11-06T10:00:00-05:00",
+      "title": "Prelim UoM Inflation Expectations",
+      "impact": "Medium",
+      "forecast": "",
+      "previous": "4.7%"
     }
   ],
-  "analysis": "XAUUSD 31.10.2026 00:17 UTC: cena $3875.39, pod EMA50 ($3964), RSI 17, MACD záporný, ATR $12.9. Indikátory převážně medvědí (7/7 bodů). Jde o souhrn indikátorů, ne o ověřený obchodní signál."
+  "analysis": "XAUUSD 02.11.2026 03:48 UTC: cena $3905.65, nad EMA50 ($3892), RSI 71, MACD kladný, ATR $6.6. Indikátory převážně býčí (5/7 bodů). Jde o souhrn indikátorů, ne o ověřený obchodní signál."
 }
