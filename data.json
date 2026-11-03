@@ -1,43 +1,43 @@
 {
-  "price": 3946.91,
+  "price": 3948.79,
   "change": 0,
   "changePct": 0,
   "high24h": 3969.99,
-  "low24h": 3866.02,
-  "ask": 3946.91,
-  "bid": 3946.91,
-  "rsi": 64.0,
-  "ema20": 3929.5,
-  "ema50": 3912.6,
-  "ema200": 3952.4,
-  "macd": 16.97,
-  "atr": 13.15,
+  "low24h": 3890.69,
+  "ask": 3948.79,
+  "bid": 3948.79,
+  "rsi": 60.9,
+  "ema20": 3937.8,
+  "ema50": 3919.5,
+  "ema200": 3951.5,
+  "macd": 14.19,
+  "atr": 12.19,
   "signal": "BUY",
   "trend": "bullish",
   "confidence": 71,
   "resistance": [
-    3947.3,
+    3949.8,
     3950.3,
-    3952.7
+    3951.3
   ],
   "support": [
-    3945.4,
-    3938.7,
-    3938.2
+    3947.7,
+    3946.3,
+    3946.0
   ],
   "tf": {
     "1D": "bearish",
     "4H": "bearish",
     "1H": "bullish"
   },
-  "entry": 3946.91,
-  "sl": 3927.19,
-  "tp1": 3973.21,
-  "tp2": 3992.93,
+  "entry": 3948.79,
+  "sl": 3930.51,
+  "tp1": 3973.17,
+  "tp2": 3991.45,
   "rr": 1.3,
-  "sl_dist": 19.72,
-  "tp1_dist": 26.3,
-  "updated": "02.11.2026 21:14 UTC",
+  "sl_dist": 18.28,
+  "tp1_dist": 24.37,
+  "updated": "03.11.2026 02:55 UTC",
   "status": "ok",
   "source": "Twelve Data XAU/USD (spot)",
   "macro": [
@@ -52,7 +52,7 @@
       "t": "2026-11-03T10:00:00-05:00",
       "title": "JOLTS Job Openings",
       "impact": "Medium",
-      "forecast": "7.11M",
+      "forecast": "7.15M",
       "previous": "7.08M"
     },
     {
@@ -66,7 +66,7 @@
       "t": "2026-11-04T10:00:00-05:00",
       "title": "ISM Services PMI",
       "impact": "Medium",
-      "forecast": "54.9",
+      "forecast": "54.8",
       "previous": "54.9"
     },
     {
@@ -87,7 +87,7 @@
       "t": "2026-11-06T08:30:00-05:00",
       "title": "Non-Farm Employment Change",
       "impact": "High",
-      "forecast": "63K",
+      "forecast": "65K",
       "previous": "29K"
     },
     {
@@ -101,7 +101,7 @@
       "t": "2026-11-06T10:00:00-05:00",
       "title": "Prelim UoM Consumer Sentiment",
       "impact": "Medium",
-      "forecast": "47.8",
+      "forecast": "48.1",
       "previous": "46.3"
     },
     {
@@ -112,5 +112,5 @@
       "previous": "4.7%"
     }
   ],
-  "analysis": "XAUUSD 02.11.2026 21:14 UTC: cena $3946.91, nad EMA50 ($3913), RSI 64, MACD kladný, ATR $13.1. Indikátory převážně býčí (5/7 bodů). Jde o souhrn indikátorů, ne o ověřený obchodní signál."
+  "analysis": "XAUUSD 03.11.2026 02:55 UTC: cena $3948.79, nad EMA50 ($3920), RSI 61, MACD kladný, ATR $12.2. Indikátory převážně býčí (5/7 bodů). Jde o souhrn indikátorů, ne o ověřený obchodní signál."
 }
