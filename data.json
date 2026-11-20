@@ -1,43 +1,43 @@
 {
-  "price": 3587.33,
+  "price": 3534.14,
   "change": 0,
   "changePct": 0,
-  "high24h": 3741.51,
+  "high24h": 3686.91,
   "low24h": 3515.19,
-  "ask": 3587.33,
-  "bid": 3587.33,
-  "rsi": 37.1,
-  "ema20": 3610.6,
-  "ema50": 3680.1,
-  "ema200": 3832.1,
-  "macd": -43.58,
-  "atr": 27.09,
+  "ask": 3534.14,
+  "bid": 3534.14,
+  "rsi": 28.8,
+  "ema20": 3580.9,
+  "ema50": 3644.6,
+  "ema200": 3809.4,
+  "macd": -30.7,
+  "atr": 25.99,
   "signal": "SELL",
   "trend": "bearish",
   "confidence": 100,
   "resistance": [
-    3590.9,
-    3609.2,
-    3625.6
+    3548.3,
+    3549.5,
+    3556.4
   ],
   "support": [
-    3585.6,
-    3566.7,
-    3558.6
+    3533.3,
+    3526.8,
+    3522.7
   ],
   "tf": {
     "1D": "bearish",
     "4H": "bearish",
     "1H": "bearish"
   },
-  "entry": 3587.33,
-  "sl": 3627.96,
-  "tp1": 3533.14,
-  "tp2": 3492.5,
+  "entry": 3534.14,
+  "sl": 3573.13,
+  "tp1": 3482.15,
+  "tp2": 3443.17,
   "rr": 1.3,
-  "sl_dist": 40.64,
-  "tp1_dist": 54.18,
-  "updated": "20.11.2026 08:36 UTC",
+  "sl_dist": 38.99,
+  "tp1_dist": 51.98,
+  "updated": "20.11.2026 17:16 UTC",
   "status": "ok",
   "source": "Twelve Data XAU/USD (spot)",
   "macro": [
@@ -96,7 +96,14 @@
       "impact": "Medium",
       "forecast": "",
       "previous": "4.3%"
+    },
+    {
+      "t": "2026-11-20T12:00:00-05:00",
+      "title": "President Trump Speaks",
+      "impact": "Medium",
+      "forecast": "",
+      "previous": ""
     }
   ],
-  "analysis": "XAUUSD 20.11.2026 08:36 UTC: cena $3587.33, pod EMA50 ($3680), RSI 37, MACD záporný, ATR $27.1. Indikátory převážně medvědí (7/7 bodů). Jde o souhrn indikátorů, ne o ověřený obchodní signál."
+  "analysis": "XAUUSD 20.11.2026 17:16 UTC: cena $3534.14, pod EMA50 ($3645), RSI 29, MACD záporný, ATR $26.0. Indikátory převážně medvědí (7/7 bodů). Jde o souhrn indikátorů, ne o ověřený obchodní signál."
 }
