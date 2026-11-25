@@ -1,43 +1,43 @@
 {
-  "price": 3556.45,
+  "price": 3546.28,
   "change": 0,
   "changePct": 0,
-  "high24h": 3681.2,
-  "low24h": 3547.16,
-  "ask": 3556.45,
-  "bid": 3556.45,
-  "rsi": 31.7,
-  "ema20": 3590.6,
-  "ema50": 3599.7,
-  "ema200": 3667.3,
-  "macd": -19.13,
-  "atr": 16.42,
+  "high24h": 3646.18,
+  "low24h": 3534.11,
+  "ask": 3546.28,
+  "bid": 3546.28,
+  "rsi": 32.1,
+  "ema20": 3569.9,
+  "ema50": 3587.5,
+  "ema200": 3661.7,
+  "macd": -18.75,
+  "atr": 16.65,
   "signal": "SELL",
   "trend": "bearish",
   "confidence": 100,
   "resistance": [
-    3556.8,
-    3558.0,
-    3564.0
+    3550.1,
+    3555.1,
+    3556.4
   ],
   "support": [
-    3555.4,
-    3554.9,
-    3554.0
+    3545.5,
+    3542.2,
+    3537.9
   ],
   "tf": {
     "1D": "bearish",
     "4H": "bearish",
     "1H": "bearish"
   },
-  "entry": 3556.45,
-  "sl": 3581.08,
-  "tp1": 3523.61,
-  "tp2": 3498.98,
+  "entry": 3546.28,
+  "sl": 3571.26,
+  "tp1": 3512.97,
+  "tp2": 3487.99,
   "rr": 1.3,
-  "sl_dist": 24.63,
-  "tp1_dist": 32.84,
-  "updated": "24.11.2026 22:53 UTC",
+  "sl_dist": 24.98,
+  "tp1_dist": 33.31,
+  "updated": "25.11.2026 05:10 UTC",
   "status": "ok",
   "source": "Twelve Data XAU/USD (spot)",
   "macro": [
@@ -84,5 +84,5 @@
       "previous": "2.3%"
     }
   ],
-  "analysis": "XAUUSD 24.11.2026 22:53 UTC: cena $3556.45, pod EMA50 ($3600), RSI 32, MACD záporný, ATR $16.4. Indikátory převážně medvědí (7/7 bodů). Jde o souhrn indikátorů, ne o ověřený obchodní signál."
+  "analysis": "XAUUSD 25.11.2026 05:10 UTC: cena $3546.28, pod EMA50 ($3587), RSI 32, MACD záporný, ATR $16.7. Indikátory převážně medvědí (7/7 bodů). Jde o souhrn indikátorů, ne o ověřený obchodní signál."
 }
